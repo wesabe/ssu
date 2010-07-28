@@ -14,13 +14,13 @@ and tails the log.
 This script starts an IRB session with some `method_missing` magic that lets you call into the
 running XulRunner. For example, getting the status of a running job:
 
->> job.status
-=> {"completed"=>nil, "result"=>nil, "status"=>nil, "fid"=>"us-001069", "jobid"=>nil, "elapsed"=>1929}
+    >> job.status
+    => {"completed"=>nil, "result"=>nil, "status"=>nil, "fid"=>"us-001069", "jobid"=>nil, "elapsed"=>1929}
 
 Or to start a job:
 
->> job.start "fid"=>"us-001069", "creds"=>{"userId"=>"wamu-user", "password"=>"wamu-pass"}, "wesabe"=>{"username"=>"wesabe-user", "password"=>"wesabe-pass"}
-=> nil
+    >> job.start "fid"=>"us-001069", "creds"=>{"userId"=>"wamu-user", "password"=>"wamu-pass"}, "wesabe"=>{"username"=>"wesabe-user", "password"=>"wesabe-pass"}
+    => nil
 
 
 Credentials
