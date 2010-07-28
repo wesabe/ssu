@@ -1,0 +1,3 @@
+content     desktopuploader                 file:content/
+skin        desktopuploader     default     file:skin/default/
+locale      desktopuploader     en-US       file:locale/en-US/

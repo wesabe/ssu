@@ -1,0 +1,29 @@
+<html>
+  <head>
+    <!-- load Screw Unit testing framework -->
+    <script src="screw-unit/jquery-1.2.3.js"></script>
+    <script src="screw-unit/jquery.fn.js"></script>
+    <script src="screw-unit/jquery.print.js"></script>
+    <script src="screw-unit/screw.builder.js"></script>
+    <script src="screw-unit/screw.matchers.js"></script>
+    <script src="screw-unit/screw.events.js"></script>
+    <script src="screw-unit/screw.behaviors.js"></script>
+    
+    <!-- manually load the files under test so that stack traces are reasonable -->
+    <script src="../wesabe.js"></script>
+    <script src="../wesabe/lang/array.js"></script>
+    <script src="../wesabe/lang/date.js"></script>
+    <script src="../wesabe/lang/extend.js"></script>
+    <script src="../wesabe/lang/func.js"></script>
+    <script src="../wesabe/lang/json.js"></script>
+    <script src="../wesabe/lang/type.js"></script>
+    <script src="../wesabe/util/Timer.js"></script>
+    
+    <!-- finally, load the specs -->
+    <script src="spec_helper.js"></script>
+    <script src="timer_spec.js"></script>
+    
+    <link rel="stylesheet" href="screw-unit/screw.css">
+  </head>
+  <body></body>
+</html>

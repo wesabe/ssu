@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+gem 'templater', '>= 0.3.2'
+require 'templater'
+
+path = File.join(File.dirname(__FILE__), 'generators')
+
+require File.join(path, 'player')
+require File.join(path, 'credential')
+
+module SSU::Generators
+  extend Templater::Manifold
+
+  add :player, PlayerGenerator
+  add :credential, CredentialGenerator
+
+  desc "Generators for Players and Credentials, yo."
+
+  run_cli Dir.pwd, $0, '0.1', ARGV
+end

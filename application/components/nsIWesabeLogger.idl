@@ -1,0 +1,7 @@
+#include "nsISupports.idl"
+
+[scriptable, uuid(27d9b6d9-f465-401c-944b-fe1558bb5bd8)]
+interface nsIWesabeLogger : nsISupports
+{
+	void log(in string msg);
+};

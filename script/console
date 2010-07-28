@@ -1,0 +1,89 @@
+#!/usr/bin/env ruby
+require 'optparse'
+
+class ConsoleCLI
+  attr_reader :port
+
+  DEFAULT_PORT = 5000
+
+  def initialize(args)
+    @port = DEFAULT_PORT
+    parse_args(args)
+  end
+
+  def run
+    ENV['PORT'] = port.to_s
+    exec "irb --simple-prompt -r #{File.dirname(__FILE__)}/console.rb"
+  end
+
+  protected
+
+  def parse_args(args)
+    begin
+      @args = args
+      parser.parse!
+    rescue ArgumentError => ex
+      $stderr.puts "#{$0}: error: #{ex.message}"
+      puts
+      puts parser
+      exit(-1)
+    end
+  end
+
+  def parser
+    @parser ||= OptionParser.new(@args) do |opts|
+      opts.banner = "Usage: script/console [options]"
+
+      opts.on('-h', '--help', "Show this message") do
+        puts opts
+        exit
+      end
+
+      opts.on('-p', '--port=PORT', Integer, "Use the given port (default #{DEFAULT_PORT})") do |port|
+        @port = port
+      end
+
+      opts.on('-P', '--profile=PATH', "Connect to the xulrunner running with the specified profile path") do |path|
+        needs 'json', '--profile'
+        read_port_from_profile(path)
+      end
+
+      opts.on('-J', '--job=JOBID', "Connect to the xulrunner running the job with the given GUID") do |jobid|
+        needs 'json', '--job'
+        read_port_from_profile("/var/wesabe/ssu-profiles/#{jobid}")
+      end
+    end
+  end
+
+  def needs(lib, who=$0)
+    begin
+      require lib
+    rescue LoadError
+      begin
+        require 'rubygems'
+        require lib
+      rescue LoadError
+        $stderr.puts "Using #{who} requires #{lib} to be installed, but it can't be found"
+      end
+    end
+
+    return true
+  end
+
+  def read_port_from_profile(path)
+    config_path = path + '/config'
+    raise ArgumentError, "Profile configuration does not exist at #{config_path}" unless File.exist?(config_path)
+
+    begin
+      config = JSON.parse(File.read(config_path))
+    rescue JSON::ParseError => ex
+      raise ArgumentError, "Profile configuration file is not valid JSON: #{ex.message}"
+    end
+
+    raise ArgumentError, "Profile config at #{config_path} does not contain 'port'" unless config.key?('port')
+
+    @port = config['port']
+  end
+end
+
+ConsoleCLI.new(ARGV).run

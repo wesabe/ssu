@@ -1,0 +1,82 @@
+The build only works on Intel Mac so far.
+
+INTEL MAC SETUP NOTES
+---------------------
+
+In order to use the Gecko SDK that we're using, you're going to need libidl from MacPorts. To do this, grab MacPorts from:
+
+ 	http://www.macports.org/install.php
+
+Then, install libidl
+
+	`sudo /opt/local/bin/port install libidl`
+
+This will grab a whole boatload of stuff and keep your machine warm for a few minutes.
+
+BUILDING DESKTOP UPLOADER
+-------------------------
+
+In this directory, run:
+
+	`rake build`
+
+If needed, this will take care of pulling in the XUL Runner Framework, the Gecko SDK, et al.
+
+BUILDING FOR DEVELOPMENT
+------------------------
+
+In this directory, run:
+
+	`rake hotbuild`
+
+That will build an application bundle and link its Resources to `application` in this directory.
+
+PACKAGING DESKTOP UPLOADER
+--------------------------
+
+In this directory, run:
+
+	`rake package`
+
+You'll be prompted to provide your password for sudo, since building the full .dmg requires root.
+
+CLEANING UP
+-----------
+
+To clean things up, run:
+
+	`rake clobber`
+
+BUILDING XULRUNNER AND SDK FROM SOURCE
+--------------------------------------
+
+Quick notes. The following steps will work, but you have to do them in this order
+
+$ sudo /opt/local/bin/port install libidl
+$ export PATH=$PATH:/opt/local/bin
+
+$ cvs -d :pserver:anonymous@cvs-mirror.mozilla.org:/cvsroot co mozilla/client.mk
+$ make -f client.mk checkout MOZ_CO_PROJECT=xulrunner
+
+Create ~/.mozconfig that contains the following lines (the last lines here will mess up a check out if you've got them and haven't checked out the project already from above):
+
+-----
+mk_add_options MOZ_OBJDIR=@TOPSRCDIR@/obj-@CONFIG_GUESS@
+mk_add_options MOZ_CO_PROJECT=xulrunner
+ac_add_options --enable-macos-target=10.4
+ac_add_options --with-macos-sdk=/Developer/SDKs/MacOSX10.4u.sdk/
+ac_add_options --enable-application=xulrunner
+#ac_add_options --enable-libxul
+ac_add_options --disable-shared
+ac_add_options --enable-static
+ac_add_options --disable-tests
+ac_add_app_options ppc --enable-prebinding
+. $topsrcdir/xulrunner/config/mozconfig
+# . $topsrcdir/build/macosx/universal/mozconfig
+-----
+
+then
+
+$ make -f client.mk build
+
+after that, you'll have a full-on XULRunner and SDK built. If you uncomment the last line of the .mozconfig, the build will attempt to do a universal build. But it currently fails.

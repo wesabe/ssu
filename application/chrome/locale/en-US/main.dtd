@@ -1,0 +1,15 @@
+<!ENTITY window-title           "Wesabe Uploader">
+<!ENTITY account-header         "Account">
+<!ENTITY upload-type-header     "Upload Type">
+<!ENTITY last-upload-header     "Last Upload">
+<!ENTITY automatic-type         "Automatic">
+<!ENTITY slug-date              "May 30">
+<!ENTITY updating-label         "Updating...">
+<!ENTITY acct1-name             "USAA Joint Checking">
+<!ENTITY acct2-name             "USAA Joint Savings">
+<!ENTITY acct3-name             "USAA Personal Checking">
+<!ENTITY acct4-name             "USAA Mastercard">
+<!ENTITY acct5-name             "American Express">
+<!ENTITY add-acct-button        "Add an Account">
+<!ENTITY upload-all-button      "Upload All">
+<!ENTITY wesabe-link-text       "Go to Wesabe">

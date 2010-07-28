@@ -1,0 +1,98 @@
+#!/usr/bin/env ruby
+
+Dir.chdir(File.join(File.dirname(__FILE__), '..'))
+
+require 'rakelib/platform'
+require 'rakelib/config'
+require 'rakelib/util'
+
+require 'optparse'
+
+def tail(log_file)
+  cursor = File.size(log_file)
+  last_checked = Time.now
+  tail_thread = Thread.new do
+    File.open(log_file, 'r') do |f|
+      loop do
+        f.seek cursor
+        if f.mtime > last_checked
+          last_checked = f.mtime
+          contents = f.read
+          cursor += contents.length
+          print contents
+        end
+        sleep 1
+      end
+    end
+  end
+  tail_thread
+end
+
+def server_linux
+  disable_em_restart
+  ENV['DISPLAY'] = ':0'
+  if File.executable?('/usr/bin/xdpyinfo')
+    `/usr/bin/xdpyinfo`
+    if $?.exitstatus.nonzero?
+      $stderr.puts "Cannot connect to Xvfb. Maybe try: sudo /etc/init.d/Xvfb start"
+      $stderr.puts "If that doesn't work make sure Xvfb is configured with DISPLAY=#{ENV['DISPLAY']}"
+      return
+    end
+  else
+    $stderr.puts "Warning: Not checking for X server."
+    $stderr.puts "If the app fails to start you may not have X running at DISPLAY=#{ENV['DISPLAY']}"
+  end
+  system "xulrunner application/application.ini #{ARGV.join(' ')}"
+end
+
+def server_macosx
+  disable_em_restart
+  xulrunner = "build/#{config.appname}.app/Contents/MacOS/xulrunner"
+
+  if File.executable?(xulrunner)
+    system "#{esh xulrunner} #{ ARGV.join(' ')}"
+  else
+    $stderr.puts "Need to build a OSX xulrunner app bundle, run: rake build:dev"
+  end
+end
+
+def disable_em_restart
+  ENV['NO_EM_RESTART'] = '1'
+end
+
+parser = OptionParser.new do |opts|
+  opts.banner = "Usage: #{$0} [options]"
+
+  opts.on("--network-log=FILE", "Make XulRunner log gobs of network info to FILE") do |path|
+    ENV["NSPR_LOG_MODULES"] = "nsHttp:5,nsSocketTransport:5,nsHostResolver:5"
+    ENV["NSPR_LOG_FILE"] = path
+    $stderr.puts "Logging extra network information to #{path}"
+  end
+
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts opts
+    exit(-1)
+  end
+
+  opts.on("--run-diagnostic", "Runs the diagnostic tests. Non-zero exit status means it didn't pass") do
+    require 'rakelib/diagnostic'
+    platform.diagnostic
+    exit
+  end
+end
+
+parser.parse!
+
+# exit on ^C
+trap(:INT) { exit }
+# run the xulrunner application
+server_thread = Thread.new { platform.server }
+
+# wait for the log file to be created
+sleep 0.1 until config.log_file && File.exist?(config.log_file)
+
+# tail the log file in this tty
+tail config.log_file
+
+# wait for the server to finish
+server_thread.join
