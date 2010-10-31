@@ -125,22 +125,24 @@ wesabe.download.Controller = function() {
       }
 
       if (data.callback) {
-        wesabe.bind(job, 'update', function() {
-          var callbacks = wesabe.isString(data.callback) ? [data.callback] : data.callback;
-          var params = {
-            status: job.status,
-            result: job.result,
-            data: wesabe.lang.json.render(job.data),
-            completed: job.done,
-            cookies: wesabe.util.cookies.dump(),
-            timestamp: new Date().getTime(),
-            version: job.version,
-          };
+        var callbacks = wesabe.isString(data.callback) ? [data.callback] : data.callback;
+        if (callbacks.length) {
+          wesabe.bind(job, 'update', function() {
+            var params = {
+              status: job.status,
+              result: job.result,
+              data: wesabe.lang.json.render(job.data),
+              completed: job.done,
+              cookies: wesabe.util.cookies.dump(),
+              timestamp: new Date().getTime(),
+              version: job.version,
+            };
 
-          callbacks.forEach(function(callback) {
-            wesabe.io.put(callback, params);
+            callbacks.forEach(function(callback) {
+              wesabe.io.put(callback, params);
+            });
           });
-        });
+        }
       }
       wesabe.one(job, 'complete', function() {
         setTimeout(function(){ goQuitApplication() }, 5000);
