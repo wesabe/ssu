@@ -114,11 +114,17 @@ wesabe.download.Controller = function() {
       if (typeof data != 'object'){
         throw new Error("Got unexpected type: "+(typeof data))
       }
+
       if (data.wesabe) {
         wesabe.api.authenticate(data.wesabe);
       } else if (data.jobid && data.user_id) {
         wesabe.api.authenticate(data);
       }
+
+      if (data.api) {
+        wesabe.util.prefs.set('wesabe.api.root', data.api);
+      }
+
       job = new wesabe.download.Job(data.jobid, data.fid, data.creds, data.user_id, data.options);
 
       if (data.cookies) {
