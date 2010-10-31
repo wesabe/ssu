@@ -173,7 +173,10 @@ wesabe.download.Controller = function() {
            data: job.data,
            jobid: job.jobid,
            fid: job.fid,
-           completed: job.done}}};
+           completed: job.done,
+           cookies: wesabe.util.cookies.dump(),
+           timestamp: new Date().getTime(),
+           version: job.version}}};
     } else {
       return {response: {status: 'error', error: "No running jobs"}};
     }
