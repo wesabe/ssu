@@ -69,20 +69,21 @@ wesabe.download.Controller = function() {
           outstream.close();
         },
         onDataAvailable: function(request, context, inputStream, offset, count) {
-          var data = instream.read(count);
+          var data = instream.read(count), index;
           log.radioactive('getting data: ', data);
           this.request += data;
-          if (/\n/.test(data)) {
-            var requestText  = this.request.replace(/[\r\n]/g, '');
+
+          while ((index = this.request.indexOf("\n")) != -1) {
+            var requestText = this.request.substring(0, index);
+            this.request = this.request.substring(index+1);
+
             var request      = wesabe.lang.json.parse(requestText);
             var response     = self.dispatch(request);
             var responseText;
             try {
-              responseText = wesabe.lang.json.render(response);
+              responseText = wesabe.lang.json.render(response)+"\n";
               log.radioactive(responseText);
               outstream.write(responseText, responseText.length);
-              outstream.close();
-              instream.close();
             } catch (e) { wesabe.error(e) }
           }
         }
