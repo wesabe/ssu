@@ -68,6 +68,9 @@ function init() {
     log.debug('Writing configuration to ', file.path, ': ', config);
     wesabe.io.file.write(file, wesabe.lang.json.render(config));
 
+    var pidFile = wesabe.io.file.open(profile.path+'/pid');
+    wesabe.io.file.write(pidFile, ''+pid);
+
     var contentListener = wesabe.io.ContentListener.sharedInstance;
     contentListener.init(window, "application/x-wes-ofx");
     wesabe.bind(contentListener, 'after-receive', wesabe.lang.func.wrap(s.onStatementReceived, s));

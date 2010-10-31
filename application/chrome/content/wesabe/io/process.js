@@ -1,16 +1,19 @@
 wesabe.provide('io.process');
 wesabe.require('io.file');
+wesabe.require('io.dir');
 
 wesabe.io.process = {
   get pid() {
-    if (!wesabe.io.file.exists('/proc/self')) {
-      wesabe.warn("No proc-fs so I can't determine my PID");
-    }
-    else {
-      var procdir = wesabe.io.file.open('/proc/self');
-      procdir.normalize();
-      var m = procdir.path.match(/(\d+)$/);
-      return m && parseInt(m[1]);
-    }
+    var process = Cc["@mozilla.org/process/util;1"].createInstance(Ci.nsIProcess);
+    var pidhelper = wesabe.io.file.open(wesabe.io.dir.root.path+'/script/pidhelper');
+    var pidfile = wesabe.io.file.open(wesabe.io.dir.root.path+'/pid'+(new Date().getTime()));
+
+    process.init(pidhelper);
+    var args = ['-p', '-o', pidfile.path];
+    process.run(true, args, args.length);
+
+    var pid = wesabe.io.file.read(pidfile);
+    wesabe.io.file.unlink(pidfile);
+    return pid && Number(pid);
   }
 };

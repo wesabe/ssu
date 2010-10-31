@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [[ "$(uname -a)" =~ "Darwin" ]]; then
+  exec "$0-osx" $@
+elif [[ "$(uname -a)" =~ "Linux" ]]; then
+  exec "$0-linux" $@
+fi
