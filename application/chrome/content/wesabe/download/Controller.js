@@ -145,9 +145,6 @@ wesabe.download.Controller = function() {
           });
         }
       }
-      wesabe.one(job, 'complete', function() {
-        setTimeout(function(){ goQuitApplication() }, 5000);
-      });
       job.start();
     });
     return {response: {status: 'ok'}};
