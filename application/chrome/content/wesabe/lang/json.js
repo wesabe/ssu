@@ -3,16 +3,16 @@ wesabe.provide('lang.json');
 wesabe.lang.json = {
   parse: function(string) {
     return eval('(' + string + ')');
-  }, 
-  
+  },
+
   render: function(object) {
     return wesabe.lang.json._render(object, []);
-  }, 
-  
+  },
+
   _render: function(object, refs) {
     for (var i = 0; i < refs.length; i++)
       if (refs[i] === object) return wesabe.lang.json._render('$$ circular reference $$', refs);
-    
+
     if (wesabe.isString(object))
       return wesabe.lang.json._renderString(object);
     if (wesabe.isNull(object))
@@ -28,24 +28,34 @@ wesabe.lang.json = {
     if (wesabe.isObject(object))
       return wesabe.lang.json._renderObject(object, refs);
     wesabe.error('could not identify type for: ', object);
-  }, 
-  
+  },
+
   _renderString: function(string) {
-    var map = {"\n": "\\n", "\t": "\\t", '"': '\\"'};
-    return '"'+string.replace(/./g, function(s) {
-      return map[s] || (/[\u00FF-\uFFFF]/.test(s) ? ('\\u'+s.charCodeAt(0).toString(16)) : s)
-    })+'"';
-  }, 
-  
+    var map = {"\n": "\\n", "\r": "\\r", "\t": "\\t", '"': '\\"', "\\": "\\\\"},
+        result = "";
+
+    for (var i = 0; i < string.length; i++) {
+      var s = string.substring(i, i+1);
+      if (map.hasOwnProperty(s))
+        result += map[s];
+      else if (/[\u00FF-\uFFFF]/.test(s))
+        result += '\\u'+s.charCodeAt(0).toString(16);
+      else
+        result += s;
+    }
+
+    return '"' + result + '"';
+  },
+
   _renderArray: function(array, refs) {
     refs.push(array);
     return '['+array.map(function(el){ return wesabe.lang.json._render(el, refs) }).join(', ')+']';
-  }, 
-  
+  },
+
   _renderBoolean: function(bool) {
     return bool.toString();
-  }, 
-  
+  },
+
   _renderObject: function(object, refs) {
     refs.push(object);
     var attrs = [];
@@ -56,16 +66,16 @@ wesabe.lang.json = {
         attrs.push(wesabe.lang.json._render(key, refs)+': '+value);
     }
     return '{' + attrs.join(', ') + '}';
-  }, 
-  
+  },
+
   _renderNumber: function(number) {
     return number.toString();
-  }, 
-  
+  },
+
   _renderNull: function() {
     return 'null';
-  }, 
-  
+  },
+
   _renderUndefined: function() {
     return 'null';
   }
