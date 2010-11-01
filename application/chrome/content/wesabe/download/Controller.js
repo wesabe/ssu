@@ -191,9 +191,14 @@ wesabe.download.Controller = function() {
   this.statement_list = function(data) {
     var statements = wesabe.io.dir.profile;
     statements.append('statements');
-    return {response: {status: 'ok', 'statement.list': wesabe.io.dir.read(statements).map(function(file) {
-      return file.path.match(/\/([^\/]+)$/)[1];
-    })}};
+    var list = [];
+
+    if (statements.exists())
+      list = wesabe.io.dir.read(statements).map(function(file) {
+        return file.path.match(/\/([^\/]+)$/)[1];
+      });
+
+    return {response: {status: 'ok', 'statement.list': list}};
   };
 
   this.statement_read = function(data) {
