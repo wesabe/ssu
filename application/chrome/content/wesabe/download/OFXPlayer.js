@@ -202,22 +202,16 @@ wesabe.download.OFXPlayer.prototype.onOFXError = function(response, callback) {
 };
 
 /**
- * Handles an OFX response containing a statement to be uploaded to PFC.
+ * Handles an OFX response containing a statement to be imported.
  */
 wesabe.download.OFXPlayer.prototype.onDownloadComplete = function(response) {
-  var statement = response.statement, self = this;
-  var uploader = new wesabe.api.Uploader(statement, this.fid, null, this.job);
+  wesabe.trigger('downloadSuccess', [response.statement]);
 
-  // get notified when the upload is done
-  wesabe.bind(uploader, 'uploadComplete', function() {
-    self.job.timer.end('Upload');
-    self.onUploadComplete();
-  });
-  // tell anyone who cares that we're uploading accounts
-  this.job.update('account.upload');
-  this.job.timer.start('Upload');
-  // actually start uploading
-  uploader.upload();
+  // done with this account
+  this.account.completed = true;
+  delete this.account;
+  // now do the rest
+  this.processAccounts();
 };
 
 /**
@@ -240,17 +234,6 @@ wesabe.download.OFXPlayer.prototype.onDownloadFailure = function(response) {
       this.skipAccount();
     });
   }
-};
-
-/**
- * Called when the upload to PFC finishes, successful or otherwise.
- */
-wesabe.download.OFXPlayer.prototype.onUploadComplete = function() {
-  // done with this account
-  this.account.completed = true;
-  delete this.account;
-  // now do the rest
-  this.processAccounts();
 };
 
 /**

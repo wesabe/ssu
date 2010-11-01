@@ -73,9 +73,8 @@ function init() {
 
     var contentListener = wesabe.io.ContentListener.sharedInstance;
     contentListener.init(window, "application/x-wes-ofx");
-    wesabe.bind(contentListener, 'after-receive', function() {
-      wesabe.trigger('downloadSuccess');
-      s.onStatementReceived.apply(s, arguments);
+    wesabe.bind(contentListener, 'after-receive', function(event, data) {
+      wesabe.trigger('downloadSuccess', [data]);
     });
   });
 }

@@ -369,8 +369,8 @@ wesabe.download.Controller = function() {
     return {response: {status: 'ok'}};
   };
 
-  this.onStatementReceived = function(event, data) {
-    wesabe.tryThrow('Controller#onStatementReceived', function(log) {
+  wesabe.bind('downloadSuccess', function(event, data) {
+    wesabe.tryThrow('Controller#downloadSuccess', function(log) {
       var folder = wesabe.io.dir.profile;
       folder.append('statements');
       if (!folder.exists())
@@ -381,5 +381,5 @@ wesabe.download.Controller = function() {
 
       wesabe.io.file.write(statement, data);
     });
-  }
+  });
 };
