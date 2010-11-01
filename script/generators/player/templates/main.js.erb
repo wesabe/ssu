@@ -10,11 +10,11 @@ wesabe.download.Player.register({
   dispatchFrames: false,
 
   // tells the player to remove the current account (tmp.account)
-  // when an upload completes. this is useful when only one account
+  // when a download completes. this is useful when only one account
   // may be downloaded as a time
   //
-  // tells Player to run the "nextAccount" action after an upload
-  afterUpload: 'nextAccount',
+  // tells Player to run the "nextAccount" action after a download
+  afterDownload: 'nextAccount',
 
   actions: {
     // The "main" action is the entry point into the script,

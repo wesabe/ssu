@@ -6,12 +6,7 @@ wesabe.download.Player.register({
   // and that "dispatch" should be run for the document
   dispatchFrames: false,
 
-  // tells the player to remove the current account (tmp.account)
-  // when an upload completes. this is useful when only one account
-  // may be downloaded as a time
-  //
-  // tells Player to run the "logoff" action after an upload
-  afterUpload: 'logoff',
+  afterDownload: 'logoff',
 
   actions: {
     // The "main" action is the entry point into the script,

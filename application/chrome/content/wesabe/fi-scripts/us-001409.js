@@ -3,7 +3,7 @@ wesabe.download.Player.register({
   org: 'CapitalOne Credit Cards',
 
   userAgent: 'firefox',
-  afterUpload: 'nextAccount',
+  afterDownload: 'nextAccount',
 
   actions: {
     main: function() {

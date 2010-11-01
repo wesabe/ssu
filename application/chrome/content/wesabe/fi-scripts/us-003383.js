@@ -3,7 +3,7 @@ wesabe.download.Player.register({
   org: 'American Express Cards',
 
   dispatchFrames: false,
-  afterUpload: 'logout',
+  afterDownload: 'logout',
 
   includes: [
     'fi-scripts.us-003383.login',

@@ -3,7 +3,7 @@ wesabe.download.Player.register({
   org: "Mechanics Bank",
 
   dispatchFrames: false,
-  afterUpload: 'nextAccount',
+  afterDownload: 'nextAccount',
 
   dispatch: function() {
     if (!page.present(e.logoff.link)) {

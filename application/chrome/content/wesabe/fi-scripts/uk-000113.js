@@ -3,7 +3,7 @@ wesabe.download.Player.register({
   org: 'First Direct (UK)',
 
   dispatchFrames: false,
-  afterUpload: 'nextAccount',
+  afterDownload: 'nextAccount',
 
   dispatch: function() {
     if (page.present(e.error.unavailable)) {

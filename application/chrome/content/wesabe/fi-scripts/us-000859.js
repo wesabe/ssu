@@ -2,7 +2,7 @@ wesabe.download.Player.register({
   fid: 'us-000859',
   org: 'US Bank',
 
-  afterUpload: 'nextAccount',
+  afterDownload: 'nextAccount',
 
   actions: {
     main: function() {

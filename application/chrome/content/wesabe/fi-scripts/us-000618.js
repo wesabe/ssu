@@ -3,7 +3,7 @@ wesabe.download.Player.register({
   org: 'City National Bank of Taylor',
 
   dispatchFrames: true,
-  // afterUpload: custom onUploadSuccessful below
+  // afterDownload: custom onDownloadSuccessful below
 
   dispatch: function() {
     if (!page.defaultView.frameElement) {
@@ -172,7 +172,7 @@ wesabe.download.Player.register({
 
 
   extensions: {
-    onUploadSuccessful: function(browser, page) {
+    onDownloadSuccessful: function(browser, page) {
       delete this.tmp.accountId;
       this.onDocumentLoaded(
         browser,

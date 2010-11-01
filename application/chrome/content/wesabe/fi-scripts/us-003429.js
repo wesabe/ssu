@@ -7,7 +7,7 @@ wesabe.download.Player.register({
 
   // TD Canada Trust uses frames
   dispatchFrames: true,
-  afterUpload: 'logoff',
+  afterDownload: 'logoff',
 
   actions: {
     main: function() {

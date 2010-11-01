@@ -3,7 +3,7 @@ wesabe.download.Player.register({
   org: 'HSBC Bank (UK)',
 
   dispatchFrames: false,
-  afterUpload: 'nextAccount',
+  afterDownload: 'nextAccount',
 
   actions: {
     main: function() {

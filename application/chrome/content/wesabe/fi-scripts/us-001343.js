@@ -3,7 +3,7 @@ wesabe.download.Player.register({
   org: 'Wells Fargo',
 
   dispatchFrames: false,
-  afterUpload: 'nextAccount',
+  afterDownload: 'nextAccount',
 
   dispatch: function() {
     tmp.authenticated = page.visible(e.signoffLink);

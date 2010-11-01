@@ -20,8 +20,8 @@ wesabe.download.Player.register = function(params) {
   klass.elements = {};
   // any dispatch filters
   klass.prototype.filters = [];
-  // any upload callbacks
-  klass.prototype.afterUploadCallbacks = [];
+  // any download callbacks
+  klass.prototype.afterDownloadCallbacks = [];
   // any alert callbacks
   klass.prototype.alertReceivedCallbacks = [];
   // the Wesabe Financial Institution ID (e.g. us-001078)
@@ -75,8 +75,8 @@ wesabe.download.Player.register = function(params) {
       wesabe.lang.extend(klass.prototype, module.extensions);
     }
 
-    if (module.afterUpload) {
-      klass.prototype.afterUploadCallbacks.push(module.afterUpload);
+    if (module.afterDownload) {
+      klass.prototype.afterDownloadCallbacks.push(module.afterDownload);
     }
 
     if (module.alertReceived) {
@@ -103,22 +103,22 @@ wesabe.download.Player.prototype.start = function(answers, browser) {
     wesabe.xul.UserAgent.revertToDefault();
   }
 
-  // set up the callbacks for page load and upload done
+  // set up the callbacks for page load and download done
   wesabe.bind(browser, 'DOMContentLoaded', function(event) {
     self.onDocumentLoaded(browser, wesabe.dom.page.wrap(event.target));
   });
 
-  wesabe.bind('uploadSuccess', function(event, uploader) {
-    self.job.update('account.upload.success');
+  wesabe.bind('downloadSuccess', function(event) {
+    self.job.update('account.download.success');
     self.setErrorTimeout('global');
-    self.onUploadSuccessful(browser, wesabe.dom.page.wrap(browser.contentDocument));
+    self.onDownloadSuccessful(browser, wesabe.dom.page.wrap(browser.contentDocument));
   });
 
-  wesabe.bind('uploadFail', function(event, uploader) {
-    wesabe.warn('Failed to upload a statement! This is bad, but a failed job is worse, so we press on');
-    self.job.update('account.upload.failure');
+  wesabe.bind('downloadFail', function(event) {
+    wesabe.warn('Failed to download a statement! This is bad, but a failed job is worse, so we press on');
+    self.job.update('account.download.failure');
     self.setErrorTimeout('global');
-    self.onUploadSuccessful(browser, wesabe.dom.page.wrap(browser.contentDocument));
+    self.onDownloadSuccessful(browser, wesabe.dom.page.wrap(browser.contentDocument));
   });
 
   this.setErrorTimeout('global');
@@ -460,9 +460,9 @@ wesabe.download.Player.prototype.onDocumentLoaded = function(browser, page) {
   }, 2000);
 };
 
-wesabe.download.Player.prototype.onUploadSuccessful = function(browser, page) {
-  for (var i = 0; i < this.afterUploadCallbacks.length; i++) {
-    this.runAction(this.afterUploadCallbacks[i], browser, page);
+wesabe.download.Player.prototype.onDownloadSuccessful = function(browser, page) {
+  for (var i = 0; i < this.afterDownloadCallbacks.length; i++) {
+    this.runAction(this.afterDownloadCallbacks[i], browser, page);
   }
 };
 

@@ -3,7 +3,7 @@ wesabe.download.Player.register({
   org: 'Bank of America',
 
   dispatchFrames: false,
-  afterUpload: 'nextAccount',
+  afterDownload: 'nextAccount',
 
   includes: [
     'fi-scripts.us-000238.global',

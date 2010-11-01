@@ -3,7 +3,7 @@ wesabe.download.Player.register({
   org: 'Chase',
 
   dispatchFrames: false,
-  afterUpload: 'nextAccount',
+  afterDownload: 'nextAccount',
 
   includes: [
     'fi-scripts.us-003396.promos',

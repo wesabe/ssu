@@ -188,33 +188,24 @@ wesabe.download.Controller = function() {
     }
   };
 
-  this.job_update = function(data) {
-    if (job) {
-      job.update(data.result);
-      return {response: {status: 'ok'}};
-    } else {
-      return {response: {status: 'error', error: "No running jobs"}};
-    }
+  this.statement_list = function(data) {
+    var statements = wesabe.io.dir.profile;
+    statements.append('statements');
+    return {response: {status: 'ok', 'statement.list': wesabe.io.dir.read(statements)}};
   };
 
-  this.job_pause = function(data) {
-    if (job) {
-      job.paused = true;
-      job.player.clearErrorTimeout("action");
-      job.player.clearErrorTimeout("global");
-      return {response: {status: 'ok'}};
-    } else {
-      return {response: {status: 'error', error: "No running jobs"}};
-    }
-  };
+  this.statement_read = function(data) {
+    if (!data)
+      return {response: {status: 'error', error: "statement id required"}};
 
-  this.job_play = function(data) {
-    if (job) {
-      job.paused = false;
-      return {response: {status: 'ok'}};
-    } else {
-      return {response: {status: 'error', error: "No running jobs"}};
-    }
+    var statement = wesabe.io.dir.profile;
+    statement.append('statements');
+    statement.append(data);
+
+    if (statement.exists())
+      return {response: {status: 'ok', 'statement.read': wesabe.io.file.read(statement)}};
+
+    return {response: {status: 'error', error: "No statement found with id="+data}};
   };
 
   this.job_stop = function(data) {
@@ -373,15 +364,15 @@ wesabe.download.Controller = function() {
 
   this.onStatementReceived = function(event, data) {
     wesabe.tryThrow('Controller#onStatementReceived', function(log) {
-      job.update('account.upload');
-      job.player.clearErrorTimeout('action');
+      var folder = wesabe.io.dir.profile;
+      folder.append('statements');
+      if (!folder.exists())
+        wesabe.io.dir.create(folder);
 
-      var uploader = new wesabe.api.Uploader(data, job.fid, null, job);
-      wesabe.bind(uploader, 'uploadComplete', function() {
-        job.timer.end('Upload');
-      });
-      job.timer.start('Upload');
-      uploader.upload();
+      var statement = folder.clone();
+      statement.append(new wesabe.ofx.UUID().toString());
+
+      wesabe.io.file.write(statement, data);
     });
   }
 };

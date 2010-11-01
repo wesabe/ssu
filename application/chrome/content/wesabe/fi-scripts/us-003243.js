@@ -3,7 +3,7 @@ wesabe.download.Player.register({
   org: 'ING Direct',
 
   dispatchFrames: false,
-  afterUpload: 'logoff',
+  afterDownload: 'logoff',
 
   actions: {
     main: function() {

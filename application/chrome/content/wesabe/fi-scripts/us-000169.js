@@ -3,7 +3,7 @@ wesabe.download.Player.register({
   org: 'Texans Credit Union',
 
   dispatchFrames: false,
-  afterUpload: 'nextAccount',
+  afterDownload: 'nextAccount',
 
   includes: [
     'fi-scripts.us-000169.login',

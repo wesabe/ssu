@@ -2,7 +2,7 @@ wesabe.download.Player.register({
   fid: 'us-001758',
   org: 'Wachovia',
 
-  afterUpload: 'logout',
+  afterDownload: 'logout',
 
   dispatch: function() {
     tmp.authenticated = page.visible(e.logoutButton);

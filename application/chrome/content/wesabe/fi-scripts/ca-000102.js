@@ -7,7 +7,7 @@ wesabe.download.Player.register({
   // and that "dispatch" should be run for the document
   dispatchFrames: false,
 
-  afterUpload: 'logoff',
+  afterDownload: 'logoff',
 
   actions: {
     // The "main" action is the entry point into the script,

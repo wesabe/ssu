@@ -3,7 +3,7 @@ wesabe.download.Player.register({
   org: 'Citibank',
 
   dispatchFrames: false,
-  afterUpload: 'logout',
+  afterDownload: 'logout',
 
   includes: [
     'fi-scripts.us-001034.terms',
