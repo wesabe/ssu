@@ -32,6 +32,11 @@ wesabe.download.OFXPlayer.prototype.start = function(creds) {
   var self = this;
   this.creds = creds;
 
+  if (self.fi) {
+    self.beginGetAccounts();
+    return;
+  }
+
   wesabe.api.FinancialInstitution.find(this.fid, {
     success: function(fi) {
       wesabe.debug('Got FI info: ', fi);
