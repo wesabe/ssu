@@ -100,43 +100,35 @@ wesabe.io.dir = {
 
   read   : function(dir, recursive) {
     var list = new Array();
-    try {
+    wesabe.tryCatch('wesabe.io.dir.read('+dir+')', function() {
       if (dir.isDirectory()) {
         if (recursive == null) {
           recursive = false;
         }
         var files = dir.directoryEntries;
-        list = this._read(files, recursive);
+        list = wesabe.io.dir._read(files, recursive);
       }
-    }
-    catch(e) {
-      // foobar!
-    }
+    });
     return list;
   },
 
   _read  : function(dirEntry, recursive) {
     var list = new Array();
-    try {
-      while (dirEntry.hasMoreElements()) {
-        list.push(dirEntry.getNext()
-                .QueryInterface(FileIO.localfileIID));
-      }
-      if (recursive) {
-        var list2 = new Array();
-        for (var i = 0; i < list.length; ++i) {
-          if (list[i].isDirectory()) {
-            files = list[i].directoryEntries;
-            list2 = this._read(files, recursive);
-          }
-        }
-        for (i = 0; i < list2.length; ++i) {
-          list.push(list2[i]);
-        }
-      }
+    while (dirEntry.hasMoreElements()) {
+      list.push(dirEntry.getNext()
+              .QueryInterface(Ci.nsILocalFile));
     }
-    catch(e) {
-       // foobar!
+    if (recursive) {
+      var list2 = new Array();
+      for (var i = 0; i < list.length; ++i) {
+        if (list[i].isDirectory()) {
+          files = list[i].directoryEntries;
+          list2 = wesabe.io.dir._read(files, recursive);
+        }
+      }
+      for (i = 0; i < list2.length; ++i) {
+        list.push(list2[i]);
+      }
     }
     return list;
   },
