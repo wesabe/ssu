@@ -107,8 +107,8 @@ wesabe.provide('fi-scripts.us-003383.accounts', {
           },
 
           continueButton: [
-            '//a[@onclick][contains(string(.), "DOWNLOAD")]',
-            '//form[contains(@name, "Download")]//input[@type="submit" or @type="image"]',
+            '//form[@id="DownloadFormBean"]//button[@id="downloadFormButton"]',
+            '//button[contains(translate(string(.), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "DOWNLOAD")]',
           ],
         },
       },
