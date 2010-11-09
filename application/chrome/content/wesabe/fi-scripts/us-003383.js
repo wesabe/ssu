@@ -65,6 +65,13 @@ wesabe.download.Player.register({
 
       wesabe.info("Starting with OFX for American Express Cards");
       var ofxPlayer = new wesabe.download.OFXPlayer(self.fid);
+      ofxPlayer.fi = {
+        ofxUrl: "https://online.americanexpress.com/myca/ofxdl/desktop/desktopDownload.do?request_type=nl_ofxdownload",
+        ofxOrg: "AMEX",
+        ofxFid: "3101",
+      };
+      ofxPlayer.appId = 'QWIN';
+      ofxPlayer.appVersion = '1500';
       ofxPlayer.job = jobproxy;
       ofxPlayer.start(answers);
     },
