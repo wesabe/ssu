@@ -217,6 +217,22 @@ wesabe.lang.extend(wesabe.ofx.Request.prototype, {
     }]);
   },
 
+  get appId() {
+    return this._appId || 'Money';
+  },
+
+  set appId(appId) {
+    this._appId = appId;
+  },
+
+  get appVersion() {
+    return this._appVersion || '1700';
+  },
+
+  set appVersion(appVersion) {
+    this._appVersion = appVersion;
+  },
+
   /* Private methods */
 
   _init: function() {
@@ -247,8 +263,8 @@ wesabe.lang.extend(wesabe.ofx.Request.prototype, {
            (this.fi.ofxOrg ? ("<ORG>" + this.fi.ofxOrg + "\r\n") : '') +
            (this.fi.ofxFid ? ("<FID>" + this.fi.ofxFid + "\r\n") : '') +
            (this.fi.ofxOrg || this.fi.ofxFid ? ("</FI>\r\n") : '') +
-           "<APPID>Money\r\n" +
-           "<APPVER>1700\r\n" +
+           "<APPID>" + this.appId + "\r\n" +
+           "<APPVER>" + this.appVersion + "\r\n" +
            "</SONRQ>\r\n" +
            "</SIGNONMSGSRQV1>\r\n"
   },

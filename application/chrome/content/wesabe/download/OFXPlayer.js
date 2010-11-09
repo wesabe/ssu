@@ -245,5 +245,8 @@ wesabe.download.OFXPlayer.prototype.onDownloadFailure = function(response) {
  * Returns a new Request instance ready to be used.
  */
 wesabe.download.OFXPlayer.prototype.buildRequest = function() {
-  return new wesabe.ofx.Request(this.fi, this.creds.username, this.creds.password, this.job);
+  var request = new wesabe.ofx.Request(this.fi, this.creds.username, this.creds.password, this.job);
+  if (this.appId) request.appId = this.appId;
+  if (this.appVersion) request.appVersion = this.appVersion;
+  return request;
 };
