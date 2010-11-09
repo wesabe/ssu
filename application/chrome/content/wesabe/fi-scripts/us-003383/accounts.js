@@ -37,14 +37,23 @@ wesabe.provide('fi-scripts.us-003383.accounts', {
     },
 
     download: function() {
+      var activity = e.accounts.download.activity;
+
       job.update('account.download');
 
-      var accountElements = page.select(e.accounts.download.activity.account.container);
+      var accountElements = page.select(activity.account.container);
       accountElements.forEach(function(element) {
-        var name = page.find(e.accounts.download.activity.account.name, element);
-        log.info("Selecting last 90 days for account: ", name);
-        // choose last 90 days
-        page.click(page.findStrict(e.accounts.download.activity.statements.timeFrame.last90Days, element));
+        var name = page.find(activity.account.name, element),
+            last90Days = page.find(activity.statements.timeFrame.last90Days, element),
+            sinceLast = page.find(activity.statements.timeFrame.sinceLastDownload, element);
+
+        if (last90Days) {
+          log.info("Selecting last 90 days for account: ", name);
+          page.click(last90Days);
+        } else {
+          log.info("Selecting since last download for account: ", name);
+          page.click(sinceLast);
+        }
       });
 
       page.click(e.accounts.download.activity.continueButton);
@@ -98,6 +107,10 @@ wesabe.provide('fi-scripts.us-003383.accounts', {
             timeFrame: {
               last90Days: [
                 './/input[@type="radio"][@value="download90Days"]',
+              ],
+
+              sinceLastDownload: [
+                './/input[@type="radio"][@value="downloadSince"]',
               ],
 
               selectedDatesChoice: [
