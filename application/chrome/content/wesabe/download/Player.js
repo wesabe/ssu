@@ -509,14 +509,14 @@ wesabe.download.Player.prototype.__defineGetter__('tmp', function() {
 wesabe.download.Player.build = function(fid) {
   return wesabe.tryThrow('download.Player.build(fid=' + fid + ')', function(log) {
     var klass;
-    try {
-      klass = wesabe.require('fi-scripts.' + fid);
-    } catch(e) { log.warn("Failed to load script, maybe it's OFX? Actual error: ", e.toString()); }
 
-    if (klass) {
+    wesabe.tryCatch('loading fi-scripts.'+fid, function() {
+      klass = wesabe.require('fi-scripts.' + fid);
+    });
+
+    if (klass)
       return new klass(fid);
-    } else {
+    else
       return new wesabe.download.OFXPlayer(fid);
-    }
   });
 };
