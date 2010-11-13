@@ -38,6 +38,11 @@ wesabe.download.Player.register({
 
       wesabe.info("Starting with OFX for Chase");
       var ofxPlayer = new wesabe.download.OFXPlayer(self.fid);
+      ofxPlayer.fi = {
+        ofxUrl: "https://ofx.chase.com",
+        ofxOrg: "B1",
+        ofxFid: "10898",
+      };
       ofxPlayer.job = jobproxy;
       ofxPlayer.start(answers);
     },
