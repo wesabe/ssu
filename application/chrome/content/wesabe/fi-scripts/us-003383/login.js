@@ -64,6 +64,7 @@ wesabe.provide('fi-scripts.us-003383.login', {
       error: {
         general: [
           '//text()[contains(., "User ID or Password is incorrect")]',
+          '//text()[contains(., "you will be locked out if your next login attempt is unsuccessful")]',
         ],
 
         blank: [
