@@ -209,9 +209,10 @@ wesabe.download.Player.register({
     // account activity
     /////////////////////////////////////////////////////////////////////////////
 
-    // Microsoft Money 2002 file format
-    microsoftMoney2002FileFormat: [
-      '//input[@value="microsoftOfx" and @name="fileFormat"]'
+    // OFX file format
+    ofxFileFormat: [
+      '//input[@value="microsoftOfx" and @name="fileFormat"]',
+      '//input[@value="quickenOfx" and @name="fileFormat"]',
     ],
     // download button
     downloadButton: [
