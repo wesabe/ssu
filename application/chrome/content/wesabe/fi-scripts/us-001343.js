@@ -105,7 +105,7 @@ wesabe.download.Player.register({
 
     downloadSelectedAccount: function() {
       log.info('account=', tmp.account);
-      page.click(e.microsoftMoney2002FileFormat);
+      page.click(e.ofxFileFormat);
       page.click(e.downloadButton);
     },
 
