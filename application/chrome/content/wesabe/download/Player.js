@@ -1,14 +1,20 @@
-wesabe.provide('download.Player');
 wesabe.provide('fi-scripts');
 wesabe.require('logger.*');
 wesabe.require('dom.*');
 wesabe.require('xul.UserAgent');
 
-wesabe.download.Player = function(answers) {
-  this.answers = answers;
-};
+wesabe.provide('download.Player', function() { });
 
 wesabe.download.Player.register = function(params) {
+  var klass = this.create(params);
+
+  // make sure we put it where wesabe.require expects it
+  wesabe['fi-scripts'][klass.fid] = klass;
+
+  return klass;
+};
+
+wesabe.download.Player.create = function(params) {
   var klass = function() {
     // inherit from Player
     wesabe.lang.extend(this, wesabe.download.Player.prototype, false);
@@ -28,6 +34,8 @@ wesabe.download.Player.register = function(params) {
   klass.fid = klass.prototype.fid = params.fid;
   // the name of the Financial Institution (e.g. Wells Fargo)
   klass.org = klass.prototype.org = params.org;
+  // ofx info in case this is a hybrid
+  klass.ofx = params.ofx;
 
   var modules = [params];
 
@@ -88,9 +96,6 @@ wesabe.download.Player.register = function(params) {
     }
   });
 
-  // make sure we put it where wesabe.require expects it
-  wesabe['fi-scripts'][klass.fid] = klass;
-
   return klass;
 };
 
@@ -144,7 +149,7 @@ wesabe.download.Player.prototype.finish = function() {
 };
 
 wesabe.download.Player.prototype.runAction = function(name, browser, page, scope) {
-  var self = this, module = this.constructor.__module__.name;
+  var self = this, module = this.constructor.fid;
   var fn = wesabe.isFunction(name) ? name : this[name];
   var name = wesabe.isFunction(name) ? (name.name || '(anonymous)') : name;
 
@@ -367,7 +372,7 @@ wesabe.download.Player.prototype.clearErrorTimeout = function(type) {
 
 wesabe.download.Player.prototype.onDocumentLoaded = function(browser, page) {
   if (this.job.done || this.job.paused) return;
-  var self = this, module = this.constructor.__module__.name;
+  var self = this, module = this.constructor.fid;
 
   // log when alert and confirm are called
   new wesabe.dom.Bridge(page.proxyTarget, function() {
@@ -470,7 +475,7 @@ wesabe.download.Player.prototype.shouldDispatch = function(browser, page) {
   var self = this;
 
   for (var i = 0; i < this.filters.length; i++) {
-    var result = wesabe.tryCatch(this.constructor.__module__.name+'#filter('+i+')', function(log) {
+    var result = wesabe.tryCatch(this.constructor.fid+'#filter('+i+')', function(log) {
       var r = wesabe.lang.func.callWithScope(self.filters[i], self, {
         browser: browser,
            page: page,

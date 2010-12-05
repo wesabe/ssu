@@ -54,7 +54,8 @@ wesabe.download.Job.prototype.finish = function(status, result, successful) {
   this.version++;
   var event = successful ? 'succeed' : 'fail';
   this.done = true;
-  this.player.finish();
+  if (typeof this.player.finish == 'function')
+    this.player.finish();
   this.status = status || (successful ? 200 : 400);
   this.result = result || (successful ? 'ok' : 'fail');
   wesabe.trigger(this, 'update ' + event + ' complete');

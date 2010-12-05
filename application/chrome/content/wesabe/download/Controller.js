@@ -1,5 +1,6 @@
 wesabe.provide('download.Controller');
 wesabe.require('download.Player');
+wesabe.require('download.CompoundPlayer');
 wesabe.require('canvas.snapshot');
 
 wesabe.download.Controller = function() {

@@ -12,17 +12,21 @@ wesabe.download.OFXPlayer = function(fid) {
 wesabe.download.OFXPlayer.prototype.DAYS_OF_HISTORY = 365;
 
 wesabe.download.OFXPlayer.register = function(params) {
-  var klass = function() {
-    // inherit from OFXPlayer
-    wesabe.lang.extend(this, wesabe.download.OFXPlayer.prototype);
-    // subclass it
-    wesabe.lang.extend(this, params);
-  };
+  var klass = this.create(params);
 
   // make sure we put it where wesabe.require expects it
   wesabe['fi-scripts'][params.fid] = klass;
 
   return klass;
+};
+
+wesabe.download.OFXPlayer.create = function(params) {
+  return function() {
+    // inherit from OFXPlayer
+    wesabe.lang.extend(this, wesabe.download.OFXPlayer.prototype);
+    // subclass it
+    wesabe.lang.extend(this, params);
+  };
 };
 
 /**
