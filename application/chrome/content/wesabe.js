@@ -33,6 +33,13 @@ var wesabe = {
     }
     base[parts[parts.length-1]] = value || {};
 
+    if (value) {
+      value.__module__ = {
+        name: parts[parts.length-1],
+        fullName: module
+      };
+    }
+
     return base;
   },
 
