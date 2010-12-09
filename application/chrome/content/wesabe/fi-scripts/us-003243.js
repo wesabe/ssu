@@ -84,6 +84,13 @@ wesabe.download.Player.register({
   dispatch: function() {
     tmp.authenticated = page.visible(e.signOffLink);
 
+    var uri = wesabe.dom.browser.getURI(browser);
+    if (uri && (uri.indexOf('pin_change_newpin') != -1)) {
+      // user is being asked to change their PIN
+      job.fail(403, 'auth.pass.expired');
+      return;
+    }
+
     if (tmp.authenticated) {
       if (page.visible(e.errors.noTransactionsForPeriod)) {
         wesabe.warn('No transactions available, skipping account');
