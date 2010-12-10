@@ -7,6 +7,8 @@ wesabe.provide('fi-scripts.us-003383.login', {
         job.fail(401, 'auth.creds.invalid');
       } else if (page.present(e.login.error.blank)) {
         job.fail(401, 'auth.creds.invalid.blank');
+      } else if (page.present(e.login.error.locked)) {
+        job.fail(403, 'auth.creds.locked');
       } else if (page.present(e.login.user.field)) {
         action.login();
       }
@@ -70,6 +72,10 @@ wesabe.provide('fi-scripts.us-003383.login', {
         blank: [
           '//text()[contains(., "You\'ve left a field blank")]',
         ],
+
+        locked: [
+          '//text()[contains(., "Your User ID is locked")]',
+        ],
       },
 
       continueButton: [
@@ -77,8 +83,8 @@ wesabe.provide('fi-scripts.us-003383.login', {
         '//form[@name="ssoform"]//*[contains(@onclick, "validate")]',
         '//form[@name="ssoform"]//*[@name="btn"][@onclick]',
         // login page
-        '//a[@onclick][.//img[contains(@onclick, "frmLogon")]]',
-        '//form[@name="frmLogin"]//a[contains(@onclick, "logon")]',
+        '//input[contains(@onclick, "loginNow")]',
+        '//form[@name="frmLogin"]//input[@type="submit" or @type="image"]',
       ],
     },
 
