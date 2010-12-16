@@ -74,7 +74,7 @@ wesabe.provide('fi-scripts.us-000238.mobile', {
         ],
 
         error: {
-          '//text()[., "Incorrect passcode"]',
+          '//text()[contains(., "Incorrect passcode")]',
         },
 
         user: {
