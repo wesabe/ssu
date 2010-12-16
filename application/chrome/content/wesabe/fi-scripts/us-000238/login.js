@@ -109,6 +109,7 @@ wesabe.provide('fi-scripts.us-000238.login', {
       },
 
       continueButton: [
+        '//form[@name="frmSignIn"]//input[@value="Sign In" or @name="olb_signin"]',
         '//form[@name="frmSignIn"]//a[contains(@href, "signon")]',
         '//a[contains(@href, "signon")]',
       ],
