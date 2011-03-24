@@ -5,18 +5,23 @@ wesabe.lang.extend(wesabe.download.CompoundPlayer, {
     var klass = this.create(params);
 
     // make sure we put it where wesabe.require expects it
-    wesabe['fi-scripts'][params.fid] = klass;
+    wesabe.provide('fi-scripts.'+klass.fid, klass);
 
     return klass;
   },
 
   create: function(params) {
-    return function() {
-      // inherit from OFXPlayer
+    var klass = function() {
+      // inherit from CompoundPlayer
       wesabe.lang.extend(this, wesabe.download.CompoundPlayer.prototype);
       // subclass it
       wesabe.lang.extend(this, params);
     };
+
+    klass.fid = params.fid;
+    klass.org = params.org;
+
+    return klass;
   },
 });
 

@@ -15,7 +15,7 @@ wesabe.download.OFXPlayer.register = function(params) {
   var klass = this.create(params);
 
   // make sure we put it where wesabe.require expects it
-  wesabe['fi-scripts'][params.fid] = klass;
+  wesabe.provide('fi-scripts.'+params.fid, klass);
 
   return klass;
 };
