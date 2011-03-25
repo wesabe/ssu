@@ -1,7 +1,7 @@
 module SSU
   module Generators
     class CredentialGenerator < Templater::Generator
-      desc %{Credential file for a financial institution (username/password).\n\nExample: script/generate credential us-000238 bofa}
+      desc %{Credential file for a financial institution (username/password).\n\nExample: script/generate credential com.bankofamerica bofa}
 
       def self.source_root
         File.join(File.dirname(__FILE__), 'credential', 'templates')
