@@ -116,16 +116,6 @@ wesabe.download.Controller = function() {
         throw new Error("Got unexpected type: "+(typeof data))
       }
 
-      if (data.wesabe) {
-        wesabe.api.authenticate(data.wesabe);
-      } else if (data.jobid && data.user_id) {
-        wesabe.api.authenticate(data);
-      }
-
-      if (data.api) {
-        wesabe.util.prefs.set('wesabe.api.root', data.api);
-      }
-
       job = new wesabe.download.Job(data.jobid, data.fid, data.creds, data.user_id, data.options);
 
       if (data.cookies) {
@@ -230,27 +220,6 @@ wesabe.download.Controller = function() {
     return {response: {status: 'ok'}};
   };
 
-  /**
-   * Create and send uploads from the console:
-   *
-   *    upload.create :wesabe => {:username => 'WESABE_USER', :password => 'WESABE_PASS'}, :path => '/path/to/file.ofx', :fid => 'us-003383'
-   *
-   */
-  this.upload_create = function(data) {
-    try {
-      wesabe.info('Starting upload of file ', data.path,
-                  ' for username ', data.wesabe.username,
-                  ' at fid ', data.fid);
-      wesabe.api.authenticate(data.wesabe);
-      var uploader = new wesabe.api.Uploader(wesabe.io.file.read(data.path), data.fid, data.nofx ? {nofx: data.nofx} : null, null);
-      uploader.upload();
-      return {response: {status: 'ok'}};
-    } catch(e) {
-      wesabe.error('upload.create: error: ', e);
-      return {response: {status: 'error', error: e.toString()}};
-    }
-  };
-
   this.page_dump = function(data) {
     try {
       return {response: {status: 'ok', 'page.dump': job.player.page.dump()}};
@@ -352,10 +321,6 @@ wesabe.download.Controller = function() {
         return new wesabe.ofx.Request(fi, username, password);
       };
     };
-
-    if (data.wesabe) {
-      wesabe.api.authenticate(data.wesabe);
-    }
 
     if (data.ofx) {
       new OFXDumper({ ofxUrl: data.ofxUrl, ofxOrg: data.ofxOrg, ofxFid: data.ofxFid }, data.creds.username, data.creds.password).dumpAll();
