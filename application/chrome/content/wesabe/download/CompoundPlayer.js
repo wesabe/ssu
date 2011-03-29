@@ -48,7 +48,7 @@ wesabe.lang.extend(wesabe.download.CompoundPlayer.prototype, {
       },
 
       fail: function(status, result) {
-        wesabe.info("Could not complete job with ", self.currentJob, " (", status, " ", result, ")");
+        wesabe.info("Could not complete job with ", self.currentPlayer, " (", status, " ", result, ")");
 
         if (self.playerIndex+1 < self.players.length) {
           startNextPlayer();
@@ -67,6 +67,10 @@ wesabe.lang.extend(wesabe.download.CompoundPlayer.prototype, {
       get page() {
         return self.currentPlayer.page;
       },
+
+      goal: self.job.goal,
+
+      options: self.job.options,
     };
 
     startNextPlayer();
