@@ -27,6 +27,7 @@ wesabe.download.CompoundPlayer.register({
         'fi-scripts.com.chase.login',
         'fi-scripts.com.chase.identification',
         'fi-scripts.com.chase.accounts',
+        'fi-scripts.com.chase.transfers',
         'fi-scripts.com.chase.errors',
       ],
     }),

@@ -154,7 +154,6 @@ wesabe.provide('fi-scripts.com.chase.identification', {
 
         confirmation: {
           indicator: [
-            '//td[@class="steptexton"][contains(string(.), "Confirmation")]',
             '//form[@name="frmOTPDeliveryModeConfirmation"]',
           ],
         },

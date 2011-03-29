@@ -1,5 +1,8 @@
 wesabe.provide('fi-scripts.com.chase.accounts', {
   dispatch: function() {
+    if (job.goal !== 'statements')
+      return;
+
     // only dispatch on authenticated pages
     tmp.authenticated = page.present(e.logoff.link);
     if (!tmp.authenticated) return;
