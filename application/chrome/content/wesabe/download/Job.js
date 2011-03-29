@@ -9,6 +9,7 @@ wesabe.download.Job = function(jobid, fid, creds, user_id, options) {
   this.version = 0;
   this.data = {};
   this.options = options || {};
+  this.goal = this.options.goal || 'statements';
   this.timer = new wesabe.util.Timer();
 };
 

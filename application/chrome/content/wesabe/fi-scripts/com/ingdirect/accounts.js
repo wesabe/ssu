@@ -1,5 +1,8 @@
 wesabe.provide('fi-scripts.com.ingdirect.accounts', {
   dispatch: function() {
+    if (job.goal !== 'statements')
+      return;
+
     tmp.authenticated = page.visible(e.signOffLink);
     if (!tmp.authenticated)
       return;

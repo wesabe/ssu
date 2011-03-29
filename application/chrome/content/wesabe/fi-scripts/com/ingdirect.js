@@ -8,5 +8,6 @@ wesabe.download.Player.register({
   includes: [
     'fi-scripts.com.ingdirect.login',
     'fi-scripts.com.ingdirect.accounts',
+    'fi-scripts.com.ingdirect.transfers',
   ],
 });
