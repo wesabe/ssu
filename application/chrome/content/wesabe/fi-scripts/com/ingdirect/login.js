@@ -45,7 +45,11 @@ wesabe.provide('fi-scripts.com.ingdirect.login', {
       if (tmp.haveGivenPinBefore) return job.fail(401, 'auth.pass.invalid');
       else tmp.haveGivenPinBefore = true;
 
+      job.update('auth.pass');
+
       var pin = answers.pin || answers.password;
+      page.click(e.pinKeyboardEntryLink);
+
       var pinmap = {
         a: 2, b: 2, c: 2,
         d: 3, e: 3, f: 3,
@@ -57,12 +61,20 @@ wesabe.provide('fi-scripts.com.ingdirect.login', {
         w: 9, x: 9, y: 9, z: 9
       };
 
-      job.update('auth.pass');
+      var pinAsLetters = '';
+
       for (var i = 0; i < pin.length; i++) {
         // map letters to numbers using the above (telephone) mapping
         var n = pinmap[pin[i].toLowerCase()] || pin[i];
-        page.click(wesabe.xpath.bind(e.pinNumericButton, {n: n}));
+        //page.click(wesabe.xpath.bind(e.pinNumericButton, {n: n}));
+        var numericButton = page.findStrict(wesabe.xpath.bind(e.pinNumericButton, {n: n})),
+            charButton = page.next(numericButton, numericButton.nodeName);
+
+        pinAsLetters += wesabe.untaint(charButton.getAttribute('alt'));
       }
+      pinAsLetters = wesabe.taint(pinAsLetters);
+
+      page.fill(e.pinPasswordField, pinAsLetters);
       page.click(e.pinSubmitButton);
     },
 
@@ -148,16 +160,22 @@ wesabe.provide('fi-scripts.com.ingdirect.login', {
     // Step 4: PIN
     /////////////////////////////////////////////////////////////////////////////
 
+    // the link to toggle to keyboard entry
+    pinKeyboardEntryLink: [
+      '//a[contains(string(.), "keyboard")][contains(@onclick, "togglePinPads")]',
+    ],
+
     // the PIN field
-    // pinPasswordField: [
-    //   '//input[@id="PINID"][@type="password"]',
-    //   '//input[@type="password"]'
-    // ],
+    pinPasswordField: [
+      '//input[@id="customerAuthenticationResponse.PIN"][@type="password"]',
+      '//input[@type="password"]'
+    ],
+
     // a pattern to match the numeric buttons on the pin pad
     pinNumericButton: [
-      '//img[contains(@src, "images/pinpad/:n.gif")]',
-      '//img[contains(@src, "/:n.gif")]'
+      '//div[@id="keyOnly"]//img[contains(@src, "pinpad/:n.gif")]',
     ],
+
     // the GO button on the pin pad
     pinSubmitButton: [
       '//a[@id="btn_continue"]',
@@ -172,6 +190,6 @@ wesabe.provide('fi-scripts.com.ingdirect.login', {
   }
 });
 
-wesabe.util.privacy.sanitize.registerSanitizer('ING PIN Digit', /pinpad\/\d.gif|[A-Z]\.gif/g);
+wesabe.util.privacy.sanitize.registerSanitizer('ING PIN Digit', /pinpad\/\d\.gif|[A-Z]\.gif/g);
 wesabe.util.privacy.sanitize.registerSanitizer('ING Security Question', /AnswerQ[\d\.]+/g);
 wesabe.util.privacy.sanitize.registerSanitizer('ING PIN Alt Text', /\b(one|two|three|four|five|six|seven|eight|nine|zero)\b/g);

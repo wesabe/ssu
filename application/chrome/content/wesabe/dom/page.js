@@ -339,6 +339,38 @@ wesabe.dom.page = {
   },
 
   /**
+   * Finds the next sibling matching +siblingMatcher+, if given.
+   *
+   * @param document [HTMLDocument]
+   *   The document to serve as the root.
+   * @param xpathOrNode [HTMLElement, Xpath]
+   *   The thing whose next sibling is wanted.
+   * @param siblingMatcher [String, null]
+   *   An Xpath expression to use to match the following sibling (defaults to "*").
+   *
+   * @return [tainted([HTMLElement]), null]
+   */
+  next: function(document, xpathOrNode, siblingMatcher) {
+    var node = wesabe.dom.page.findStrict(document, xpathOrNode);
+    return wesabe.dom.page.find(document, 'following-sibling::'+(siblingMatcher || '*'), node);
+  },
+
+  /**
+   * Returns the text content of +xpathOrNode+.
+   *
+   * @param document [HTMLDocument]
+   *   The document to serve as the root.
+   * @param xpathOrNode [HTMLElement, Xpath]
+   *   The thing whose text is wanted.
+   *
+   * @return [tainted([String])]
+   */
+  text: function(document, xpathOrNode) {
+    var node = wesabe.dom.page.findStrict(document, xpathOrNode);
+    return wesabe.taint(wesabe.dom.page.select(document, './/text()', node).map(function(text){ return wesabe.untaint(text.nodeValue); }).join(''));
+  },
+
+  /**
    * Goes back one step in the document's window's history.
    *
    * @param document [HTMLDocument]
