@@ -126,20 +126,17 @@ wesabe.provide("fi-scripts.net.bnpparibas.login", {
     // slightest thing about the numeric parts of the image.
     processPassImage: function() {
       var imageSignatureMap = {
-        '205712ef4595c3e8186f355691a6108e': NaN, // blank spot
-        '9ca266efeb77cf6861f328114497ec70': 1,
-        'b18ffbd3d69051d199c4dc00e8b783d4': 1,
-        '33954cded00ca090c48befd46a24b866': 2,
-        'ea1616821c22d2cfbef30d4ebe83c58c': 2,
-        '35249bb410573752ddbea039bd5ca90d': 3,
-        '577bc8f52c8ddac37d91b9cc38a3dd71': 4,
-        '85fae9496e2e6dc2870ddf97ae077bb2': 5,
-        '262bf5c68e1a21b7647e738d80474a0c': 6,
-        '5d10a033a184ed61e7df650e685f84dc': 7,
-        '40060673ed585d9c6f61c346c5138646': 8,
-        'd1583a86a1c9e5edccb535ec3755679d': 9,
-        '0b6d83ee26fc418f8279a9ad09c6f36c': 0,
-        '27b86fe26d16808038ad78f764032e47': 0,
+        '51a9107d2e5b39fd584d38ebc9943948': NaN, // blank spot
+        '5c6f9649d91b0e5b2aa253a2ea3a9316': 1,
+        '2b7fc838971f607fb6dd9bd3464fbcdd': 2,
+        'a97dc836e72fd06305bd8c6b40e7be7b': 3,
+        '0fb187b530184cbbd20de2959bc9289b': 4,
+        'a30ba739c24fc0941b95f6d5da5fd7d8': 5,
+        'd96b294ca46d3949ad91cd703514eb09': 6,
+        '0bea694d6f46dc6d995dec6955a31b00': 7,
+        'e8e92f4fbda19ee6211a9b8a2d9e1410': 8,
+        'a497b31c2b345705e4810fd931f00807': 9,
+        '7368ce318266ed36299602c9720a6596': 0,
       };
 
       var image = tmp.passImageData, center = image.rect.center.nearestPixel;
