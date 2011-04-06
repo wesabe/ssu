@@ -21,6 +21,7 @@ wesabe.download.CompoundPlayer.register({
 
       dispatchFrames: false,
       afterDownload: 'nextAccount',
+      afterLastGoal: 'logoff',
 
       includes: [
         'fi-scripts.com.chase.promos',

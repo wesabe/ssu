@@ -21,9 +21,9 @@ wesabe.provide('fi-scripts.com.chase.accounts', {
         return action.downloadSelectedAccount();
       }
 
-      // Step 8: Logoff
+      // Step 8: Next goal
       if (!tmp.accounts.length) {
-        return action.logoff();
+        return job.nextGoal();
       }
 
       // Step 3: Go to Account Activity Page
