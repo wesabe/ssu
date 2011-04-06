@@ -185,7 +185,7 @@ var wesabe = {
    */
   _getUrisForParts: function(parts, scheme, lookForPackages, preferPackages) {
     var s = wesabe.baseUrlForScheme(scheme);
-    var u = function(pp) { return [s].concat(pp).join('/') + '.js' };
+    var u = function(pp) { var base = [s].concat(pp).join('/'); return [base + '.js', base + '.coffee']; };
 
     if (parts.length == 0) {
       return [];
@@ -196,15 +196,15 @@ var wesabe = {
     }
 
     var uris = [];
-    // A/B/C/__package__.js
+    // A/B/C/__package__.{js,coffee}
     if (lookForPackages) {
-      uris.push(u(parts.concat(['__package__'])));
+      uris = uris.concat(u(parts.concat(['__package__'])));
     }
-    // A/B/C.js
+    // A/B/C.{js,coffee}
     if (preferPackages) {
-      uris.push(u(parts));
+      uris = uris.concat(u(parts));
     } else {
-      uris.unshift(u(parts));
+      uris = u(parts).concat(uris)
     }
     // start over with A/B
     return uris.concat(wesabe._getUrisForParts(parts.slice(0, parts.length-1), scheme, true, false));
@@ -253,6 +253,14 @@ var wesabe = {
       return false;
     }
 
+    if (/\.coffee$/.test(uri)) {
+      try {
+        contents = CoffeeScript.compile(contents);
+      } catch (e) {
+        dump('!! Unable to compile CoffeeScript file '+uri+': '+e+'\n');
+      }
+    }
+
     // figure out LOC offset and EVAL offset
     if (wesabe._locOffset === null) {
       var lines = wesabe._getText(wesabe.getMyURI()).split(/\n/);
@@ -277,7 +285,12 @@ var wesabe = {
     var padding = (new Array(wesabe._locOffset-wesabe._evalOffset+1)).join('\n');
     wesabe._locOffset += loc;
 
-    eval(padding + contents + '\r\n//@ sourceUri=' + uri); // __EVAL__
+    try {
+      eval(padding + contents + '\r\n//@ sourceUri=' + uri); // __EVAL__
+    } catch (e) {
+      dump('!! Error while evaluating code from '+uri+': '+e+'\n');
+      dump('\n\n'+contents+'\n\n');
+    }
 
     return true;
   },
@@ -303,7 +316,7 @@ var wesabe = {
 
     xhr.open('GET', uri, false);
     try { xhr.send(null) }
-    catch(e) { /* uh oh, 404? */ dump('_getText: error(' + uri + '): ' + e + '\n'); return null }
+    catch(e) { /* uh oh, 404? */ return null }
 
     return (xhr.status === 200 || xhr.status === 0) ? xhr.responseText : null;
   },

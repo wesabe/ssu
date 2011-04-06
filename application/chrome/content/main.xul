@@ -7,11 +7,12 @@
 
 <window id="main" title="&window-title;" width="450" height="330" persist="width,height,screenX,screenY,sizemode"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  
+
   <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
+  <script type="application/x-javascript" src="coffee-script.js"/>
   <script type="application/x-javascript" src="wesabe.js"/>
   <script type="application/x-javascript" src="main.js"/>
-  
+
   <keyset>
     <key modifiers="accel" key="W" oncommand="window.close()"/>
     <key modifiers="accel" key="Q" id="quit"/>
@@ -26,6 +27,6 @@
       </menu>
     </menubar>
   </toolbox>
-  
+
   <browser id="playback-browser" flex="1" type="content-primary" />
 </window>
