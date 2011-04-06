@@ -28,6 +28,8 @@ wesabe.download.Player.create = function(params) {
   klass.prototype.filters = [];
   // any download callbacks
   klass.prototype.afterDownloadCallbacks = [];
+  // after last goal callbacks
+  klass.prototype.afterLastGoalCallbacks = [];
   // any alert callbacks
   klass.prototype.alertReceivedCallbacks = [];
   // the Wesabe Financial Institution ID (e.g. us-001078)
@@ -52,7 +54,8 @@ wesabe.download.Player.create = function(params) {
   // dispatchFrames: false
   if (wesabe.isFalse(params.dispatchFrames)) {
     klass.prototype.filters.push(function() {
-      if (page.defaultView.frameElement) return false;
+      if (page.defaultView.frameElement)
+        return false;
     });
   }
 
@@ -85,6 +88,10 @@ wesabe.download.Player.create = function(params) {
 
     if (module.afterDownload) {
       klass.prototype.afterDownloadCallbacks.push(module.afterDownload);
+    }
+
+    if (module.afterLastGoal) {
+      klass.prototype.afterLastGoalCallbacks.push(module.afterLastGoal);
     }
 
     if (module.alertReceived) {
@@ -140,6 +147,17 @@ wesabe.download.Player.prototype.start = function(answers, browser) {
 
   this.answers = answers;
   this.runAction('main', browser);
+};
+
+wesabe.download.Player.prototype.nextGoal = function() {
+  this.job.nextGoal();
+};
+
+wesabe.download.Player.prototype.onLastGoalFinished = function() {
+  wesabe.info('Finished all goals, running callbacks');
+  for (var i = 0; i < this.afterLastGoalCallbacks.length; i++) {
+    this.runAction(this.afterLastGoalCallbacks[i], this.browser, this.page);
+  }
 };
 
 wesabe.download.Player.prototype.finish = function() {
@@ -410,6 +428,20 @@ wesabe.download.Player.prototype.onDocumentLoaded = function(browser, page) {
       });
   });
 
+  if (!this.shouldDispatch(browser, page)) {
+    wesabe.info('skipping document load');
+    return;
+  }
+
+  this.triggerDispatch(browser, page);
+};
+
+wesabe.download.Player.prototype.triggerDispatch = function(browser, page) {
+  var self = this, module = this.constructor.fid;
+
+  browser = browser || this.browser;
+  page = page || this.page;
+
   var url = wesabe.taint(page.defaultView.location.href);
   var title = wesabe.taint(page.title);
 
@@ -417,11 +449,6 @@ wesabe.download.Player.prototype.onDocumentLoaded = function(browser, page) {
   wesabe.info('title=', title);
 
   wesabe.trigger(this, 'page-load', [browser, page]);
-
-  if (!this.shouldDispatch(browser, page)) {
-    wesabe.info('skipping document load');
-    return;
-  }
 
   // these should not be used inside the FI scripts
   this.browser = browser;

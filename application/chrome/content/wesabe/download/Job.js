@@ -9,7 +9,7 @@ wesabe.download.Job = function(jobid, fid, creds, user_id, options) {
   this.version = 0;
   this.data = {};
   this.options = options || {};
-  this.goal = this.options.goal || 'statements';
+  this.options.goals = this.options.goals || ['statements'];
   this.timer = new wesabe.util.Timer();
 };
 
@@ -93,9 +93,26 @@ wesabe.download.Job.prototype.start = function() {
 
   this.player = wesabe.download.Player.build(this.fid);
   this.player.job = this;
-  this.player.start(this.creds, document.getElementById('playback-browser'));
-  wesabe.trigger(this, 'begin');
-  this.timer.start('Total');
 
   wesabe.info('Starting job for ',this.player.org,' (',this.fid,')');
+  this.player.start(this.creds, document.getElementById('playback-browser'));
+
+  wesabe.trigger(this, 'begin');
+  this.timer.start('Total');
+  this.nextGoal();
+};
+
+wesabe.download.Job.prototype.nextGoal = function() {
+  if (this.options.goals.length)
+  {
+    this.goal = this.options.goals.shift();
+    wesabe.info('Starting new goal: ', this.goal);
+
+    if (this.player.page)
+      this.player.triggerDispatch();
+
+    return this.goal;
+  }
+
+  this.player.onLastGoalFinished();
 };

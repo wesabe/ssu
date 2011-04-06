@@ -59,7 +59,7 @@ wesabe.lang.extend(wesabe.download.CompoundPlayer.prototype, {
       },
 
       succeed: function() {
-        self.job.succeed();
+        self.job.succeed.apply(self.job, arguments);
       },
 
       timer: self.job.timer,
@@ -68,7 +68,17 @@ wesabe.lang.extend(wesabe.download.CompoundPlayer.prototype, {
         return self.currentPlayer.page;
       },
 
-      goal: self.job.goal,
+      nextGoal: function() {
+        self.job.nextGoal.apply(self.job, arguments);
+      },
+
+      get goal() {
+        return self.job.goal;
+      },
+
+      suspend: function() {
+        self.job.suspend.apply(self.job, arguments);
+      },
 
       options: self.job.options,
     };
