@@ -3,7 +3,8 @@ wesabe.download.Player.register({
   org: 'ING Direct',
 
   dispatchFrames: false,
-  afterDownload: 'logoff',
+  afterDownload: 'nextGoal',
+  afterLastGoal: 'logoff',
 
   includes: [
     'fi-scripts.com.ingdirect.login',

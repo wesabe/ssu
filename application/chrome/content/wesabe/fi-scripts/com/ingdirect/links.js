@@ -32,7 +32,7 @@ wesabe.provide('fi-scripts.com.ingdirect.links', {
         };
       });
 
-      action.logoff();
+      job.nextGoal();
     },
   },
 

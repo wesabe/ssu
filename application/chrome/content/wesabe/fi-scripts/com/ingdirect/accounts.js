@@ -13,8 +13,10 @@ wesabe.provide('fi-scripts.com.ingdirect.accounts', {
       action.logoff();
     } else if (page.visible(e.downloadPeriod)) {
       action.downloadActivity();
-    } else {
+    } else if (page.present(e.downloadLink)) {
       action.goDownloadPage();
+    } else {
+      action.goMyAccountsPage();
     }
   },
 
@@ -22,6 +24,11 @@ wesabe.provide('fi-scripts.com.ingdirect.accounts', {
     goDownloadPage: function() {
       job.update('account.download');
       page.click(e.downloadLink);
+    },
+
+    goMyAccountsPage: function() {
+      job.update('account');
+      page.click(e.myAccountsNavLink);
     },
 
     downloadActivity: function() {
@@ -53,6 +60,11 @@ wesabe.provide('fi-scripts.com.ingdirect.accounts', {
   },
 
   elements: {
+    myAccountsNavLink: [
+      '//a[@href="/myaccount/INGDirect.html?command=displayAccountSummary"]',
+      '//div[@id="tabs"]//a[contains(string(.), "My Accounts")]',
+    ],
+
     /////////////////////////////////////////////////////////////////////////////
     // Account List
     /////////////////////////////////////////////////////////////////////////////
