@@ -76,7 +76,11 @@ class wesabe.dom.Bridge
   dispatch: (response) ->
     if response.id
       fn = @requestCallbacks[response.id]
-      fn?.call(response, response.data)
+      try
+        fn?.call(response, response.data)
+      catch e
+        wesabe.error('Bridge XUL callback function threw an error with response: ', response)
+        wesabe.error(e)
     else
       wesabe.warn('bridge response did not contain an id')
 
