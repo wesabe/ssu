@@ -33,7 +33,7 @@ class wesabe.dom.Bridge
   constructor: (document, callback) ->
     @document = document
     @callback = callback
-    @requestCallbacks = {}
+    @requests = {}
     @messageid = 1
     @connect(@callback) if @callback
 
@@ -64,8 +64,10 @@ class wesabe.dom.Bridge
       id: @messageid++
       data: data
       method: methodName
+      connected: false
+      callback: fn
 
-    @requestCallbacks[request.id] = fn
+    @requests[request.id] = request
 
     event = document.createEvent("Events")
     event.initEvent("xulDispatch", true, false)
@@ -75,9 +77,14 @@ class wesabe.dom.Bridge
 
   dispatch: (response) ->
     if response.id
-      fn = @requestCallbacks[response.id]
+      request = @requests[response.id]
+
+      if !request.connected
+        request.connected = true
+        return
+
       try
-        fn?.call(response, response.data)
+        request.callback?.call(response, response.data)
       catch e
         wesabe.error('Bridge XUL callback function threw an error with response: ', response)
         wesabe.error(e)
