@@ -47,6 +47,8 @@ package manager (e.g. `apt-get`). If you're on OS X you can use the
 bundled rake task:
 
     ssu$ rake xulrunner
+    # If you're on Mac OS X, run this too:
+    ssu$ rake build:dev
 
 That'll install it if it's not installed and tell you the version you
 have installed if it is already. Now go ahead and start the app itself
