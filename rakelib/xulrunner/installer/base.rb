@@ -31,7 +31,7 @@ module Xulrunner
     end
 
     def url_for(file)
-      "ftp://#{HOST}/#{RELEASE_PATH}/#{file}"
+      "http://#{HOST}/#{RELEASE_PATH}/#{file}"
     end
 
     def platform_package_path(version)

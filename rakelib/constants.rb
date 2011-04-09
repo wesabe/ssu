@@ -1,6 +1,6 @@
 XULSDK = "#{File.dirname(__FILE__)}/../gecko-sdk"
 XULFRAMEWORK = "/Library/Frameworks/XUL.framework"
 XULRUNNER = "#{XULFRAMEWORK}/xulrunner-bin" # modify for windows and linux
-XULVERSION = "1.9.2.8"
+XULVERSION = "1.9.2.16"
 
 BUILD = "#{File.dirname(__FILE__)}/../build"
