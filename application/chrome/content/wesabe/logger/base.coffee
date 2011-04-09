@@ -156,9 +156,7 @@ wesabe.logger.__defineSetter__ 'level', (level) ->
 #
 wesabe.log4 = (prefix) ->
   logger = sharedLogger.clone()
-  logger.prefix ||= ""
-  logger.prefix += ": " if logger.prefix.length
-  logger.prefix += prefix
+  logger.prefix += "#{prefix}: "
   return logger
 
 
