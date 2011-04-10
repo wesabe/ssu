@@ -44,15 +44,15 @@ need to look in the `com` directory for the `chase.js` script.
 If your financial institution is supported, then great! Next you'll need
 to install XulRunner. If you're on Linux, you'll want to use your
 package manager (e.g. `apt-get`). If you're on OS X you can use the
-bundled rake task:
+bundled setup script:
 
-    ssu$ rake build:dev
+    ssu$ ./bootstrap
 
 That'll install it if it's not installed and tell you the version you
 have installed if it is already. Now go ahead and start the app itself
 in a terminal window:
 
-    ssu$ script/server
+    ssu$ bin/server
 
 You'll see some logging output along with some startup messages and a
 blank browser window titled "Wesabe DesktopUploader". As long as you
