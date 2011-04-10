@@ -1,5 +1,5 @@
 def build_macosx
-  puts "assembling the application bundle"
+  say "Assembling the application bundle"
 
   bundle = "build/#{APP_NAME}.app"
   xulrunner = "/Library/Frameworks/XUL.framework/xulrunner-bin"

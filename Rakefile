@@ -39,11 +39,13 @@ namespace :build do
   if macosx?
     desc "Build the application for development on Mac OS X"
     task :dev => :build do
-      puts "linking application to your sources"
+      say "Linking application to your sources"
 
       resources_path = "build/#{APP_NAME}.app/Contents/Resources"
       FileUtils.rm_rf resources_path
       FileUtils.ln_s  "../../../application", resources_path
+
+      good "Successfully set up SSU for development, run script/server to start the application"
     end
   end
 end

@@ -14,5 +14,13 @@ def esh(string)
 end
 
 def say(what)
-  puts "** #{what}"
+  puts "~> #{what}"
+end
+
+def good(what)
+  if $stdout.tty?
+    say "\e[32m#{what}\e[0m"
+  else
+    say what
+  end
 end
