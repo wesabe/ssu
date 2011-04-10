@@ -1,0 +1,86 @@
+#!/bin/bash
+test -e bootstrap.log && rm -f bootstrap.log
+
+APP_NAME="Wesabe DesktopUploader"
+
+bootstrap_darwin()
+{
+  XULVERSION="1.9.1.18"
+
+  ROOT="/Library/Frameworks/XUL.framework"
+  THIS="$ROOT/Versions/Current"
+
+  if [ -d $THIS ]; then
+    info "XUL.framework version $(basename $(readlink $THIS)) is already installed."
+  else
+    URL="http://mozilla.mirrors.tds.net/pub/mozilla.org/xulrunner/releases/1.9.1.18/runtimes/xulrunner-1.9.1.18.en-US.mac-pkg.dmg"
+    DOWNLOAD="$HOME/Downloads/$(basename $URL)"
+    MOUNTPOINT="/Volumes/XULRunnerFramework"
+
+    if [ ! -e $DOWNLOAD ]; then
+      info "Downloading $(basename $URL)"
+      curl -o $DOWNLOAD $URL >>bootstrap.log 2>&1|| die "Unable to download $(basename $URL)"
+    fi
+
+    info "Installing XUL.framework version $XULVERSION (you may be asked for your password)"
+
+    hdiutil attach -mountpoint $MOUNTPOINT $DOWNLOAD >>bootstrap.log 2>&1 ||
+      die "Unable to mount downloaded DMG $DOWNLOAD"
+
+    sudo installer -package $MOUNTPOINT/$(basename $DOWNLOAD -pkg.dmg).pkg -target / >>bootstrap.log 2>&1 ||
+      die "Unable to install XUL.framework"
+
+    hdiutil detach $MOUNTPOINT >>bootstrap.log 2>&1 ||
+      die "Unable to detach downloaded DMG"
+  fi
+
+  info "Setting up development environment"
+
+  BUNDLE="build/$APP_NAME.app"
+
+  # kill it if it's already there
+  rm -rf "$BUNDLE"
+  mkdir -p "$BUNDLE"
+
+  $ROOT/xulrunner-bin --install-app application build >>bootstrap.log 2>&1 &&
+    cp resources/Info.plist "$BUNDLE/Contents" &&
+    mkdir -p "$BUNDLE/Contents/Frameworks/XUL.framework" &&
+    /usr/bin/rsync -al $ROOT/ "$BUNDLE/Contents/Frameworks/XUL.framework/" &&
+    rm -rf "$BUNDLE/Contents/Resources" &&
+    ln -nfs "../../../application" "$BUNDLE/Contents/Resources" ||
+      die "Unable to set up OS X development .app bundle"
+}
+
+bootstrap_aptitude()
+{
+  XULVERSION="1.9.1"
+
+  info "Installing XUL.framework version $XULVERSION (you may be asked for your password)"
+
+  sudo aptitude install xulrunner-$XULVERSION || die "Unable to install xulrunner package"
+}
+
+info()
+{
+  echo -e "\033[36m~> $1\033[0m"
+}
+
+yay()
+{
+  echo -e "\033[32m~> $1\033[0m"
+}
+
+die()
+{
+  echo -e "\033[31m~> $1. Check bootstrap.log\033[0m"
+  exit 1
+}
+
+if [[ `uname` == "Darwin" ]]; then
+  bootstrap_darwin
+elif which -s aptitude 2>/dev/null; then
+  bootstrap_aptitude
+fi
+
+yay "Done! Run script/server to start the application"
+test -e bootstrap.log && rm -f bootstrap.log

@@ -118,15 +118,6 @@ namespace :config do
       prefs.delete(type) if prefs[type] == 1
     end
     
-    pfc = 'wesabe.pfc.root'
-    api = 'wesabe.api.root'
-    
-    prefs[pfc] = 'https://www.wesabe.com/' if prefs[pfc].blank?
-    prefs[api] = 'https://www.wesabe.com/rest/' if prefs[api].blank?
-    
-    prefs[pfc] = readline_with_default("What url should xulrunner use for PFC?", prefs[pfc])
-    prefs[api] = readline_with_default("What url should xulrunner use for the API?", prefs[api])
-    
     level = 'wesabe.logger.level'
     prefs[level] = 'debug' if prefs[level].blank?
     prefs[level] = readline_with_default("What logger level should the xulrunner use?", prefs[level])

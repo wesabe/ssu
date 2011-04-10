@@ -1,0 +1,113 @@
+#!/bin/bash
+
+export NO_EM_RESTART=1
+
+server_darwin()
+{
+  NAME="$(config App Name)"
+  XUL="build/$NAME.app/Contents/MacOS/xulrunner"
+
+  if [[ ! -x "$XUL" ]]; then
+    warn "You don't have an .app bundle built for development"
+    read -p "Build it now? [y] "
+    if [[ "$REPLY" == "" || "$REPLY" == "y" || "$REPLY" == "Y" ]]; then
+      $(dirname $0)/../bootstrap || exit $?
+    else
+      die "Cannot run server without an .app bundle"
+    fi
+  fi
+
+  PROFILES="$HOME/Library/Application Support/$(config App Name)/Profiles"
+  for profile in "$PROFILES"/*.default
+  do
+    logfile="$profile/wuff_log.txt"
+    break
+  done
+
+  run_and_tail "$XUL" "$logfile" "$@"
+}
+
+server_linux()
+{
+  vendor="$(config App Vendor | tr '[A-Z]' '[a-z]')"
+  appname="$(config App Name | tr '[A-Z]' '[a-z]')"
+  PROFILES="$HOME/.$vendor/$appname"
+  for profile in "$PROFILES"/*.default
+  do
+    logfile="$profile/wuff_log.txt"
+    break
+  done
+
+  run_and_tail xulrunner "$logfile" application/application.ini "$@"
+}
+
+run_and_tail()
+{
+  XUL=$1
+  shift
+  logfile=$1
+  shift
+
+  "$XUL" "$@" &
+
+  if [[ -e "$logfile" ]]; then
+    tail -n 0 -f "$logfile" &
+    trap "kill %1; kill %2; exit" INT TERM EXIT
+    wait %1
+    wait %2
+  else
+    warn "Expected log file at $logfile, but it wasn't found"
+    warn "File logging won't happen automatically"
+    trap "kill %1; exit" INT TERM EXIT
+    wait %1
+  fi
+}
+
+config()
+{
+  section=$1
+  key=$2
+
+  foundsection=false
+
+  while read line
+  do
+    if [[ "$foundsection" == true ]]; then
+      if [[ "$line" =~ "[*" ]]; then
+        break
+      elif [[ "$line" =~ "$key="* ]]; then
+        echo "${line:$(expr ${#key}+1)}" | tr -d "\r\n"
+        break
+      fi
+    elif [[ "$line" == "[$section]"* ]]; then
+      foundsection=true
+    fi
+  done < application/application.ini
+}
+
+info()
+{
+  echo -e "\033[36m~> $1\033[0m"
+}
+
+yay()
+{
+  echo -e "\033[32m~> $1\033[0m"
+}
+
+warn()
+{
+  echo -e "\033[33m~> $1\033[0m"
+}
+
+die()
+{
+  echo -e "\033[31m~> $1\033[0m"
+  exit 1
+}
+
+if [[ `uname` == "Darwin" ]]; then
+  server_darwin "$@"
+else
+  server_linux "$@"
+fi
