@@ -46,8 +46,6 @@ to install XulRunner. If you're on Linux, you'll want to use your
 package manager (e.g. `apt-get`). If you're on OS X you can use the
 bundled rake task:
 
-    ssu$ rake xulrunner
-    # If you're on Mac OS X, run this too:
     ssu$ rake build:dev
 
 That'll install it if it's not installed and tell you the version you
