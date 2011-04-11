@@ -54,7 +54,7 @@ run_and_tail()
     tail -n 0 -f "$logfile" &
     trap "kill %1 2>/dev/null; kill %2 2>/dev/null; exit" INT TERM EXIT
     wait %1
-    wait %2
+    exit
   else
     warn "Expected log file at $logfile, but it wasn't found"
     warn "File logging won't happen automatically"
