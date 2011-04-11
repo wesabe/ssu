@@ -52,13 +52,13 @@ run_and_tail()
 
   if [[ -e "$logfile" ]]; then
     tail -n 0 -f "$logfile" &
-    trap "kill %1; kill %2; exit" INT TERM EXIT
+    trap "kill %1 2>/dev/null; kill %2 2>/dev/null; exit" INT TERM EXIT
     wait %1
     wait %2
   else
     warn "Expected log file at $logfile, but it wasn't found"
     warn "File logging won't happen automatically"
-    trap "kill %1; exit" INT TERM EXIT
+    trap "kill %1 2>/dev/null; exit" INT TERM EXIT
     wait %1
   fi
 }
