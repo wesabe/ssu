@@ -4,9 +4,6 @@ wesabe.require('ofx.*')
 # public methods
 
 class wesabe.download.OFXPlayer
-  constructor: (fid) ->
-    @fid = fid
-
   DAYS_OF_HISTORY: 365
 
   @register: (params) ->
