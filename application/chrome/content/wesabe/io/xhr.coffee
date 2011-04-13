@@ -6,7 +6,7 @@ wesabe.io.xhr =
 
     url = path
     qs = @encodeParams(params)
-    url += (/\?/.test(url) ? '&' : '?') + qs if qs.length
+    url += (if /\?/.test(url) then '&' else '?') + qs if qs.length
 
     return url
 
