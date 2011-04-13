@@ -119,13 +119,12 @@ class wesabe.xml.Element
   inspect: (refs, color, tainted) ->
     s = new wesabe.util.Colorizer()
     s.disabled = !color
-    s
-      .reset()
-      .bold("{#{if @selfclosing then 'empty' else ''}elem ")
-      .yellow('<')
-      .white()
-      .bold()
-      .print(@name)
+    s.reset()
+     .bold("{#{if @selfclosing then 'empty' else ''}elem ")
+     .yellow('<')
+     .white()
+     .bold()
+     .print(@name)
 
     # print out the attributes
     for attr in @attributes
