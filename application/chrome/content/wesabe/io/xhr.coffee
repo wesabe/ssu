@@ -94,5 +94,6 @@ wesabe.io.xhr =
     @request('PUT', path, params, data, block)
 
 for method in ['get', 'post', 'put']
-  wesabe.io[method] = ->
-    wesabe.io.xhr[method].apply(wesabe.io.xhr, arguments)
+  do (method) ->
+    wesabe.io[method] = ->
+      wesabe.io.xhr[method].apply(wesabe.io.xhr, arguments)
