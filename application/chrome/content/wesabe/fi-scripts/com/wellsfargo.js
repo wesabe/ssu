@@ -309,4 +309,4 @@ wesabe.download.Player.register({
   },
 });
 
-wesabe.util.privacy.sanitize.registerSanitizer('Wells Fargo Session ID', /sessargs=[^=&\?]*/g);
+wesabe.util.privacy.registerSanitizer('Wells Fargo Session ID', /sessargs=[^=&\?]*/g);

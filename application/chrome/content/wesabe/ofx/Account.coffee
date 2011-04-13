@@ -21,7 +21,6 @@ class wesabe.ofx.Account
     ('X' for i in [0...@acctid.length-4]).join('') + @acctid[-4..-1]
 
 wesabe.ready 'wesabe.util.privacy', =>
-  wesabe.util.privacy.taint.registerWrapper(
+  wesabe.util.privacy.registerTaintWrapper
     detector: (o) -> wesabe.is(o, wesabe.ofx.Account)
     getters: ["accttype", "acctid", "bankid", "desc", "masked_acctid"]
-  )

@@ -51,8 +51,8 @@ var wesabe = {
    * callback<Function>:: A function to call when the module is ready.
    *
    * ==== Example
-   *   wesabe.ready("privacy", function() {
-   *     wesabe.privacy.registerSanitizer(...);
+   *   wesabe.ready("util.privacy", function() {
+   *     wesabe.util.privacy.registerSanitizer(...);
    *   });
    *
    * @public

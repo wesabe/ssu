@@ -36,7 +36,7 @@ wesabe.lang.extend(wesabe.ofx.Status.prototype, {
 });
 
 wesabe.ready('wesabe.util.privacy', function() {
-  wesabe.util.privacy.taint.registerWrapper({
+  wesabe.util.privacy.registerTaintWrapper({
     detector: function(o){ return wesabe.is(o, wesabe.ofx.Status) },
     getters: ["code", "status", "message"]
   });
