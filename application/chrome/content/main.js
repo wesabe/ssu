@@ -4,7 +4,6 @@ wesabe.logger.setLogger('file');
 wesabe.require('download.*');
 wesabe.require('util.*');
 wesabe.require('io.*');
-wesabe.require('api.*');
 wesabe.require('ofx.*');
 
 window.onerror = function(error, uri, errcode) {
@@ -59,8 +58,6 @@ function init() {
     // write out our configuration so that whoever started us can talk to us
     var config = {
       port: port,
-      api: {
-        url: wesabe.api.DEFAULT_BASE_URL},
       version: wesabe.SSU_VERSION,
       pid: pid || null};
     var profile = wesabe.io.dir.profile;

@@ -11,7 +11,3 @@ pref("javascript.options.showInConsole", true);
 pref("javascript.options.strict", true);
 pref("nglayout.debug.disable_xul_cache", true);
 pref("nglayout.debug.disable_xul_fastload", true);
-
-/* wesabe prefs */
-pref("wesabe.pfc.root", "https://www.wesabe.com/");
-pref("wesabe.api.root", "https://api.wesabe.com/rest/");
