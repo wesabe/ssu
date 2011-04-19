@@ -542,13 +542,10 @@ wesabe.download.Player.build = function(fid) {
   return wesabe.tryThrow('download.Player.build(fid=' + fid + ')', function(log) {
     var klass;
 
-    wesabe.tryCatch('loading fi-scripts.'+fid, function() {
+    wesabe.tryThrow('loading fi-scripts.'+fid, function() {
       klass = wesabe.require('fi-scripts.' + fid);
     });
 
-    if (klass)
-      return new klass(fid);
-    else
-      return new wesabe.download.OFXPlayer(fid);
+    return new klass(fid);
   });
 };
