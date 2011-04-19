@@ -84,7 +84,6 @@ _inspectError = (error, refs, color, tainted) ->
    .print('An exception has occurred:\n    ')
    .red(error.message)
    .print(' (', error.name, ')\n')
-   .print('Backtrace:\n')
 
   trace = []
   files = {}
@@ -102,37 +101,49 @@ _inspectError = (error, refs, color, tainted) ->
       frame = frame.caller
 
   for frame in trace
-    name = frame.name||'unknown'
-    file = frame.filename||'unknown'
-    lineno = frame.lineNumber||'??'
+    frame.name ||= 'unknown'
+    frame.filename ||= 'unknown'
+    frame.lineNumber ||= '??'
 
-    m = file.match(/^(.*\/)wesabe\.js$/)
+    m = frame.filename.match(/^(.*\/)wesabe\.js$/)
     if m
-      info = wesabe.fileAndLineFromEvalLine(parseInt(lineno, 10))
-      if info && info.file != 'wesabe.js'
-        file = m[1] + info.file
-        lineno = "#{info.lineno} (eval line #{lineno})"
+      info = wesabe.fileAndLineFromEvalLine(parseInt(frame.lineNumber, 10))
+      if info?.file != 'wesabe.js'
+        frame.filename = m[1] + info.file
+        frame.lineNumber = "#{info.lineno} (eval line #{frame.lineNumber})"
 
-    m = file.match(/^chrome:\/\/[^\/]+\/content\/(.*)$/)
+    m = frame.filename.match(/^chrome:\/\/[^\/]+\/content\/(.*)$/)
     if m
-      file = m[1]
+      frame.filename = m[1]
 
-    contents = (files[file] ||= (wesabe._getEvalText(file) || '').split(/\n/))
-    if contents && lineno != '??'
-      lineno = parseInt(lineno, 10)
-      if lineno < contents.length
-        for i in [lineno..0]
+    contents = wesabe._getEvalText(frame.filename)?.split(/\n/)
+    if contents && frame.lineNumber != '??'
+      frame.lineNumber = parseInt(frame.lineNumber, 10)
+      frame.lineText = contents[frame.lineNumber-1]
+      if frame.lineNumber < contents.length
+        for i in [frame.lineNumber..0]
           m = contents[i].match(/([a-zA-Z]\w*)\s*:\s*function\s*\(|function\s*([a-zA-Z]\w*)\s*\([\)]*|((?:get|set)\s+[a-zA-Z]\w*)\(\)|\.prototype\.([a-zA-Z]\w*)\s*=\s*function/)
           if m
-            name = m[1] || m[2] || m[3] || m[4]
+            frame.name = m[1] || m[2] || m[3] || m[4]
             break
 
+  if lineText = trace[0]?.lineText
+    lineText = wesabe.lang.string.trim(lineText)
+    lineText = lineText[0...38]+'...'+lineText[lineText.length-35...lineText.length] if lineText.length > 76
+
+    s.print('On:\n    ')
+     .red(lineText)
+     .print('\n')
+
+  s.print('Backtrace:\n')
+
+  for {name, filename, lineNumber} in trace
     if name.length < 40
       s.print(' ') for i in [0...(40 - name.length)]
     else
       name = "#{name[0...37]}..."
 
-    s.print(name, ' at ', file, ':', lineno, '\n')
+    s.print(name, ' at ', filename, ':', lineNumber, '\n')
 
   return s.toString()
 
