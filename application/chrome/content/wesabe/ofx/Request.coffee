@@ -144,7 +144,7 @@ class wesabe.ofx.Request
   this::__defineGetter__ 'appId', ->
     @_appId || 'Money'
 
-  this::__defineSetter__ 'appId', ->
+  this::__defineSetter__ 'appId', (appId) ->
     @_appId = appId
 
   this::__defineGetter__ 'appVersion', ->
