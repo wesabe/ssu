@@ -122,7 +122,7 @@ _inspectError = (error, refs, color, tainted) ->
       frame.lineText = contents[frame.lineNumber-1]
       if frame.lineNumber < contents.length
         for i in [frame.lineNumber..0]
-          m = contents[i].match(/([a-zA-Z]\w*)\s*:\s*function\s*\(|function\s*([a-zA-Z]\w*)\s*\([\)]*|((?:get|set)\s+[a-zA-Z]\w*)\(\)|\.prototype\.([a-zA-Z]\w*)\s*=\s*function/)
+          m = contents[i].match(/([_a-zA-Z]\w*)\s*:\s*function\s*\(|function\s*([_a-zA-Z]\w*)\s*\([\)]*|((?:get|set)\s+[_a-zA-Z]\w*)\(\)|\.prototype\.([_a-zA-Z]\w*)\s*=\s*function/)
           if m
             frame.name = m[1] || m[2] || m[3] || m[4]
             break
