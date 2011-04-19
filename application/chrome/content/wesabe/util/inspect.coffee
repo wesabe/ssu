@@ -122,9 +122,8 @@ _inspectError = (error, refs, color, tainted) ->
       frame.lineText = contents[frame.lineNumber-1]
       if frame.lineNumber < contents.length
         for i in [frame.lineNumber..0]
-          m = contents[i].match(/([_a-zA-Z]\w*)\s*:\s*function\s*\(|function\s*([_a-zA-Z]\w*)\s*\([\)]*|((?:get|set)\s+[_a-zA-Z]\w*)\(\)|\.prototype\.([_a-zA-Z]\w*)\s*=\s*function/)
-          if m
-            frame.name = m[1] || m[2] || m[3] || m[4]
+          if name = functionNameForLine(contents[i])
+            frame.name = name
             break
 
   if lineText = trace[0]?.lineText
@@ -269,6 +268,27 @@ _inspectWindow = (window, color, tainted) ->
    .print(_inspectString(window.document.title,color,tainted))
    .yellow('>')
    .toString()
+
+functionNameForLine = (line) ->
+  # foo: function(...)
+  if match = line.match(/([_a-zA-Z]\w*)\s*:\s*function\s*\(/)
+    match[1]
+
+  # function foo(...)
+  else if match = line.match(/function\s*([_a-zA-Z]\w*)\s*\([\)]*/)
+    match[1]
+
+  # get foo() / set foo(value)
+  else if match = line.match(/((?:get|set)\s+[_a-zA-Z]\w*)\(\)/)
+    match[1]
+
+  # Bar.prototype.foo = function(...)
+  else if match = line.match(/\.prototype\.([_a-zA-Z]\w*)\s*=\s*function/)
+    match[1]
+
+  # __defineGetter__('foo', function() / __defineSetter__('foo', function(...)
+  else if match = line.match(/__define([GS]et)ter__\(['"]([_a-zA-Z]\w*)['"],\s*function/)
+    "#{match[1].toLowerCase()} #{match[2]}"
 
 wesabe.util.inspect = inspect
 wesabe.util.inspectForLog = inspectForLog
