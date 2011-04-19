@@ -23,7 +23,7 @@ class wesabe.download.Job
   suspend: (result, data, callback) ->
     @version++
     player = @player
-    @result = result;
+    @result = result
     @data[result] = data
 
     if callback
@@ -57,7 +57,7 @@ class wesabe.download.Job
     wesabe.trigger(this, "update #{event} complete")
     @timer.end('Total')
 
-    org = @player.org;
+    org = @player.org
     summary = @timer.summarize()
     line = []
     total = parseFloat(summary['Total'])

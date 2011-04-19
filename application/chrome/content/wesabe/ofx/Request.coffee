@@ -59,7 +59,7 @@ class wesabe.ofx.Request
         wesabe.lang.func.executeCallback(callback, 'failure', [self, response, request])
 
   accountInfo: ->
-    @_init();
+    @_init()
 
     @_header() +
     "<OFX>\r\n" +
