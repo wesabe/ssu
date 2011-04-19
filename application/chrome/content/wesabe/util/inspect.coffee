@@ -117,15 +117,15 @@ _inspectError = (error, refs, color, tainted) ->
     if m
       file = m[1]
 
-    contents = (files[file] ||= (wesabe._getText(file) || '').split(/\n/))
+    contents = (files[file] ||= (wesabe._getEvalText(file) || '').split(/\n/))
     if contents && lineno != '??'
       lineno = parseInt(lineno, 10)
       if lineno < contents.length
         for i in [lineno..0]
-          m = contents[i].match(/([a-zA-Z]\w*)\s*:\s*function\s*\(|function\s*([a-zA-Z]\w*)\s*\([\)]*|((?:get|set)\s+[a-zA-Z]\w*)\(\)/)
-        if m
-          name = m[1] || m[2] || m[3]
-          break
+          m = contents[i].match(/([a-zA-Z]\w*)\s*:\s*function\s*\(|function\s*([a-zA-Z]\w*)\s*\([\)]*|((?:get|set)\s+[a-zA-Z]\w*)\(\)|\.prototype\.([a-zA-Z]\w*)\s*=\s*function/)
+          if m
+            name = m[1] || m[2] || m[3] || m[4]
+            break
 
     if name.length < 40
       s.print(' ') for i in [0...(40 - name.length)]

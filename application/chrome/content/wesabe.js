@@ -248,22 +248,13 @@ var wesabe = {
       return true;
     }
 
-    var contents = wesabe._getText(uri);
-    if (!contents) {
+    var contents = wesabe._getEvalText(uri);
+    if (!contents)
       return false;
-    }
-
-    if (/\.coffee$/.test(uri)) {
-      try {
-        contents = CoffeeScript.compile(contents);
-      } catch (e) {
-        dump('!! Unable to compile CoffeeScript file '+uri+': '+e+'\n');
-      }
-    }
 
     // figure out LOC offset and EVAL offset
     if (wesabe._locOffset === null) {
-      var lines = wesabe._getText(wesabe.getMyURI()).split(/\n/);
+      var lines = wesabe._getEvalText(wesabe.getMyURI()).split(/\n/);
       for (var i = 0; i < lines.length; i++) {
         // can't actually use the same value we're looking for, or this'll be found first
         if (/_{2}EVAL_{2}/.test(lines[i])) {
@@ -319,6 +310,30 @@ var wesabe = {
     catch(e) { /* uh oh, 404? */ return null }
 
     return (xhr.status === 200 || xhr.status === 0) ? xhr.responseText : null;
+  },
+
+  _evalTextByURI: {},
+
+  _getEvalText: function(uri) {
+    if (this._evalTextByURI[uri])
+      return this._evalTextByURI[uri];
+
+    var text = this._getText(uri);
+
+    if (!text)
+      return text;
+
+    if (/\.coffee$/.test(uri))
+    {
+      try { text = CoffeeScript.compile(text); }
+      catch (e)
+      {
+        dump('!! Unable to compile CoffeeScript file '+uri+': '+e+'\n');
+        return null;
+      }
+    }
+
+    return this._evalTextByURI[uri] = text;
   },
 
   /**
