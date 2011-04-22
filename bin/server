@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# make sure we're in the project's root
+cd "$(dirname $0)"
+this=$(readlink "$0" || echo "$0")
+cd "$(dirname "$(dirname "$this")")"
+
 export NO_EM_RESTART=1
 
 server_darwin()
@@ -17,12 +22,16 @@ server_darwin()
     fi
   fi
 
-  PROFILES="$HOME/Library/Application Support/$(config App Name)/Profiles"
-  for profile in "$PROFILES"/*.default
-  do
-    logfile="$profile/wuff_log.txt"
-    break
-  done
+  logfile=$(logfile_from_arguments "$@")
+
+  if [[ -z "$logfile" ]]; then
+    PROFILES="$HOME/Library/Application Support/$(config App Name)/Profiles"
+    for profile in "$PROFILES"/*.default
+    do
+      logfile="$profile/wuff_log.txt"
+      break
+    done
+  fi
 
   run_and_tail "$XUL" "$logfile" "$@"
 }
@@ -31,14 +40,38 @@ server_linux()
 {
   vendor="$(config App Vendor | tr '[A-Z]' '[a-z]')"
   appname="$(config App Name | tr '[A-Z]' '[a-z]')"
-  PROFILES="$HOME/.$vendor/$appname"
-  for profile in "$PROFILES"/*.default
-  do
-    logfile="$profile/wuff_log.txt"
-    break
-  done
+
+  logfile=$(logfile_from_arguments "$@")
+
+  if [[ -z "$logfile" ]]; then
+    PROFILES="$HOME/.$vendor/$appname"
+    for profile in "$PROFILES"/*.default
+    do
+      logfile="$profile/wuff_log.txt"
+      break
+    done
+  fi
 
   run_and_tail xulrunner "$logfile" application/application.ini "$@"
+}
+
+logfile_from_arguments()
+{
+  local next_is_profile=false
+
+  for arg in "$@"
+  do
+    if [[ "$next_is_profile" == "true" ]]; then
+      echo "$arg/wuff_log.txt"
+      return 0
+    fi
+
+    if [[ "$arg" == "-profile" ]]; then
+      next_is_profile=true
+    fi
+  done
+
+  return 1
 }
 
 run_and_tail()
