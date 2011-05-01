@@ -1,6 +1,6 @@
 wesabe.provide('fi-scripts.com.americanexpress.login', {
   dispatch: function() {
-    tmp.authenticated = page.present(e.logout.link);
+    tmp.authenticated = page.visible(e.logout.link);
 
     if (!tmp.authenticated) {
       if (page.present(e.login.error.general)) {
@@ -41,6 +41,7 @@ wesabe.provide('fi-scripts.com.americanexpress.login', {
         field: [
           // home page
           '//form[@name="ssoform"]//input[@name="Userid"][@type="text"]',
+          '//form[@name="ssoform"]//input[@name="UserID"][@type="text"]',
           '//input[@name="Userid"][@type="text"]',
           '//form[@name="ssoform"]//input[@type="text"]',
           // login page
@@ -54,6 +55,7 @@ wesabe.provide('fi-scripts.com.americanexpress.login', {
         field: [
           // home page
           '//form[@name="ssoform"]//input[@name="Pword"][@type="password"]',
+          '//form[@name="ssoform"]//input[@name="Password"][@type="password"]',
           '//input[@name="Pword"][@type="password"]',
           '//form[@name="ssoform"]//input[@type="password"]',
           // login page
@@ -82,6 +84,7 @@ wesabe.provide('fi-scripts.com.americanexpress.login', {
         // home page
         '//form[@name="ssoform"]//*[contains(@onclick, "validate")]',
         '//form[@name="ssoform"]//*[@name="btn"][@onclick]',
+        '//form[@name="ssoform"]//input[@type="submit" or @type="image"]',
         // login page
         '//input[contains(@onclick, "loginNow")]',
         '//form[@name="frmLogin"]//input[@type="submit" or @type="image"]',
