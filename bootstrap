@@ -1,5 +1,5 @@
 #!/bin/bash
-cd $(dirmname "$0")
+cd $(dirname "$0")
 source ./lib/common.sh
 
 test -e bootstrap.log && rm -f bootstrap.log
