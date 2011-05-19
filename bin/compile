@@ -1,0 +1,31 @@
+#!/bin/bash
+
+info()
+{
+  echo -e "\033[36m~> $1\033[0m"
+}
+
+yay()
+{
+  echo -e "\033[32m~> $1\033[0m"
+}
+
+warn()
+{
+  echo -e "\033[33m~> $1\033[0m"
+}
+
+die()
+{
+  echo -e "\033[31m~> $1\033[0m"
+  exit 1
+}
+
+which -s coffee 2>/dev/null ||
+  die "CoffeeScript is not installed. Please make sure 'coffee' is in your PATH."
+
+if [[ "$1" == "-w" || "$1" == "--watch" ]]; then
+  exec coffee --compile --watch application/chrome/content/wesabe
+else
+  exec coffee --compile application/chrome/content/wesabe/**/*.coffee
+fi

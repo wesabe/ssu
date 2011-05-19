@@ -190,6 +190,6 @@ wesabe.provide('fi-scripts.com.ingdirect.login', {
   }
 });
 
-wesabe.util.privacy.sanitize.registerSanitizer('ING PIN Digit', /pinpad\/\d\.gif|[A-Z]\.gif/g);
-wesabe.util.privacy.sanitize.registerSanitizer('ING Security Question', /AnswerQ[\d\.]+/g);
-wesabe.util.privacy.sanitize.registerSanitizer('ING PIN Alt Text', /\b(one|two|three|four|five|six|seven|eight|nine|zero)\b/g);
+wesabe.util.privacy.registerSanitizer('ING PIN Digit', /pinpad\/\d\.gif|[A-Z]\.gif/g);
+wesabe.util.privacy.registerSanitizer('ING Security Question', /AnswerQ[\d\.]+/g);
+wesabe.util.privacy.registerSanitizer('ING PIN Alt Text', /\b(one|two|three|four|five|six|seven|eight|nine|zero)\b/g);

@@ -336,4 +336,4 @@ wesabe.provide("fi-scripts.net.bnpparibas.login", {
 });
 
 // mask things like Grille('12') and 6,5,25,24 (the coords string) which would give away the password digits
-wesabe.util.privacy.sanitize.registerSanitizer('Area Map Info', /Grille\('\d+'\)|\d+,\d+,\d+,\d+/g);
+wesabe.util.privacy.registerSanitizer('Area Map Info', /Grille\('\d+'\)|\d+,\d+,\d+,\d+/g);

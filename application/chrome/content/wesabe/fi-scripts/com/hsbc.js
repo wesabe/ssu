@@ -226,4 +226,4 @@ wesabe.download.Player.register({
   },
 });
 
-wesabe.util.privacy.sanitize.registerSanitizer('HSBC Keyboard Key', /\bid\d+_key\b/g);
+wesabe.util.privacy.registerSanitizer('HSBC Keyboard Key', /\bid\d+_key\b/g);
