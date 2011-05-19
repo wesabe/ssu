@@ -1,7 +1,8 @@
 #!/bin/bash
-test -e bootstrap.log && rm -f bootstrap.log
+cd $(dirmname "$0")
+source ./lib/common.sh
 
-APP_NAME="Wesabe DesktopUploader"
+test -e bootstrap.log && rm -f bootstrap.log
 
 bootstrap_darwin()
 {
@@ -36,7 +37,7 @@ bootstrap_darwin()
 
   info "Setting up development environment"
 
-  BUNDLE="build/$APP_NAME.app"
+  BUNDLE="build/$(config App Name).app"
 
   # kill it if it's already there
   rm -rf "$BUNDLE"
@@ -58,22 +59,6 @@ bootstrap_aptitude()
   info "Installing XUL.framework version $XULVERSION (you may be asked for your password)"
 
   sudo aptitude install xulrunner-$XULVERSION || die "Unable to install xulrunner package"
-}
-
-info()
-{
-  echo -e "\033[36m~> $1\033[0m"
-}
-
-yay()
-{
-  echo -e "\033[32m~> $1\033[0m"
-}
-
-die()
-{
-  echo -e "\033[31m~> $1. Check bootstrap.log\033[0m"
-  exit 1
 }
 
 if [[ `uname` == "Darwin" ]]; then
