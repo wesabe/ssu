@@ -14,18 +14,33 @@ wesabe.dom.browser =
   #   browser.go('/groups')
   #
   go: (browser, uri) ->
-    curi = browser.currentURI
-    tainted = wesabe.isTainted(uri)
-    uri = wesabe.untaint(uri) if tainted
-    uri = curi.resolve(uri) if curi
-    wesabe.debug('Loading uri=', (if tainted then wesabe.taint(uri.toString()) else uri.toString()))
-    browser.loadURI(uri, null, null)
+    uri = @joinURI(browser, uri)
+    wesabe.debug('Loading uri=', uri)
+    browser.loadURI(wesabe.untaint(uri), null, null)
 
   #
-  # Get the current location of this browser, null if it is not on a page.
+  # Get the absolute uri by joining +uri+ to the current uri of +browser+.
+  # +uri+ may be either relative or absolute.
   #
-  # @param browser {XULBrowser} A <browser/> element.
-  # @return {String, null} The location of the browser.
+  joinURI: (browser, uri) ->
+    tainted = wesabe.isTainted(uri)
+    uri = wesabe.untaint(uri) if tainted
+    uri = browser.currentURI?.resolve(uri)
+
+    if tainted then wesabe.taint(uri) else uri
+
+  #
+  # Get the current uri of +browser+ as a string.
   #
   getURI: (browser) ->
-    browser.currentURI?.toString()
+    wesabe.taint(browser.currentURI?.resolve(null))
+
+  #
+  # Determines whether +browser+ is currently at +uri+,
+  # which may be relative or absolute.
+  #
+  atURI: (browser, uri) ->
+    currentURI = browser.currentURI
+    return true if currentURI is null and uri is null
+
+    wesabe.untaint(@getURI(browser)) == wesabe.untaint(@joinURI(browser, uri))
