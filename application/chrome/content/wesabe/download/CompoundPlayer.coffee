@@ -66,4 +66,7 @@ class wesabe.download.CompoundPlayer
     startNextPlayer()
 
   resume: ->
-    @currentPlayer && @currentPlayer.resume()
+    @currentPlayer?.resume()
+
+  onLastGoalFinished: ->
+    @currentPlayer?.onLastGoalFinished?()
