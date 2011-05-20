@@ -44,15 +44,15 @@ class wesabe.download.CompoundPlayer
           # no more players to try, report the last failure
           @job.fail(status, result)
 
-      succeed: ->
+      succeed: =>
         @job.succeed.apply(@job, arguments)
 
       timer: @job.timer
 
-      nextGoal: ->
+      nextGoal: =>
         @job.nextGoal.apply(@job, arguments)
 
-      suspend: ->
+      suspend: =>
         @job.suspend.apply(@job, arguments)
 
       options: @job.options
