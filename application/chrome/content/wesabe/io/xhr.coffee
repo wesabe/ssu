@@ -84,8 +84,8 @@ wesabe.io.xhr =
       req.send(data)
       return req
 
-  get: (path, params, data, block) ->
-    @request('GET', path, params, data, block)
+  get: (path, params, block) ->
+    @request('GET', path, params, null, block)
 
   post: (path, params, data, block) ->
     @request('POST', path, params, data, block)
