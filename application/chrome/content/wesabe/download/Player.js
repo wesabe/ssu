@@ -195,7 +195,7 @@ wesabe.download.Player.prototype.runAction = function(name, browser, page, scope
          action: self.getActionProxy(browser, page),
             job: self.getJobProxy(),
     skipAccount: self.skipAccount,
-         reload: function(){ self.onDocumentLoaded(browser, page) },
+         reload: function(){ self.triggerDispatch(browser, page) },
       }, scope||{}));
     });
   });
@@ -419,7 +419,7 @@ wesabe.download.Player.prototype.onDocumentLoaded = function(browser, page) {
                     tmp: self.tmp,
                  action: self.getActionProxy(browser, page),
                     job: self.getJobProxy(),
-                 reload: function(){ self.onDocumentLoaded(browser, page) },
+                 reload: function(){ self.triggerDispatch(browser, page) },
             skipAccount: self.skipAccount,
               });
             });
@@ -479,7 +479,7 @@ wesabe.download.Player.prototype.triggerDispatch = function(browser, page) {
               tmp: self.tmp,
            action: self.getActionProxy(browser, page),
               job: self.getJobProxy(),
-           reload: function(){ self.onDocumentLoaded(browser, page) },
+           reload: function(){ self.triggerDispatch(browser, page) },
       skipAccount: self.skipAccount,
         });
       });
