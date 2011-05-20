@@ -220,3 +220,15 @@ class wesabe.download.Controller
       response:
         status: 'error'
         error: e.toString()
+
+
+wesabe.bind 'downloadSuccess', (event, data) ->
+  wesabe.tryThrow 'Controller#downloadSuccess', (log) ->
+    folder = wesabe.io.dir.profile
+    folder.append('statements')
+    wesabe.io.dir.create(folder) unless folder.exists()
+
+    statement = folder.clone()
+    statement.append(new wesabe.ofx.UUID().toString())
+
+    wesabe.io.file.write(statement, data)
