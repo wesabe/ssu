@@ -20,7 +20,7 @@ wesabe.lang.array =
   include: (array, object) ->
     object = wesabe.untaint(object)
 
-    for i, item in array
+    for item, i in array
       return true if wesabe.untaint(array[i]) == object
 
     return false
@@ -28,7 +28,7 @@ wesabe.lang.array =
   compact: (array) ->
     retval = []
 
-    for i, item in array
+    for item, i in array
       retval.push(item) if wesabe.untaint(item)
 
     return retval
@@ -36,7 +36,7 @@ wesabe.lang.array =
   equal: (a, b) ->
     return false if a.length != b.length
 
-    for i in a
+    for i in [0...a.length]
       return false if a[i] != b[i]
 
     return true
