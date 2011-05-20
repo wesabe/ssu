@@ -62,7 +62,7 @@ wesabe.provide('fi-scripts.com.chase.accounts', {
 
       // Step 7: Logoff
       if (!tmp.account && !tmp.accounts.length) {
-        return action.logoff();
+        return job.nextGoal();
       }
 
       // Step 3: Go to Account Activity Page
