@@ -1,4 +1,12 @@
+# run with:
+# $ rake spec
+# OR
+# $ npm install jasmine-node
+# $ jasmine-node --coffee spec
+
 exports.wesabe =
+  log: [],
+
   provide: (module, value) ->
     @walk module, (part, mod, level, levels) ->
       mod[part] ||= if value? and level is level.length - 1
@@ -15,6 +23,24 @@ exports.wesabe =
 
   untaint: (object) ->
     object
+
+  radioactive: (args...) ->
+    @log.push 'radioactive', args
+
+  debug: (args...) ->
+    @log.push 'debug', args
+
+  info: (args...) ->
+    @log.push 'info', args
+
+  warn: (args...) ->
+    @log.push 'warn', args
+
+  error: (args...) ->
+    @log.push 'error', args
+
+  fatal: (args...) ->
+    @log.push 'fatal', args
 
   walk: (module, callback) ->
     base = wesabe
