@@ -18,7 +18,7 @@ wesabe.provide 'lang.number',
   ]
 
   parseOrdinalPhrase: (string) ->
-    for [patern, value] in @ORDINAL_PARSERS
+    for [pattern, value] in @ORDINAL_PARSERS
       if m = string.match(pattern)
         value = value(m) if wesabe.isFunction(value)
         return value
