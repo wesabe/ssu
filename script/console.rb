@@ -9,7 +9,7 @@ class String
   end
 end
 
-JAVASCRIPT_HISTORY = []
+SCRIPT_HISTORY = Hash.new {|h,k| h[k] = [] }
 
 require File.dirname(__FILE__)/'api'
 
@@ -19,23 +19,31 @@ self.instance_eval do
   end
 
   def js
+    start_script_repl :js, 'text/javascript'
+  end
+
+  def coffee
+    start_script_repl :coffee, 'text/coffeescript'
+  end
+
+  def start_script_repl(command, type)
     # this bit of insanity is needed since HISTORY is not an Array
     history = IRB::ReadlineInputMethod::HISTORY
-    js_history = JAVASCRIPT_HISTORY
+    script_history = SCRIPT_HISTORY[command]
     ruby_history = []
 
     ruby_history << history.shift until history.empty?
-    history << js_history.shift until js_history.empty?
+    history << script_history.shift until script_history.empty?
 
-    puts '=> entering javascript mode'
+    puts "=> entering #{command} mode"
     loop do
-      script = Readline.readline 'js> '
+      script = Readline.readline "#{command}> "
       break if script.nil? || %w[exit quit].include?(script)
       next if script.empty?
 
       history << script
       begin
-        puts Api['eval', {:script => script}]
+        puts Api['eval', {:script => script, :type => type}]
       rescue Api::Error => e
         puts e
       rescue => e
@@ -43,14 +51,14 @@ self.instance_eval do
       end
     end
     puts
-    js = Object.new
-    def js.inspect; 'back to ruby mode'; end
-    js
+    result = Object.new
+    def result.inspect; 'back to ruby mode'; end
+    result
   ensure
     # don't record the "js" call
-    ruby_history -= ['js']
+    ruby_history -= [command.to_s]
 
-    js_history << history.shift until history.empty?
+    script_history << history.shift until history.empty?
     history << ruby_history.shift until ruby_history.empty?
   end
 

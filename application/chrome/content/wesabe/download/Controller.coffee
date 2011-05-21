@@ -208,7 +208,12 @@ class wesabe.download.Controller
   eval: (data) ->
     try
       script = data.script
-      script = "(function(){#{script}})()" if /[;\n]/.test(script)
+
+      if data.type is 'text/coffeescript'
+        script = CoffeeScript.compile("return (-> #{script})()")
+      else
+        script = "(function(){#{script}})()" if /[;\n]/.test(script)
+
       script = "return #{script}"
       result = wesabe.lang.func.callWithScope(script, wesabe, {job: @job})
 
