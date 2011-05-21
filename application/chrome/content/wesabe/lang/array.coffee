@@ -48,3 +48,5 @@ wesabe.lang.array =
       result.push([array1[i], array2[i]])
 
     return result
+
+exports?.array = wesabe.lang.array
