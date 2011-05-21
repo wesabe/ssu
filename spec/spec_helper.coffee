@@ -9,7 +9,7 @@ exports.wesabe =
 
   provide: (module, value) ->
     @walk module, (part, mod, level, levels) ->
-      mod[part] ||= if value? and level is level.length - 1
+      mod[part] ||= if value? and (level is levels.length - 1)
         value
       else
         {}
