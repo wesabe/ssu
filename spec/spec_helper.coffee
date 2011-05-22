@@ -5,7 +5,8 @@
 # $ jasmine-node --coffee spec
 
 exports.wesabe =
-  log: [],
+
+  ## MODULE GENERATION
 
   provide: (module, value) ->
     @walk module, (part, mod, level, levels) ->
@@ -18,11 +19,20 @@ exports.wesabe =
     require "../application/chrome/content/wesabe/#{module.replace('.', '/')}"
     @walk module
 
+  ## (STUB) TAINT HELPERS
+
   taint: (object) ->
     object
 
   untaint: (object) ->
     object
+
+  ## TYPE CHECKING
+
+  isFunction: (object) ->
+    typeof object is 'function'
+
+  ## LOGGING
 
   radioactive: (args...) ->
     @log.push 'radioactive', args
@@ -41,6 +51,10 @@ exports.wesabe =
 
   fatal: (args...) ->
     @log.push 'fatal', args
+
+  ## INTERNAL
+
+  log: [],
 
   walk: (module, callback) ->
     base = wesabe

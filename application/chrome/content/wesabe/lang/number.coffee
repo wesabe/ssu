@@ -1,7 +1,7 @@
 wesabe.provide 'lang.number',
   ORDINAL_PARSERS: [
-    [/\b(\w+)\s+from\s+last\b/i,  (m) -> -wesabe.lang.number.parseOrdinalPhrase(m[1]) if m[1]]
-    [/(\d+)(st|rd|th|nd)/i,       (m) -> parseInt(m[1])]
+    [/\b(\w+)\s+from\s+(last|the\s+end)\b/i,  (m) -> -wesabe.lang.number.parseOrdinalPhrase(m[1]) if m[1]]
+    [/([\d,]+)(st|rd|th|nd)/i,                (m) -> Number(m[1].replace(',', ''))]
     [/\blast\b/i,              0]
     [/\bpenultimate\b/i,      -1]
     [/\bnext\s+to\s+last\b/i, -1]
