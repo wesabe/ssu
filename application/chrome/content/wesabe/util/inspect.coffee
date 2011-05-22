@@ -40,7 +40,11 @@ _inspect = (object, refs, color, tainted) ->
   if wesabe.isTainted(object)
     _inspectTainted(object, refs, color)
   else if t == 'function'
-    '#<Function>'
+    s = new wesabe.util.Colorizer()
+    s.print('#<Function')
+    if object.name
+      s.print(_inspectAttribute('name', object.name, refs, color, tainted))
+    s.print('>').toString()
   else if t == 'number'
     object.toString()
   else if object == null
@@ -216,13 +220,14 @@ _inspectAttributes = (object, refs, color, tainted) ->
 
   for key in keys.sort()
     continue if wesabe.isFunction(object[key]) || key.match(/^__/)
+    s.print(_inspectAttribute(key, object[key], refs, color, tainted))
 
-    s.print(' ')
-     .underlined(key)
-     .yellow('=')
-     .print(_inspect(object[key], refs, color, tainted))
-
-  s.toString()
+_inspectAttribute = (key, value, refs, color, tainted) ->
+    new wesabe.util.Colorizer().print(' ')
+                               .underlined(key)
+                               .yellow('=')
+                               .print(_inspect(value, refs, color, tainted))
+                               .toString()
 
 #
 # Generate a string inspecting the given +element+.
