@@ -31,7 +31,7 @@ _inspect = (object, refs, color, tainted) ->
   for ref in refs
     return '...' if object == ref
 
-  refs.push(object)
+  refs.push(object) if typeof object is 'object'
 
   return object.inspect(refs, color, tainted) if object?.inspect?
 
