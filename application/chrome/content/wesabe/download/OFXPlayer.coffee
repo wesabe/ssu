@@ -42,13 +42,12 @@ class wesabe.download.OFXPlayer
     # tell the user we're logging in
     @job.update('auth.creds')
 
-    @buildRequest().requestAccountInfo({
+    @buildRequest().requestAccountInfo
       success: (response) =>
         @onGetAccounts(response)
 
       failure: (response) =>
         @onGetAccountsFailure(response)
-    })
 
   #
   # Handles the response containing the account list.
@@ -59,7 +58,7 @@ class wesabe.download.OFXPlayer
     @accounts = wesabe.taint(response.accounts)
     wesabe.debug('accounts=', @accounts)
 
-    if !@accounts.length
+    if @accounts.length == 0
       wesabe.warn('There are no accounts! This might not be right...')
 
     # start downloading accounts in serial
@@ -85,7 +84,7 @@ class wesabe.download.OFXPlayer
 
     job.update('account.download')
     wesabe.tryThrow 'OFXPlayer#processAccounts', (log) =>
-      if !@accounts.length
+      if @accounts.length == 0
         # no more accounts, we're done
         job.succeed()
         return
@@ -120,7 +119,7 @@ class wesabe.download.OFXPlayer
     else
       args = ["Skipping account=", @account]
     wesabe.warn.apply(wesabe, args)
-    delete @account;
+    delete @account
     @processAccounts()
 
   #
@@ -137,7 +136,7 @@ class wesabe.download.OFXPlayer
         return
       else if response.ofx.isAuthorizationError()
         this.job.fail(403, 'auth.noaccess')
-        return;
+        return
       # doh! didn't recognize any status
     else
       # wow, this wasn't even an OFX error, it was some sort of
