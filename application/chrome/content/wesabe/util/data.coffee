@@ -17,7 +17,7 @@ wesabe.util.data = (elem, name, data) ->
   cache[id] ||= {}
 
   # set the data if we're using it as a setter
-  cache[id][name] = data if data != undefined
+  cache[id][name] = data unless data is undefined
 
   return cache[id][name]
 
@@ -34,7 +34,7 @@ wesabe.util.data.remove = (elem, name) ->
     cacheEmpty = true
 
     # anything left in the cache?
-    for name of cache[id]
+    for own name of cache[id]
       cacheEmpty = false
       break
 
