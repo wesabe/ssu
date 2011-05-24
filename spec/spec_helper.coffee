@@ -32,6 +32,9 @@ exports.wesabe =
   isFunction: (object) ->
     typeof object is 'function'
 
+  isString: (object) ->
+    typeof object is 'string'
+
   ## LOGGING
 
   radioactive: (args...) ->

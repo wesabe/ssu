@@ -5,6 +5,15 @@ data = wesabe.util.data
 
 guid = 0
 
+canHandleEvents = (object) ->
+  return false unless object
+
+  switch object?.nodeType
+    when 3, 4, 8 # text, cdata, comment
+      return false
+    else
+      return true
+
 # shamelessly adapted from jQuery
 wesabe.util.event =
   add: (elem, type, handler) ->
@@ -13,8 +22,7 @@ wesabe.util.event =
       type = elem
       elem = wesabe
 
-    # ignore text and comment nodes
-    return if elem.nodeType == 3 || elem.nodeType == 8
+    return unless canHandleEvents(elem)
 
     handler.guid ||= ++guid
 
@@ -25,7 +33,7 @@ wesabe.util.event =
 
     handlers[handler.guid] = handler
 
-    elem.addEventListener?(type, handler, false);
+    elem.addEventListener?(type, handler, false)
 
   remove: (elem, type, handler) ->
     if wesabe.isString(elem)
@@ -33,8 +41,7 @@ wesabe.util.event =
       type = elem
       elem = wesabe
 
-    # ignore text and comment nodes
-    return if elem.nodeType == 3 || elem.nodeType == 8
+    return unless canHandleEvents(elem)
 
     events = data(elem, 'events') || data(elem, 'events', {})
 
