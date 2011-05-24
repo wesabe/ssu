@@ -222,6 +222,8 @@ _inspectAttributes = (object, refs, color, tainted) ->
     continue if wesabe.isFunction(object[key]) || key.match(/^__/)
     s.print(_inspectAttribute(key, object[key], refs, color, tainted))
 
+  return s.toString()
+
 _inspectAttribute = (key, value, refs, color, tainted) ->
     new wesabe.util.Colorizer().print(' ')
                                .underlined(key)
