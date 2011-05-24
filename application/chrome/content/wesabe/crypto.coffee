@@ -1,31 +1,34 @@
-try
-  cryptoHash = Cc['@mozilla.org/security/hash;1'].createInstance(Ci.nsICryptoHash)
-catch err
-  wesabe.error('Could not load crypto package: ', err)
-
 wesabe.provide 'crypto',
-  # adapted from http://rcrowley.org/2007/11/15/md5-in-xulrunner-or-firefox-extensions/
-  md5: (object) ->
+  md5: (object) -> md5Impl(object)
+
+try
+  # assume we're in xulrunner
+  cryptoHash = Cc['@mozilla.org/security/hash;1'].createInstance(Ci.nsICryptoHash)
+
+  # adapted from https://developer.mozilla.org/en/nsICryptoHash#Computing_the_Hash_of_a_String
+  md5Impl = (object) ->
     arr = []
 
     if wesabe.isArray(object)
       arr = object
     else if wesabe.isString(object)
-      # Build array of character codes to MD5
-      for i in [0...object.length]
-        arr.push(object.charCodeAt(i))
+      converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter)
+      converter.charset = "UTF-8"
+      arr = converter.convertToByteArray(object, {})
 
     cryptoHash.init(Ci.nsICryptoHash.MD5)
     cryptoHash.update(arr, arr.length)
     hash = cryptoHash.finish(false)
 
     # Unpack the binary data bin2hex style
-    ascii = []
-    for i in [0...hash.length]
-      c = hash.charCodeAt(i)
-      ones = c % 16
-      tens = c >> 4
-      ascii.push(String.fromCharCode(tens + (if tens > 9 then 87 else 48)) +
-                 String.fromCharCode(ones + (if ones > 9 then 87 else 48)))
+    return ("0#{hash.charCodeAt(i).toString(16)}".slice(-2) for c, i in hash).join('')
 
-    return ascii.join('')
+catch xulErr
+  try
+    # maybe we're in node.js
+    crypto = require 'crypto'
+
+    md5Impl = (object) ->
+      crypto.createHash('md5').update(object).digest('hex')
+  catch nodeErr
+    wesabe.error('Could not load xulrunner or node.js crypto package: ', xulErr, nodeErr)
