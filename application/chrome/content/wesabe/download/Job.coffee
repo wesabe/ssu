@@ -84,13 +84,13 @@ class wesabe.download.Job
   start: ->
     @player = wesabe.download.Player.build(@fid)
     @player.job = this
+    @nextGoal()
 
     wesabe.info("Starting job for #{@player.org} (#{@fid})")
     @player.start(@creds, document.getElementById('playback-browser'))
 
     wesabe.trigger(this, 'begin')
     @timer.start('Total')
-    @nextGoal()
 
   nextGoal: ->
     if @options.goals.length
