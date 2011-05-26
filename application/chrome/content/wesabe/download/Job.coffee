@@ -60,18 +60,18 @@ class wesabe.download.Job
     org = @player.org
     summary = @timer.summarize()
     line = []
-    total = parseFloat(summary['Total'])
+    total = Number(summary['Total'])
 
     wesabe.info("Job completed #{if successful then '' else 'un'}sucessfully for #{org} (#{this.fid}) with status #{@status} (#{@result}) in #{Math.round(total/1000,2)}s")
 
     for label of summary
       continue if label == 'Total'
 
-      line.push(label+': ')
+      line.push("#{label}: ")
       line.push(summary[label])
       line.push('ms')
       line.push(' (')
-      line.push(parseInt((summary[label]/total)*100))
+      line.push(Number((summary[label]/total)*100))
       line.push('%)')
       line.push(', ')
 

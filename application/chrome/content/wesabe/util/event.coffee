@@ -8,11 +8,7 @@ guid = 0
 canHandleEvents = (object) ->
   return false unless object
 
-  switch object?.nodeType
-    when 3, 4, 8 # text, cdata, comment
-      return false
-    else
-      return true
+  object?.nodeType not in [3, 4, 8] # text, cdata, comment
 
 # shamelessly adapted from jQuery
 wesabe.util.event =
