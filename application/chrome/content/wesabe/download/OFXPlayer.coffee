@@ -33,6 +33,13 @@ class wesabe.download.OFXPlayer
   #
   finish: ->
 
+  #
+  # Gives the player a chance to skip processing of a job,
+  # possibly leaving it for other players in a CompoundPlayer.
+  #
+  canHandleGoal: (goal) ->
+    goal in ['statements']
+
   # private methods
 
   #

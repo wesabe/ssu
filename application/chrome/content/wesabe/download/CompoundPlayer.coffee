@@ -23,12 +23,30 @@ class wesabe.download.CompoundPlayer
   players: null
 
   start: (answers, browser) ->
-    startNextPlayer = =>
-      @playerIndex++
-      @currentPlayer = new @players[@playerIndex]()
-      wesabe.info("Starting player ", @currentPlayer)
-      @currentPlayer.job = jobProxy
-      @currentPlayer.start(answers, browser)
+    startNextPlayer = (failureCallback) =>
+      nextPlayer()
+      while @currentPlayer and not @currentPlayer.canHandleGoal(@job.goal)
+        wesabe.warn("Skipping player ", @currentPlayer, " since it can't handle goal: ", @job.goal)
+        nextPlayer()
+
+      if @currentPlayer
+        wesabe.info("Starting player ", @currentPlayer)
+        @currentPlayer.job = jobProxy
+        @currentPlayer.start(answers, browser)
+      else if failureCallback
+        failureCallback()
+      else
+        wesabe.info("No more players to handle goal: ", jobProxy.goal)
+        @job.fail(400, "goal.unreachable")
+
+    nextPlayer = =>
+      @currentPlayer?.job = null
+
+      if playerClass = @players[++@playerIndex]
+        @currentPlayer = new playerClass()
+        @currentPlayer.job = jobProxy
+      else
+        @currentPlayer = null
 
     jobProxy =
       update: (status, result) =>
@@ -38,11 +56,8 @@ class wesabe.download.CompoundPlayer
       fail: (status, result) =>
         wesabe.info("Could not complete job with ", @currentPlayer, " (", status, " ", result, ")")
 
-        if @playerIndex+1 < @players.length
-          startNextPlayer()
-        else
-          # no more players to try, report the last failure
-          @job.fail(status, result)
+        # if we can't, just report the last failure
+        startNextPlayer(-> @job.fail(status, result))
 
       succeed: =>
         @job.succeed.apply(@job, arguments)

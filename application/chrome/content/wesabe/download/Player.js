@@ -39,6 +39,8 @@ wesabe.download.Player.create = function(params) {
   // ofx info in case this is a hybrid
   klass.ofx = params.ofx;
 
+  klass.prototype.canHandleGoal = params.canHandleGoal || function(){ return true };
+
   var modules = [params];
 
   if (params.includes) {
