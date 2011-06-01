@@ -194,8 +194,8 @@ class wesabe.xml.Parser
 
     wesabe.tryThrow 'xml.Parser', (log) =>
       parser.parse(xml)
-      delete self.parser
-      delete self.work
+      delete @parser
+      delete @work
       return work.nodes
 
   stop: ->
