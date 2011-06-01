@@ -83,8 +83,7 @@ class wesabe.ofx.Response
     return @__investmentAccounts__
 
   hasOFX: ->
-    documentElement = this.responseXML.documentElement
-    return documentElement?.tagName.toLowerCase() == 'ofx'
+    return @responseXML.documentElement?.tagName.toLowerCase() == 'ofx'
 
   # Check to see if the server returned any errors in the OFX response.
   isSuccess: ->
