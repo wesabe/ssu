@@ -1,5 +1,6 @@
-wesabe.provide('util.event')
-wesabe.require('util.data')
+wesabe.provide 'util.event'
+wesabe.require 'util.data'
+wesabe.require 'lang.array'
 
 data = wesabe.util.data
 

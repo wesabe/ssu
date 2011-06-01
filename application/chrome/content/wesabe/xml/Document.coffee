@@ -1,5 +1,8 @@
-wesabe.provide('xml.Document')
-wesabe.require('xml.*')
+wesabe.provide 'xml.Document'
+wesabe.require 'xml.*'
+wesabe.require 'util.event'
+wesabe.require 'util.Colorizer'
+wesabe.require 'util.inspect'
 
 class wesabe.xml.Document
   constructor: (xml, verboten) ->
