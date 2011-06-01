@@ -101,7 +101,10 @@ _inspectError = (error, refs, color, tainted) ->
   else if error.location
     frame = error.location
     while frame
-      trace.push(frame)
+      trace.push
+        name: frame.name
+        filename: frame.filename
+        lineNumber: frame.lineNumber
       frame = frame.caller
 
   for frame in trace
