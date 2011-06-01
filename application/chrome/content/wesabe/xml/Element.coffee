@@ -1,5 +1,6 @@
-wesabe.provide('xml.Element')
-wesabe.require('dom.Selector')
+wesabe.provide 'xml.Element'
+wesabe.require 'dom.Selector'
+wesabe.require 'util.inspect'
 
 class wesabe.xml.Element
   constructor: (name, selfclosing) ->
@@ -144,7 +145,7 @@ class wesabe.xml.Element
     hasElementChildren = false
     for child in @__children__
       hasElementChildren = hasElementChildren || wesabe.is(child, wesabe.xml.Element)
-      s.print(' ', wesabe.util._inspect(child, refs, color, tainted))
+      s.print(' ', wesabe.util.inspect(child, refs, color, tainted))
 
     # only show the closing tag if there are child elements (not text)
     if hasElementChildren
@@ -152,7 +153,7 @@ class wesabe.xml.Element
        .yellow('</')
        .white()
        .bold()
-       .print(this.name)
+       .print(@name)
        .yellow('>')
 
     return s.bold('}').toString()

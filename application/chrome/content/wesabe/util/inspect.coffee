@@ -5,11 +5,11 @@ wesabe.provide('util.inspect')
 # @method inspect
 # @param object {Object} The object to inspect.
 #
-inspect = (object) ->
-  _inspect(object, [], false)
+inspect = (object, refs=[], color=false, tainted=false) ->
+  _inspect(object, refs, color, tainted)
 
-inspectForLog = (object) ->
-  _inspect(object, [], wesabe.logger?.colorizeLogging)
+inspectForLog = (object, refs=[], color=wesabe.logger?.colorizeLogging, tainted=false) ->
+  _inspect(object, refs, color, tainted)
 
 #
 # Generates an inspect function suitable for use in a class prototype.
