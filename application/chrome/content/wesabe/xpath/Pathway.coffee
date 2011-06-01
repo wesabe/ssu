@@ -23,13 +23,19 @@ class wesabe.xpath.Pathway
   # @public
   #
   first: (document, scope) ->
-    result = document.evaluate(
-               wesabe.untaint(@value),
-               wesabe.untaint(scope || document),
-               null,
-               XPathResult.ANY_TYPE,
-               null,
-               null)
+    try
+      result = document.evaluate(
+                 wesabe.untaint(@value),
+                 wesabe.untaint(scope || document),
+                 null,
+                 XPathResult.ANY_TYPE,
+                 null,
+                 null)
+    catch err
+      if err instanceof XPathException
+        throw new Error("#{err.message} (XPath = #{@value})")
+
+      throw err
 
     return result && wesabe.taint(result.iterateNext())
 
