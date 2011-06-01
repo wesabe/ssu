@@ -1,5 +1,4 @@
-wesabe.provide('util.Colorizer')
-extend = wesabe.lang.extend
+extend = wesabe.require('lang.extend')
 
 #
 # Provides an easy way to generate ANSI color strings for the shell.
@@ -13,7 +12,8 @@ extend = wesabe.lang.extend
 #   s.reset();
 #   dump(s.toString());
 #
-class wesabe.util.Colorizer
+wesabe.provide 'util.Colorizer',
+class Colorizer
   @COLORS =
     black: '30'
     red: '31'
