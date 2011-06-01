@@ -35,7 +35,7 @@ class wesabe.logger.file extends wesabe.logger.simple
     try
       @getLoggerComponent().log(@format(args, level))
     catch ex
-      dump("error while logging: #{ex}\n")
+      dump("LOGGING ERROR: #{wesabe.logger.levelNameForCode(level)}(#{args.join()}) #{ex}\n")
       super(args, level)
 
   getLoggerComponent: ->
