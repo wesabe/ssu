@@ -15,7 +15,7 @@ desc "Run the specs"
 task :spec do
   if not installed?('jasmine-node')
     $stderr.puts "~ You don't seem to have jasmine-node installed!"
-    $stderr.puts "~ Install it with: npm install jasmine-node"
+    $stderr.puts "~ Install it with: npm install -g jasmine-node"
 
     if not installed?('npm')
       $stderr.puts "~"

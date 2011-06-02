@@ -1,7 +1,7 @@
 # run with:
 # $ rake spec
 # OR
-# $ npm install jasmine-node
+# $ npm install -g jasmine-node
 # $ jasmine-node --coffee spec
 
 path = require 'path'
