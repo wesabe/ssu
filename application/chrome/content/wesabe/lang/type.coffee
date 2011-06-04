@@ -2,28 +2,39 @@ wesabe.require('lang.extend')
 
 wesabe.provide 'lang.type',
   isString: (object) ->
-    typeof(object) == 'string'
+    typeof object is 'string'
 
   isNull: (object) ->
     object == null
 
   isUndefined: (object) ->
-    typeof(object) == 'undefined'
+    typeof object is 'undefined'
 
   isFunction: (object) ->
-    typeof(object) == 'function'
+    typeof object is 'function' and not @isRegExp(object)
+
+  isRegExp: (re) ->
+    s = "#{re}"
+    re instanceof RegExp or # easy case
+    # duck-type for context-switching evalcx case
+    re and
+    re.constructor.name is 'RegExp' and
+    re.compile and
+    re.test and
+    re.exec and
+    s.match(/^\/.*\/[gim]{0,3}$/)
 
   isBoolean: (object) ->
-    (object == true) || (object == false)
+    object is true or object is false
 
   isFalse: (object) ->
-    object == false
+    object is false
 
   isTrue: (object) ->
-    object == true
+    object is true
 
   isNumber: (object) ->
-    typeof(object) == 'number'
+    typeof object is 'number'
 
   isArray: (object) ->
     object &&
@@ -31,7 +42,7 @@ wesabe.provide 'lang.type',
     @isFunction(object.splice)
 
   isObject: (object) ->
-    typeof(object) == 'object'
+    typeof object is 'object'
 
   isDate: (object) ->
     object?.constructor == Date || @isFunction(object.getMonth)
