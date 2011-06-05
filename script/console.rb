@@ -43,7 +43,7 @@ self.instance_eval do
 
       history << script
       begin
-        puts Api['eval', {:script => script, :type => type}]
+        puts Api['eval', {:script => script, :type => type, :color => $stdin.tty?}]
       rescue Api::Error => e
         puts e
       rescue => e

@@ -219,7 +219,7 @@ class wesabe.download.Controller
 
       response:
         status: 'ok'
-        eval: wesabe.util.inspect(result)
+        eval: wesabe.util.inspect(result, null, null, data.color)
     catch e
       wesabe.error('eval: error: ', e)
       response:
