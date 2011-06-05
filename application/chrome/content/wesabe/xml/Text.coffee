@@ -21,4 +21,4 @@ class wesabe.xml.Text
     s.reset()
      .print(wesabe.util._inspectString(@text, color, tainted))
      .reset()
-     .toString();
+     .toString()
