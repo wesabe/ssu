@@ -27,11 +27,14 @@ class wesabe.xml.Element
   this::__defineGetter__ 'tagName', ->
     @name
 
+  getAttribute: (name) ->
+    @__attributes__[name]
+
   setAttribute: (name, value) ->
     @__attributes__[name] = value
 
   this::__defineGetter__ 'attributes', ->
-    for name, value in @__attributes__
+    for name, value of @__attributes__
       new wesabe.xml.Attribute(name, value)
 
   # child stuff
