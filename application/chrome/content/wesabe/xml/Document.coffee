@@ -6,7 +6,7 @@ wesabe.require 'util.inspect'
 
 class wesabe.xml.Document
   constructor: (xml, verboten) ->
-    @parse(xml, verboten) if xml
+    @parse(xml, verboten) if xml?
 
   this::__defineGetter__ 'root', ->
     this._root ||= new wesabe.xml.Element()
@@ -37,7 +37,7 @@ class wesabe.xml.Document
         if wesabe.is(node, wesabe.xml.Text)
           @stack.push(node)
         else if wesabe.is(node, wesabe.xml.Attribute)
-          @stack[@stack.length-1].setAttribute(node.name, node.value);
+          @stack[@stack.length-1].setAttribute(node.name, node.value)
         else if wesabe.is(node, wesabe.xml.Element)
           node.parsing = !node.selfclosing
           @stack.push(node)
