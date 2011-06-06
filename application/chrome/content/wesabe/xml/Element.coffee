@@ -15,16 +15,19 @@ class wesabe.xml.Element
 
   # attribute stuff
 
-  this::__defineGetter__ 'id', ->
+  @::__defineGetter__ 'id', ->
     @__attributes__.id || null
 
-  this::__defineGetter__ 'className', ->
+  @::__defineGetter__ 'className', ->
     @__attributes__.class || ''
 
-  this::__defineGetter__ 'childNodes', ->
+  @::__defineGetter__ 'childNodes', ->
     new wesabe.xml.NodeList(@__children__)
 
-  this::__defineGetter__ 'tagName', ->
+  @::__defineGetter__ 'nodeName', ->
+    @name
+
+  @::__defineGetter__ 'tagName', ->
     @name
 
   getAttribute: (name) ->
@@ -33,7 +36,7 @@ class wesabe.xml.Element
   setAttribute: (name, value) ->
     @__attributes__[name] = value
 
-  this::__defineGetter__ 'attributes', ->
+  @::__defineGetter__ 'attributes', ->
     for name, value of @__attributes__
       new wesabe.xml.Attribute(name, value)
 
@@ -43,13 +46,13 @@ class wesabe.xml.Element
     @__children__.push(node)
     node.parentNode = this
 
-  this::__defineGetter__ 'firstChild', ->
+  @::__defineGetter__ 'firstChild', ->
     @__children__[0]
 
-  this::__defineGetter__ 'lastChild', ->
+  @::__defineGetter__ 'lastChild', ->
     @__children__[@__children__.length-1]
 
-  this::__defineGetter__ 'text', ->
+  @::__defineGetter__ 'text', ->
     (n.text for n in @__children__).join('')
 
   insertBefore: (node, adjacentNode) ->

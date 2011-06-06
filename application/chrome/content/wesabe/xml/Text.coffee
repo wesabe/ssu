@@ -4,6 +4,9 @@ class wesabe.xml.Text
   constructor: (text) ->
     @text = text || ''
 
+  @::__defineGetter__ 'nodeValue', ->
+    @text
+
   beginParsing: (parser) ->
     @trigger('start-text', parser)
 
