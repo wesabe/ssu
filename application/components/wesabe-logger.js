@@ -68,8 +68,14 @@ WesabeLogger.prototype.getPathForLogFileName = function(name) {
 
 WesabeLogger.prototype.log = function(msg) {
   try {
-    var logline = WesabeLogger.getDateStr() + ": " + msg + "\n";
-    this.fout.write(logline, logline.length);
+    var lines = msg.split(/\r?\n/),
+        date = WesabeLogger.getDateStr(),
+        fout = this.fout;
+
+    lines.forEach(function(line) {
+      var logline = date + ": " + line + "\n";
+      fout.write(logline, logline.length);
+    });
   }
   catch (ex) {
     dump("WesabeLogger error: log: " + ex.message + '\n');

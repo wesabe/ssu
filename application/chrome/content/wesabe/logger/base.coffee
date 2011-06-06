@@ -86,7 +86,10 @@ class wesabe.logger.base
                 else
                   wesabe.util.inspectForLog(object)
 
-    return "#{wesabe.logger.levelNameForCode(level).toUpperCase()} -- #{@prefix}#{strings.join('')}"
+    level = wesabe.logger.levelNameForCode(level).toUpperCase()
+    lines = strings.join('').split(/\r?\n/)
+
+    return ("#{level} -- #{@prefix}#{line}" for line in lines).join('\n')
 
   clone: ->
     clone = new this.constructor()
