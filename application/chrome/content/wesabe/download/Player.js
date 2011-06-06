@@ -198,6 +198,7 @@ wesabe.download.Player.prototype.runAction = function(name, browser, page, scope
             job: self.getJobProxy(),
     skipAccount: self.skipAccount,
          reload: function(){ self.triggerDispatch(browser, page) },
+       download: function(){ self.download.apply(self, arguments) },
       }, scope||{}));
     });
   });
@@ -230,6 +231,31 @@ wesabe.download.Player.prototype.getActionProxy = function(browser, page) {
 
 wesabe.download.Player.prototype.getJobProxy = function() {
   return this.job;
+};
+
+wesabe.download.Player.prototype.download = function(url) {
+  var self = this;
+
+  wesabe.tryThrow("Player#download("+url+")", function(log) {
+    var folder = wesabe.io.dir.profile;
+    folder.append('statements');
+    if (!folder.exists()) wesabe.io.dir.create(folder);
+
+    var statement = folder.clone();
+    statement.append(new wesabe.ofx.UUID().toString());
+
+    wesabe.io.download(url, statement, {
+      success: function(file) {
+        log.info('successfully downloaded file to ', file.path);
+        self.onDownloadSuccessful(self.browser, wesabe.dom.page.wrap(self.browser.contentDocument));
+      },
+
+      failure: function() {
+        log.error('failed to download file');
+        self.onDownloadSuccessful(self.browser, wesabe.dom.page.wrap(self.browser.contentDocument));
+      }
+    });
+  });
 };
 
 /**
@@ -423,6 +449,7 @@ wesabe.download.Player.prototype.onDocumentLoaded = function(browser, page) {
                     job: self.getJobProxy(),
                  reload: function(){ self.triggerDispatch(browser, page) },
             skipAccount: self.skipAccount,
+               download: function(){ self.download.apply(self, arguments) },
               });
             });
           }
@@ -483,6 +510,7 @@ wesabe.download.Player.prototype.triggerDispatch = function(browser, page) {
               job: self.getJobProxy(),
            reload: function(){ self.triggerDispatch(browser, page) },
       skipAccount: self.skipAccount,
+         download: function(){ self.download.apply(self, arguments) },
         });
       });
 
