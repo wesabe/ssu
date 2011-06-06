@@ -39,6 +39,8 @@ exports.wesabe =
   is: (object, klass) ->
     object?.constructor == klass
 
+  isTainted: -> false
+
   ## LOGGING
 
   radioactive: (args...) ->
