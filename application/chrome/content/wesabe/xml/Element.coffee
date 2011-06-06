@@ -118,6 +118,10 @@ class wesabe.xml.Element
   #
 
   inspect: (refs, color, tainted) ->
+    # handle NodeJS-style inspect
+    if typeof refs is 'number'
+      refs = null
+
     s = new wesabe.util.Colorizer()
     s.disabled = !color
     s.reset()
