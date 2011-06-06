@@ -1,0 +1,31 @@
+#!/usr/bin/env coffee
+
+sys = require 'sys'
+
+usage = (error) ->
+  if error
+    sys.puts "Error: #{error}"
+    process.exit(1)
+  else
+    sys.puts "Starts a NodeJS REPL and loads the basic SSU library code."
+
+  process.exit(if error then 1 else 0)
+
+args = process.argv[2..]
+while arg = args.shift()
+  switch arg
+    when '-h'
+      usage()
+
+    else
+      usage "unrecognized option #{arg}"
+
+fs = require 'fs'
+path = require 'path'
+root = path.join(path.dirname(fs.realpathSync(__filename)), '..')
+
+require.paths.push("#{root}/lib")
+{wesabe} = require 'wesabe'
+GLOBAL.wesabe = wesabe
+
+require('repl').start('js> ')
