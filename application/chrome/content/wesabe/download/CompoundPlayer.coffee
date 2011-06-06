@@ -57,7 +57,7 @@ class wesabe.download.CompoundPlayer
         wesabe.info("Could not complete job with ", @currentPlayer, " (", status, " ", result, ")")
 
         # if we can't, just report the last failure
-        startNextPlayer(-> @job.fail(status, result))
+        startNextPlayer(=> @job.fail(status, result))
 
       succeed: =>
         @job.succeed.apply(@job, arguments)
