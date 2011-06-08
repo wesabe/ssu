@@ -1,11 +1,11 @@
 wesabe.download.CompoundPlayer.register
   fid: 'com.ingdirect'
-  org: 'Chase'
+  org: 'ING Direct'
 
   players: [
     wesabe.download.OFXPlayer.create
       fid: 'com.ingdirect'
-      org: 'Chase'
+      org: 'ING Direct'
 
       fi:
         ofxFid: '031176110'
@@ -14,7 +14,7 @@ wesabe.download.CompoundPlayer.register
 
     wesabe.download.Player.create
       fid: 'com.ingdirect'
-      org: 'Chase'
+      org: 'ING Direct'
 
       dispatchFrames: false
       afterDownload: 'nextGoal'
