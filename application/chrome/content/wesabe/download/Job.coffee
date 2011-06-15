@@ -7,6 +7,7 @@ class wesabe.download.Job
     @creds = creds
     @user_id = user_id
     @status = 202
+    @done = false
     @version = 0
     @data = {}
     @options = options || {}
