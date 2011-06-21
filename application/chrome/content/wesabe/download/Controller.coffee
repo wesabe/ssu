@@ -67,7 +67,7 @@ class wesabe.download.Controller
 
           while (index = @request.indexOf("\n")) != -1
             requestText = @request.substring(0, index)
-            @request = @request.substring(index+1);
+            @request = @request.substring(index+1)
 
             request      = wesabe.lang.json.parse(requestText)
             response     = @dispatch(request)
@@ -122,7 +122,7 @@ class wesabe.download.Controller
 
       @job.start()
     catch e
-      wesabe.error('job.start: ', e);
+      wesabe.error('job.start: ', e)
 
     return {response: {status: 'ok'}}
 
