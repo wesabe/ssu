@@ -124,7 +124,7 @@ wesabe.provide('fi-scripts.com.ingdirect.login', {
 
     security: {
       questions: [
-        '//label[@class="question"]//text()',
+        '//label[contains(@class, "question")]//text()',
       ],
 
       answers: [
