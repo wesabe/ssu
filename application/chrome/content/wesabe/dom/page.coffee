@@ -76,8 +76,9 @@ wesabe.dom.page =
   # @public
   #
   findStrict: (document, xpathOrNode, scope) ->
-    wesabe.dom.page.find(document, xpathOrNode, scope) || (
-      throw new Error("No element found matching #{wesabe.util.inspect(xpathOrNode)}"))
+    result = wesabe.dom.page.find(document, xpathOrNode, scope)
+    throw new Error("No element found matching #{wesabe.util.inspect(xpathOrNode)}") unless result
+    return result
 
   #
   # Fills the given node/xpath endpoint with the given value.
