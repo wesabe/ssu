@@ -1,6 +1,4 @@
-wesabe.provide('lang.func')
-
-wesabe.lang.func =
+wesabe.provide 'lang.func',
   #
   # Calls the given function as if it had the keys in +scope+ as function
   # parameters and the values of +scope+ as their values, using +context+
@@ -62,23 +60,20 @@ wesabe.lang.func =
   # Returns a function that will call the given function with the second argument
   # as `this' inside the function. Example:
   #
-  #   var obj = {
-  #     bar: 4,
+  #   obj =
+  #     bar: 4
   #
-  #     foo: function() {
-  #       return this.bar;
-  #     }
-  #   };
+  #     foo: ->
+  #       @bar
   #
-  #   var obj2 = {bar: 1};
+  #   obj2 = bar: 1
   #
-  #   obj.foo();                               // => 4
-  #   wesabe.lang.func.wrap(obj.foo, obj2);    // => 1
+  #   obj.foo()                                // => 4
+  #   wesabe.lang.func.wrap(obj.foo, obj2)()   // => 1
   #
   #
   wrap: (fn, self) ->
-    return ->
-      return fn.apply(self || fn, arguments)
+    -> fn.apply(self or fn, arguments)
 
 wesabe.success = (callback, args) ->
   return wesabe.lang.func.executeCallback(callback, 'success', args)
