@@ -13,13 +13,13 @@ wesabe.provide('fi-scripts.com.bankofamerica.accounts', {
 
       var accounts = page.select(e.overviewAccountLinks);
       tmp.accounts = wesabe.lang.array.uniq(accounts.map(function(a) {
-        return a.getAttribute('href').match(/accountIndex=\d+/i)[0];
+        return a.getAttribute('href');
       }));
       log.debug('accounts=', tmp.accounts);
     },
 
     chooseAccount: function() {
-      page.click(wesabe.xpath.bind(e.overviewAccountLink, {url: tmp.account}));
+      wesabe.dom.browser.go(browser, tmp.account);
     },
 
     downloadSelectedAccount: function() {
@@ -115,14 +115,13 @@ wesabe.provide('fi-scripts.com.bankofamerica.accounts', {
     accountsTab: [
       '//a[contains(@href, "GotoWelcome")]',                                          // bank
       '//li/a[contains(@href, "acctoverview") and contains(string(.), "Accounts")]',  // credit
+
+      // 2011 redesign
+      '//a[contains(@href, "/accounts-overview")][contains(string(.), "Accounts Overview")]',
     ],
 
     overviewAccountLinks: [
-      '//a[contains(@href, "WelcomeControl?action=account_details") or contains(@href, "WelcomeControl?action=ACCOUNT_DETAIL")]' // bank, credit
-    ],
-
-    overviewAccountLink: [
-      '//a[contains(@href, "WelcomeControl?action=")][contains(@href,":url")][not(ancestor::td[@id="leftPane"])]',
+      '//a[contains(@href, "target=acctDetails")]' // 2011 redesign
     ],
 
     welcomeAccountDetailLink: [
@@ -222,6 +221,10 @@ wesabe.provide('fi-scripts.com.bankofamerica.accounts', {
       '//a[contains(@href, "BacLogoff")]',    // credit
       '//a[contains(@href, "logoutScreen")]', // small business
       '//div[@class="navheader" or @class="masthead"]//a[contains(string(.), "Sign Off")]', // nw
+
+      // 2011 redesign
+      '//a[contains(@href, "target=signOff")]',
+      '//div[contains(@class, "header")]//a[contains(string(.), "Sign Off")]',
     ],
 
     errorWrongOnlineId: [
