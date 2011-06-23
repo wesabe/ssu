@@ -6,7 +6,7 @@ wesabe.provide('fi-scripts.com.bankofamerica.login', {
 
     login: function() {
       job.update('auth.user');
-      page.fill(e.login.user.field, answers.userId || answers.username);
+      page.fill(e.login.user.field, answers.username);
       // if we're cookied we won't be asked for state
       page.present(e.login.state.field) && page.fill(e.login.state.field, answers.state);
       page.click(e.login.continueButton);
@@ -23,7 +23,7 @@ wesabe.provide('fi-scripts.com.bankofamerica.login', {
 
     sitekey: function() {
       job.update('auth.pass');
-      page.fill(e.sitekey.passcode.field, answers.passcode || answers.password);
+      page.fill(e.sitekey.passcode.field, answers.password);
       if (page.present(e.sitekeySignInButton)) {
         page.click(e.sitekeySignInButton);
       } else if (page.present(e.login.continueButton)) {
