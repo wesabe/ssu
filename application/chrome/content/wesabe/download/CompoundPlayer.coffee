@@ -72,6 +72,8 @@ class wesabe.download.CompoundPlayer
 
       options: @job.options
 
+      data: @job.data
+
     jobProxy.__defineGetter__ 'page', =>
       @currentPlayer.page
 
