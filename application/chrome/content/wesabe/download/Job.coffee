@@ -12,6 +12,7 @@ class wesabe.download.Job
     @data = {}
     @options = options || {}
     @options.goals = @options.goals || ['statements']
+    @options.since &&= wesabe.lang.date.parse(@options.since)
     @timer = new wesabe.util.Timer()
 
   update: (result, data) ->
