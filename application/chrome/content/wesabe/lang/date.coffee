@@ -22,6 +22,14 @@ wesabe.lang.date =
   parse: (string) ->
     idate = Date.parse(string)
     if isNaN(idate)
+      # try to parse it ourselves
+      string = wesabe.lang.string.trim(string)
+
+      # 2011-7-11
+      if m = string.match(/^(\d{4})[-\/]?(\d{1,2})[-\/]?(\d{1,2})$/)
+        return new Date(m[1], Number(m[2])-1, m[3])
+
+      # still couldn't do it
       wesabe.warn('unable to parse date: ', string)
       return null
 
