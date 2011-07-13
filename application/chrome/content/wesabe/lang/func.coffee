@@ -1,3 +1,22 @@
+# Taken from https://github.com/mauricemach/coffeekup/blob/7eed6ea2bf404f36e1f9da51500969fe346428f3/src/coffeekup.coffee#L100
+support = '''
+  var __slice = Array.prototype.slice;
+  var __hasProp = Object.prototype.hasOwnProperty;
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  var __extends = function(child, parent) {
+    for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
+    function ctor() { this.constructor = child; }
+    ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype;
+    return child;
+  };
+  var __indexOf = Array.prototype.indexOf || function(item) {
+    for (var i = 0, l = this.length; i < l; i++) {
+      if (this[i] === item) return i;
+    }
+    return -1;
+  };
+'''
+
 wesabe.provide 'lang.func',
   #
   # Calls the given function as if it had the keys in +scope+ as function
@@ -25,13 +44,13 @@ wesabe.provide 'lang.func',
   #    wesabe.lang.func.callWithScope(foo, this, {});
   #   })();
   #
-  callWithScope: (fn, context, scope) ->
+  callWithScope: (fn, context, scope={}) ->
     body = if wesabe.isString(fn)
              fn
            else
              fn.toString().match(/^[^\{]*\{((.*\n*)*)\}/m)[1]
 
-    return new Function('__scope__', "with(__scope__){\n#{body}\n}").call(context, scope)
+    return new Function('__scope__', support + "with(__scope__){\n#{body}\n}").call(context, scope)
 
   #
   # Executes a callback by name or, if only one callback was given, the

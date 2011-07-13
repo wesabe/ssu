@@ -17,6 +17,24 @@ describe 'wesabe.lang.func', ->
         this,
         abc: 'def')
 
+    it 'works with CoffeeScript function binding', ->
+      func.callWithScope(
+        (->
+          expect((-> this)()).not.toBe(this)
+          expect((=> this)()).toBe(this)),
+        this)
+
+    it 'works with CoffeeScript classes', ->
+      func.callWithScope(
+        (->
+          class Animal
+
+          class Dog extends Animal
+            speak: -> 'woof'
+
+          expect(new Dog().speak()).toBe('woof')),
+        this)
+
   describe '.wrap function', ->
     it 'wraps a function by providing a new context', ->
       obj =
