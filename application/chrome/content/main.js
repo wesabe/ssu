@@ -69,9 +69,9 @@ function init() {
     wesabe.io.file.write(pidFile, ''+pid);
 
     var contentListener = wesabe.io.ContentListener.sharedInstance;
-    contentListener.init(window, "application/x-wes-ofx");
-    wesabe.bind(contentListener, 'after-receive', function(event, data) {
-      wesabe.trigger('downloadSuccess', [data]);
+    contentListener.init(window, "application/x-ssu-intercept");
+    wesabe.bind(contentListener, 'after-receive', function(event, data, filename) {
+      wesabe.trigger('downloadSuccess', [data, filename]);
     });
   });
 }

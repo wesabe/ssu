@@ -43,6 +43,8 @@ WesabeSniffer.prototype.dataToString = function(data) {
 }
 
 WesabeSniffer.prototype.getMIMETypeFromContent = function(request, data, length) {
+  //dump("WesabeSniffer.getMIMETypeFromContent("+request+", "+data+", "+length+")");
+
   var collecting = true;  
   if (collecting) {
       // Checkable - data is uncompressed and available for inspection/verification of file type
@@ -78,37 +80,42 @@ WesabeSniffer.prototype.getMIMETypeFromContent = function(request, data, length)
         }
       }
     }
-    catch (ex) { 
-      /* do nothing - merely means the header does not exist */ 
+    catch (ex) {
+      /* do nothing - merely means the header does not exist */
     }
-  
+
     if (ext.length > 0 || checkable) {
       // dump("WesabeSniffer.getMTFC: --- Content sniffing --- ");
       var intercept = true;
       var stringData = this.dataToString(data);
       // dump("WesabeSniffer: getMTFC: checking data: \n" + stringData.substring(0, 25) + "\n");
-      
-      var con = this.sniffContent(stringData);
-      // dump("WesabeSniffer: getMTFC: sniffed content revealed: '" + con + "' versus '" + ext + "'");
-      if (con.length > 0 && ext !== con) ext = con;
+
+      var con = new FileTyper(stringData);
+      // dump("WesabeSniffer: getMTFC: sniffed content revealed "+(con.isSupportedType() ? "supported" : "unsupported")+" type: '" + con + "' versus extension '" + ext + "'\n");
+      if (con.isSupportedType() && ext.toUpperCase() !== con.getType())
+        ext = con.getType();
 
       if (ext.length > 0) {
         try {
           var http = request.QueryInterface(Components.interfaces.nsIHttpChannel);
-          http.setResponseHeader("content-disposition", "", false);
+
+          // NOTE: We clear the Content-Disposition header because otherwise XulRunner will attempt
+          // to present the file download prompt. We don't want that, but we do want the suggested
+          // filename, so we try to save the original Content-Disposition header.
+          try { http.setResponseHeader("X-SSU-Content-Disposition", http.getResponseHeader("Content-Disposition"), false); }
+          catch (ex) { dump("WesabeSniffer.getMTFC: can't preserve Content-Disposition header: " + ex.message + "\n") }
+
+          http.setResponseHeader("Content-Disposition", "", false);
         }
         catch (ex) {
-          dump("WesabeSniffer.getMTFC: can't unset content-disposition: " + ex.message);
+          dump("WesabeSniffer.getMTFC: can't unset content-disposition: " + ex.message + "\n");
         }
-        // dump("WesabeSniffer.getMTFC: mime type of 'application/x-wes-" + ext + "'");
-        if (ext && ext === 'qif')
-          return "application/x-wes-nofx"; 
-        else 
-          return "application/x-wes-ofx"; 
+
+        dump("WesabeSniffer: getMTFC: marking request for intercept\n");
+        return "application/x-ssu-intercept";
       }
-      }
+    }
   }
-    
 }
 
 WesabeSniffer.prototype.sniffExt = function(filename) {
@@ -116,16 +123,8 @@ WesabeSniffer.prototype.sniffExt = function(filename) {
   if (filename.indexOf('.qif') >= 0) return "qif";
   if (filename.indexOf('.ofc') >= 0) return "ofc";
   if (filename.indexOf('.qfx') >= 0) return "qfx";
-  return "";  
-}
-
-WesabeSniffer.prototype.sniffContent = function(content) {
-  typer = new FileTyper(content);
-  filetype = typer.get_type();
-  if (typer.is_supported_type()) 
-    return typer.needs_more_info() ? "qif" : "ofx"; 
-  else 
-    return "";
+  if (filename.indexOf('.pdf') >= 0) return "pdf";
+  return "";
 }
 
 var WesabeSnifferFactory = new Object();
@@ -160,7 +159,6 @@ WesabeSnifferModule.getClassObject = function (compMgr, cid, iid) {
     return WesabeSnifferFactory;
 
   throw Components.results.NS_ERROR_NO_INTERFACE;
-    
 }
 
 WesabeSnifferModule.canUnload = function(compMgr) {
@@ -200,10 +198,10 @@ FileTyper.MARKER = {
 
 function FileTyper(contents) {
   this.contents = contents;
-  this.filetype = this._guess_type();
+  this.filetype = this._guessType();
 }
 
-FileTyper.prototype._guess_type = function() {
+FileTyper.prototype._guessType = function() {
   // Try each format-specific marker in turn.
   for (var marker in FileTyper.MARKER) {
     if (FileTyper.MARKER[marker].test(this.contents)) {
@@ -211,17 +209,34 @@ FileTyper.prototype._guess_type = function() {
     }
   }
   return FileTyper.TYPE.UNKNOWN;
-}
+};
 
-FileTyper.prototype.get_type = function() {
+FileTyper.prototype.getType = function() {
   return this.filetype;
-}
+};
 
-FileTyper.prototype.is_supported_type = function() {
-  return (this.filetype === FileTyper.TYPE.OFX1 || this.filetype === FileTyper.TYPE.OFX2 ||
-          this.filetype === FileTyper.TYPE.OFC  || this.filetype === FileTyper.TYPE.QIF);
-}
+FileTyper.prototype.toString = function() {
+  return this.filetype;
+};
 
-FileTyper.prototype.needs_more_info = function() {
+FileTyper.prototype.isUnknown = function() {
+  return this.filetype == FileTyper.TYPE.UNKNOWN;
+};
+
+FileTyper.prototype.isSupportedType = function() {
+  switch (this.filetype) {
+    case FileTyper.TYPE.OFX1:
+    case FileTyper.TYPE.OFX2:
+    case FileTyper.TYPE.OFC:
+    case FileTyper.TYPE.QIF:
+    case FileTyper.TYPE.PDF:
+      return true;
+
+    default:
+      return false;
+  }
+};
+
+FileTyper.prototype.needsMoreInfo = function() {
   return (this.filetype === FileTyper.TYPE.QIF);
-}
+};

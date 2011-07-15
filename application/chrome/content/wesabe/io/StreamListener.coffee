@@ -11,9 +11,9 @@ class wesabe.io.StreamListener
     @mData = ""
 
   onDataAvailable: (aRequest, aContext, aStream, aSourceOffset, aLength) ->
-    scriptableInputStream = Cc["@mozilla.org/scriptableinputstream;1"].createInstance(Ci.nsIScriptableInputStream)
-    scriptableInputStream.init(aStream)
-    @mData += scriptableInputStream.read(aLength)
+    bstream = Components.classes["@mozilla.org/binaryinputstream;1"].createInstance(Components.interfaces.nsIBinaryInputStream)
+    bstream.setInputStream(aStream)
+    @mData += bstream.readBytes(aLength)
 
   onStopRequest: (aRequest, aContext, aStatus) ->
     if Components.isSuccessCode(aStatus)

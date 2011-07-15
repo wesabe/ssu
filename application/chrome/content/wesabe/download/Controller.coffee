@@ -227,7 +227,7 @@ class wesabe.download.Controller
         error: e.toString()
 
 
-wesabe.bind 'downloadSuccess', (event, data) ->
+wesabe.bind 'downloadSuccess', (event, data, filename) ->
   wesabe.tryThrow 'Controller#downloadSuccess', (log) ->
     folder = wesabe.io.dir.profile
     folder.append('statements')

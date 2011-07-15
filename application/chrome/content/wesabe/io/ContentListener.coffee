@@ -26,7 +26,7 @@ class wesabe.io.ContentListener
        iid.equals(Components.interfaces.nsISupports)
           return this
 
-    throw Components.results.NS_NOINTERFACE;
+    throw Components.results.NS_NOINTERFACE
 
   onStartURIOpen: (uri) ->
     wesabe.debug("onStartURIOpen ", uri)
@@ -36,17 +36,35 @@ class wesabe.io.ContentListener
     wesabe.tryCatch "ContentListener#doContent(contentType=#{contentType})", (log) =>
       contentHandler.value = new wesabe.io.StreamListener((
         (data) =>
-          log.debug('got some data')
-          wesabe.trigger(this, 'after-receive', [data])
+          filename = @suggestedFilenameForRequest(request)
+          log.debug("got some data (filename=#{filename})")
+          wesabe.trigger(this, 'after-receive', [data, filename])
         ), contentType)
 
     return false
 
+  suggestedFilenameForRequest: (request) ->
+    httpChannel = request.QueryInterface(Components.interfaces.nsIHttpChannel)
+
+    try
+      header = httpChannel.getResponseHeader('X-SSU-Content-Disposition')
+      wesabe.debug('X-SSU-Content-Disposition header = ', header)
+      match = header.match(/filename="([^"]+)"/i)
+      return match?[1]
+    catch err
+      wesabe.debug("suggestedFilenameForRequest error: #{err}")
+
+      httpChannel.visitResponseHeaders
+        visitHeader: (key, value) -> wesabe.debug("HEADER: #{key}=#{value}")
+
+      match = httpChannel.URI?.spec?.match(/.+\/([^\/\?]+)/)
+      return match?[1]
+
   isPreferred: (contentType, desiredContentType) ->
-    @contentType == contentType
+    @contentType is contentType
 
   canHandleContent: (contentType, isContentPreferred, desiredContentType) ->
-    @contentType == contentType
+    @contentType is contentType
 
   GetWeakReference: ->
     this
