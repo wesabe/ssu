@@ -55,9 +55,12 @@ wesabe.download.Player.create = function(params) {
 
   // dispatchFrames: false
   if (wesabe.isFalse(params.dispatchFrames)) {
-    klass.prototype.filters.push(function() {
-      if (page.defaultView.frameElement)
-        return false;
+    klass.prototype.filters.push({
+      name: 'frame blocker',
+      test: function() {
+        if (page.defaultView.frameElement)
+            return false;
+      }
     });
   }
 
@@ -101,7 +104,7 @@ wesabe.download.Player.create = function(params) {
     }
 
     if (module.filter) {
-      klass.prototype.filters.push(module.filter);
+      klass.prototype.filters.push({ name: module.__module__.name, test: module.filter });
     }
   });
 
@@ -532,8 +535,10 @@ wesabe.download.Player.prototype.shouldDispatch = function(browser, page) {
   var self = this;
 
   for (var i = 0; i < this.filters.length; i++) {
-    var result = wesabe.tryCatch(this.constructor.fid+'#filter('+i+')', function(log) {
-      var r = wesabe.lang.func.callWithScope(self.filters[i], self, {
+    var filter = self.filters[i];
+
+    var result = wesabe.tryCatch(this.constructor.fid+'#filter(' + filter.name + ')', function(log) {
+      var r = wesabe.lang.func.callWithScope(filter.test, self, {
         browser: browser,
            page: page,
               e: self.constructor.elements,
