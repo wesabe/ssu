@@ -1,6 +1,8 @@
 wesabe.provide('dom.Bridge')
 wesabe.require('dom.page')
 
+bridges = []
+
 #
 # Provides communication between XUL and HTML documents. Create a
 # +Bridge+ by initializing one with an +HTMLDocument+ and then calling
@@ -31,6 +33,14 @@ wesabe.require('dom.page')
 #
 class wesabe.dom.Bridge
   constructor: (document, callback) ->
+  @forDocument: (doc) ->
+    for {bridge, document} in bridges
+      return bridge if doc is document
+
+    bridge = new @(doc)
+    bridges.push {bridge, document}
+    return bridge
+
     @document = document
     @callback = callback
     @requests = {}
