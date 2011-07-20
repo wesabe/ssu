@@ -76,7 +76,7 @@ wesabe.download.Player.create = function(params) {
 
   modules.forEach(function(module) {
     if (module.dispatch) {
-      klass.prototype.dispatches.push(module.dispatch);
+      klass.prototype.dispatches.push({name: module.__module__.name, callback: module.dispatch});
     }
 
     if (module.elements) {
@@ -497,10 +497,12 @@ wesabe.download.Player.prototype.triggerDispatch = function(browser, page) {
     var result;
 
     for (var i = 0; i < self.dispatches.length; i++) {
-      wesabe.tryThrow(module+'#dispatch('+i+')', function(log) {
+      var dispatch = self.dispatches[i];
+
+      wesabe.tryThrow(module+'#dispatch('+dispatch.name+')', function(log) {
         self.job.timer.start('Dispatch', {overlap: false});
 
-        result = wesabe.lang.func.callWithScope(self.dispatches[i], self, {
+        result = wesabe.lang.func.callWithScope(dispatch.callback, self, {
           browser: browser,
              page: page,
                 e: self.constructor.elements,
