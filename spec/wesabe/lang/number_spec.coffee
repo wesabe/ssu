@@ -29,3 +29,14 @@ describe 'wesabe.lang.number', ->
     it 'parses nth from last/from the end as a negative number', ->
       expect(number.parseOrdinalPhrase('20th from last')).toEqual(-20)
       expect(number.parseOrdinalPhrase('second from the end')).toEqual(-2)
+
+  describe '.parse function', ->
+    it 'works with untainted numeric strings', ->
+      expect(number.parse('12')).toEqual(12)
+
+    it 'works with tainted numeric strings', ->
+      expect(number.parse(wesabe.taint('12'))).toEqual(12)
+
+    it 'returns NaN for non-numeric strings', ->
+      for string in ['', 'hey there', '!!0']
+        expect(isNaN(number.parse(string))).toBeTruthy()

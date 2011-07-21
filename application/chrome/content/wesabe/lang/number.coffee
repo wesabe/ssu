@@ -22,3 +22,6 @@ wesabe.provide 'lang.number',
       if m = string.match(pattern)
         value = value(m) if wesabe.isFunction(value)
         return value
+
+  parse: (string) ->
+    parseInt(wesabe.untaint(string), 10)
