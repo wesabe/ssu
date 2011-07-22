@@ -253,8 +253,23 @@ wesabe.download.Player.prototype.getJobProxy = function() {
   return this.job;
 };
 
-wesabe.download.Player.prototype.download = function(url) {
-  var self = this;
+wesabe.download.Player.prototype.download = function(url, metadata) {
+  var self = this,
+      callback;
+
+  // allow pre-registering information about the next download
+  if (wesabe.isFunction(metadata)) {
+    callback = metadata;
+    metadata = url;
+    url = null;
+
+    this.job.nextDownloadMetadata = metadata;
+    callback()
+
+    return;
+  }
+
+  metadata = wesabe.lang.extend({url: url}, metadata || {});
 
   wesabe.tryThrow("Player#download("+url+")", function(log) {
     var folder = wesabe.io.dir.profile;
