@@ -16,3 +16,6 @@ describe 'wesabe.lang.date', ->
 
     it 'parses dates in the format YYYY-MM-DD', ->
       expect(date.parse('2011-07-11')).toEqual(new Date(2011, 6, 11))
+
+    it 'parses dates in the format MMM DD, YYYY', ->
+      expect(date.parse('Jul 15, 2011')).toEqual(new Date(2011, 6, 15))

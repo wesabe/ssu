@@ -20,6 +20,8 @@ wesabe.lang.date =
   SECONDS: 1000
 
   parse: (string) ->
+    string = wesabe.untaint(string)
+
     idate = Date.parse(string)
     if isNaN(idate)
       # try to parse it ourselves
