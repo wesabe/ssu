@@ -6,19 +6,22 @@ wesabe.require('xul.UserAgent');
 wesabe.provide('download.Player', function() { });
 
 wesabe.download.Player.register = function(params) {
-  var klass = this.create(params);
-
-  // make sure we put it where wesabe.require expects it
-  wesabe.provide('fi-scripts.'+klass.fid, klass);
-
-  return klass;
+  return this.create(params, function(klass) {
+    // make sure we put it where wesabe.require expects it
+    wesabe.provide('fi-scripts.' + params.fid, klass);
+  });
 };
 
-wesabe.download.Player.create = function(params) {
+wesabe.download.Player.create = function(params, callback) {
   var klass = function() {
     // inherit from Player
     wesabe.lang.extend(this, wesabe.download.Player.prototype, false);
   };
+
+  if (callback)
+    callback(klass);
+
+  params.__module__ = klass.__module__;
 
   // the method that decides based on the state of the job and page what to do next
   klass.prototype.dispatches = [];

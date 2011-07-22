@@ -3,8 +3,8 @@ wesabe.download.CompoundPlayer.register({
   org: 'American Express Cards',
 
   players: [
-    wesabe.download.Player.create({
-      fid: 'com.americanexpress',
+    wesabe.download.Player.register({
+      fid: 'com.americanexpress.web',
       org: 'American Express Cards',
 
       dispatchFrames: false,
