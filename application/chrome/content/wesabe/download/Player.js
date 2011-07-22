@@ -128,10 +128,24 @@ wesabe.download.Player.prototype.start = function(answers, browser) {
     self.onDocumentLoaded(browser, wesabe.dom.page.wrap(event.target));
   });
 
-  wesabe.bind('downloadSuccess', function(event) {
+  wesabe.bind('downloadSuccess', function(event, data, filename) {
     self.job.update('account.download.success');
     self.setErrorTimeout('global');
-    self.onDownloadSuccessful(browser, wesabe.dom.page.wrap(browser.contentDocument));
+
+    wesabe.tryThrow('Player#downloadSuccess', function(log) {
+      var folder = wesabe.io.dir.profile;
+      folder.append('statements')
+      if (!folder.exists())
+        wesabe.io.dir.create(folder);
+
+      var statement = folder.clone()
+      statement.append(new wesabe.ofx.UUID().toString());
+
+      wesabe.io.file.write(statement, data);
+
+      self.job.recordSuccessfulDownload(statement, filename, self.job.nextDownloadMetadata);
+      delete self.job.nextDownloadMetadata;
+    });
   });
 
   wesabe.bind('downloadFail', function(event) {
@@ -251,14 +265,12 @@ wesabe.download.Player.prototype.download = function(url) {
     statement.append(new wesabe.ofx.UUID().toString());
 
     wesabe.io.download(url, statement, {
-      success: function(file) {
-        log.info('successfully downloaded file to ', file.path);
-        self.onDownloadSuccessful(self.browser, wesabe.dom.page.wrap(self.browser.contentDocument));
+      success: function(file, suggestedFilename) {
+        job.recordSuccessfulDownload(file, suggestedFilename, metadata);
       },
 
       failure: function() {
-        log.error('failed to download file');
-        self.onDownloadSuccessful(self.browser, wesabe.dom.page.wrap(self.browser.contentDocument));
+        job.recordFailedDownload(metadata);
       }
     });
   });

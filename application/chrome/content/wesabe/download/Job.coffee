@@ -105,3 +105,15 @@ class wesabe.download.Job
       return @goal
 
     @player.onLastGoalFinished()
+
+  recordSuccessfulDownload: (file, suggestedFilename, metadata) ->
+    wesabe.info 'successfully downloaded file to ', file.path
+    @data.downloads ||= []
+    @data.downloads.push(wesabe.lang.extend({path: file.path, suggestedFilename: suggestedFilename, status: 'ok'}, metadata || {}))
+    @player.onDownloadSuccessful @player.browser, wesabe.dom.page.wrap(@player.browser.contentDocument)
+
+  recordFailedDownload: (metadata) ->
+    wesabe.error 'failed to download file'
+    @data.downloads ||= []
+    @data.downloads.push(wesabe.lang.extend({status: 'error'}, metadata || {}))
+    @player.onDownloadSuccessful @player.browser, wesabe.dom.page.wrap(@player.browser.contentDocument)
