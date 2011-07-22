@@ -350,6 +350,12 @@ wesabe.dom.page =
     wesabe.taint((wesabe.untaint(node.nodeValue) for node in textNodes).join(''))
 
   #
+  # Returns +true+ if +xpathOrNode+ has class +className+, +false+ otherwise.
+  #
+  hasClass: (document, xpathOrNode, className) ->
+    " #{@findStrict(document, xpathOrNode).className} ".indexOf(" #{className} ") > -1
+
+  #
   # Goes back one step in the document's window's history.
   #
   # @param document [HTMLDocument]
