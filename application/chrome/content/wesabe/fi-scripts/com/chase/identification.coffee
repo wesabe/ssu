@@ -85,15 +85,16 @@ wesabe.provide 'fi-scripts.com.chase.identification',
       log.warn "Could not answer delivery method question, suspending job"
       action.collectIdentificationCodeDeliveryMethods()
 
-#      job.suspend "suspended.missing-answer.auth.identification.delivery-method",
-#            title: "Confirm Your Identity"
-#           header: "Chase needs a one-time Identification Code to confirm that you own the accounts before Wesabe can access them. Once you have the code we'll ask you to enter it on the next screen."
-#        questions: [
-#           type: "choice"
-#          label: "How should Chase send you the Identification Code?"
-#            key: "identificationCodeDeliveryMethod"
-#     persistent: false
-#        choices: tmp.identificationCodeDeliveryMethods]
+      job.suspend "suspended.missing-answer.auth.identification.delivery-method",
+        title: "Confirm Your Identity"
+        header: "Chase needs a one-time Identification Code to confirm that you own the accounts before Wesabe can access them. Once you have the code we'll ask you to enter it on the next screen."
+        questions: [
+          type: "choice"
+          label: "How should Chase send you the Identification Code?"
+          key: "identificationCodeDeliveryMethod"
+          persistent: false
+          choices: tmp.identificationCodeDeliveryMethods
+        ]
 
     confirmIdentificationCode: ->
       page.click e.identification.continueButton
@@ -105,14 +106,15 @@ wesabe.provide 'fi-scripts.com.chase.identification',
         page.click e.identification.continueButton
       else
         log.warn "Could not answer identification code question, suspending job"
-#        job.suspend "suspended.missing-answer.auth.identification.code",
-#            title: "Identification Code"
-#           header: "Please enter the identification code you received from Chase. If you didn't receive an identification code please cancel and try again."
-#        questions: [
-#           type: "number",
-#          label: "Identification Code",
-#            key: "identificationCode",
-#     persistent: false]
+        job.suspend "suspended.missing-answer.auth.identification.code",
+          title: "Identification Code"
+          header: "Please enter the identification code you received from Chase. If you didn't receive an identification code please cancel and try again."
+          questions: [
+            type: "number",
+            label: "Identification Code",
+            key: "identificationCode",
+            persistent: false
+          ]
 
   elements:
     identification:
@@ -125,8 +127,7 @@ wesabe.provide 'fi-scripts.com.chase.identification',
 
         contact:
           indicator: [
-            '//td[@class="steptexton"][contains(string(.), "Identification Code")]'
-            '//form[@name="frmOTPDeliveryMode"]'
+            '//*[@class="instrtexthead"][contains(string(.), "Get your Identification Code")]'
           ]
 
         confirmation:
@@ -136,8 +137,7 @@ wesabe.provide 'fi-scripts.com.chase.identification',
 
         codeEntry:
           indicator: [
-            '//td[@class="steptexton"][contains(string(.), "Enter Code")]'
-            '//form[@name="frmValidateOTP"]'
+            '//*[@class="instrtexthead"][contains(string(.), "Enter your Identification Code")]'
           ]
 
         legalAgreements:
