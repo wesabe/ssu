@@ -49,30 +49,21 @@ class wesabe.download.CompoundPlayer
         @currentPlayer = null
 
     jobProxy =
-      update: (status, result) =>
-        # proxy job updates through
-        @job.update(status, result)
+      # pass all method calls through
+      __noSuchMethod__: (method, args) =>
+        @job[method].apply(@job, args)
 
+      # handle properties
+      timer: @job.timer
+      options: @job.options
+      data: @job.data
+
+      # customize fail to go to the next player
       fail: (status, result) =>
         wesabe.info("Could not complete job with ", @currentPlayer, " (", status, " ", result, ")")
 
         # if we can't, just report the last failure
         startNextPlayer(=> @job.fail(status, result))
-
-      succeed: =>
-        @job.succeed.apply(@job, arguments)
-
-      timer: @job.timer
-
-      nextGoal: =>
-        @job.nextGoal.apply(@job, arguments)
-
-      suspend: =>
-        @job.suspend.apply(@job, arguments)
-
-      options: @job.options
-
-      data: @job.data
 
     jobProxy.__defineGetter__ 'page', =>
       @currentPlayer.page
@@ -87,3 +78,9 @@ class wesabe.download.CompoundPlayer
 
   onLastGoalFinished: (args...) ->
     @currentPlayer?.onLastGoalFinished?(args...)
+
+  onDownloadSuccessful: (args...) ->
+    @currentPlayer?.onDownloadSuccessful?(args...)
+
+  @::__defineGetter__ 'browser', ->
+    @currentPlayer?.browser
