@@ -313,7 +313,9 @@ wesabe.download.Player.prototype.answerSecurityQuestions = function() {
     return false;
   }
 
-  questions = questions.map(function(q){ return wesabe.lang.string.trim(q.nodeValue) });
+  questions = questions.map(function(q) {
+    return wesabe.lang.string.trim(page.text(q))
+  });
 
   wesabe.info("Found security questions: ", questions);
   questions = wesabe.untaint(questions);
