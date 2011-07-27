@@ -346,7 +346,11 @@ wesabe.dom.page =
   # @return [tainted([String])]
   #
   text: (document, xpathOrNode) ->
-    textNodes = @select(document, './/text()', @findStrict(document, xpathOrNode))
+    node = @findStrict(document, xpathOrNode)
+    if node.nodeType is 3
+      textNodes = [node]
+    else
+      textNodes = @select(document, './/text()', node)
     wesabe.taint((wesabe.untaint(node.nodeValue) for node in textNodes).join(''))
 
   #
