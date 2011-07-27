@@ -19,7 +19,6 @@ class wesabe.download.CompoundPlayer
     return klass
 
   playerIndex: -1
-  currentJob: null
   players: null
 
   start: (answers, browser) ->
@@ -31,12 +30,12 @@ class wesabe.download.CompoundPlayer
 
       if @currentPlayer
         wesabe.info("Starting player ", @currentPlayer)
-        @currentPlayer.job = jobProxy
+        @currentPlayer.job = @job
         @currentPlayer.start(answers, browser)
       else if failureCallback
         failureCallback()
       else
-        wesabe.info("No more players to handle goal: ", jobProxy.goal)
+        wesabe.info("No more players to handle goal: ", @job.goal)
         @job.fail(400, "goal.unreachable")
 
     nextPlayer = =>
@@ -44,32 +43,20 @@ class wesabe.download.CompoundPlayer
 
       if playerClass = @players[++@playerIndex]
         @currentPlayer = new playerClass()
-        @currentPlayer.job = jobProxy
+        @currentPlayer.job = @job
       else
         @currentPlayer = null
 
-    jobProxy =
-      # pass all method calls through
-      __noSuchMethod__: (method, args) =>
-        @job[method].apply(@job, args)
+    # customize fail to go to the next player
+    job_fail_original = @job.fail
+    @job.fail = (status, result) =>
+      wesabe.info "Could not complete job with ", @currentPlayer, " (", status, " ", result, ")"
 
-      # handle properties
-      timer: @job.timer
-      options: @job.options
-      data: @job.data
+      # if we can't, just report the last failure
+      startNextPlayer(=> job_fail_original(status, result))
 
-      # customize fail to go to the next player
-      fail: (status, result) =>
-        wesabe.info("Could not complete job with ", @currentPlayer, " (", status, " ", result, ")")
-
-        # if we can't, just report the last failure
-        startNextPlayer(=> @job.fail(status, result))
-
-    jobProxy.__defineGetter__ 'page', =>
+    @job.__defineGetter__ 'page', =>
       @currentPlayer.page
-
-    jobProxy.__defineGetter__ 'goal', =>
-      @job.goal
 
     startNextPlayer()
 
