@@ -22,7 +22,7 @@ wesabe.provide 'xul.UserAgent',
     wesabe.util.prefs.set("general.useragent.vendor", ua.vendor) if ua.vendor
     wesabe.util.prefs.set("general.useragent.vendorSub", ua.vendorSub) if ua.vendorSub
 
-    wesabe.info("User Agent changed to ", @toString)
+    wesabe.info "User Agent changed to ", @toString()
 
   #
   # Set the User Agent string by an alias.
@@ -59,11 +59,11 @@ wesabe.provide 'xul.UserAgent',
       useragent: "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.0.4) Gecko/2008102920 Firefox/3.0.4",
       vendor: "",
       vendorSub: "",
-    else if /^(safari)\s*(3[\.\d]*)?$/i.test(alias)
+    else if /^(safari)\s*(5[\.\d]*)?$/i.test(alias)
       appname: "Netscape",
-      appversion: "5.0 (Macintosh; U; Intel Mac OS X 10_5_5; en-us) AppleWebKit/528.5+ (KHTML, like Gecko) Version/3.2 Safari/525.26.12",
+      appversion: "5.0 (Macintosh; Intel Mac OS X 10_7) AppleWebKit/534.48.3 (KHTML, like Gecko) Version/5.1 Safari/534.48.3",
       platform: "MacIntel",
-      useragent: "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_5; en-us) AppleWebKit/528.5+ (KHTML, like Gecko) Version/3.2 Safari/525.26.12",
+      useragent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7) AppleWebKit/534.48.3 (KHTML, like Gecko) Version/5.1 Safari/534.48.3",
       vendor: "Apple Computer, Inc.",
       vendorSub: "",
 
