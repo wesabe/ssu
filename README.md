@@ -13,6 +13,12 @@ that provides a customizable (and scriptable) browser. SSU has scripts
 for each financial institution it supports that describes how to log in
 and download data from that institution's web site.
 
+It was originally written in JavaScript but is currently mostly
+[CoffeeScript][CoffeeScript]. You can write bank scripts in either language, though
+CoffeeScript will be the preferred one going forward.
+
+[CoffeeScript]: http://jashkenas.github.com/coffee-script/
+
 
 Why would I use this?
 ---------------------
@@ -96,7 +102,8 @@ The only known application that uses it is the one that used it at
 Wesabe: [pfc][pfc], specifically [this file that controls the SSU
 process][daemon] and [this file to talk to it][sync_job].
 
-[damon]: https://github.com/wesabe/pfc/blob/master/app/models/ssu/daemon.rb
+[pfc]: https://github.com/wesabe/pfc
+[daemon]: https://github.com/wesabe/pfc/blob/master/app/models/ssu/daemon.rb
 [sync_job]: https://github.com/wesabe/pfc/blob/master/app/models/ssu/sync_job.rb
 
 Basically, SSU listens on a socket (at port 5000 by default) for lines
@@ -119,6 +126,15 @@ You'll similarly get responses back as JSON lines:
 
     # an example error response
     {"response": {"status": "error", "error": "ReferenceError: foo is not defined"}}
+
+You can use any programming language you like that supports spawning
+processes and network sockets to manage an SSU instance. This project
+ships with really basic examples in the [server][server] (spawning) and
+[console][console] (communication & managing via [api.rb][api.rb]) scripts.
+
+[server]: https://github.com/wesabe/ssu/blob/master/bin/server
+[console]: https://github.com/wesabe/ssu/blob/master/script/console
+[api.rb]: https://github.com/wesabe/ssu/blob/master/script/api.rb
 
 My bank isn't supported. Can I add it?
 --------------------------------------
