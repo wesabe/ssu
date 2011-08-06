@@ -53,7 +53,7 @@ class wesabe.download.CompoundPlayer
       wesabe.info "Could not complete job with ", @currentPlayer, " (", status, " ", result, ")"
 
       # if we can't, just report the last failure
-      startNextPlayer(=> job_fail_original(status, result))
+      startNextPlayer(=> job_fail_original.call(@job, status, result))
 
     @job.__defineGetter__ 'page', =>
       @currentPlayer.page
