@@ -462,32 +462,44 @@ wesabe.download.Player.prototype.onDocumentLoaded = function(browser, page) {
       function() {
         window.alert = function(message){ callback('alert', message); return true };
         window.confirm = function(message){ callback('confirm', message); return true };
+        window.open = function(url) { callback('open', url); return false };
       },
       // evaluated here
       function(data) {
         var type = data[0], message = data[1];
-        if (type == "alert") {
-          wesabe.info(type, ' called with message=', wesabe.util.inspectForLog(message));
-          if (self.alertReceivedCallbacks) {
-            self.alertReceivedCallbacks.forEach(function(callback) {
-              wesabe.lang.func.callWithScope(callback, self, {
-                message: message,
-                browser: browser,
-                   page: page,
-                      e: self.constructor.elements,
-                answers: self.answers,
-                options: self.job.options,
-                    log: wesabe,
-                     go: go,
-                    tmp: self.tmp,
-                 action: self.getActionProxy(browser, page),
-                    job: self.getJobProxy(),
-                 reload: function(){ self.triggerDispatch(browser, page) },
-            skipAccount: self.skipAccount,
-               download: function(){ self.download.apply(self, arguments) },
+
+        switch (type) {
+          case 'alert':
+            wesabe.info(type, ' called with message=', wesabe.util.inspectForLog(message));
+            if (self.alertReceivedCallbacks) {
+              self.alertReceivedCallbacks.forEach(function(callback) {
+                wesabe.lang.func.callWithScope(callback, self, {
+                  message: message,
+                  browser: browser,
+                     page: page,
+                        e: self.constructor.elements,
+                  answers: self.answers,
+                  options: self.job.options,
+                      log: wesabe,
+                       go: go,
+                      tmp: self.tmp,
+                   action: self.getActionProxy(browser, page),
+                      job: self.getJobProxy(),
+                   reload: function(){ self.triggerDispatch(browser, page) },
+              skipAccount: self.skipAccount,
+                 download: function(){ self.download.apply(self, arguments) },
+                });
               });
-            });
-          }
+            }
+            break;
+
+          case 'confirm':
+            wesabe.info(type, ' called with message=', wesabe.util.inspectForLog(message), ', automatically answered YES');
+            break;
+
+          case 'open':
+            wesabe.info(type, ' called with url=', wesabe.util.inspectForLog(message), ' ignoring it');
+            break;
         }
       });
   });
