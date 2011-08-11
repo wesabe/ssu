@@ -69,6 +69,13 @@ wesabe.download.Player.create = function(params, callback) {
     });
   }
 
+  if (params.filter) {
+    klass.prototype.filters.push({
+      name: 'global',
+      test: params.filter
+    });
+  }
+
   // userAgent: "Mozilla/4.0 HappyFunBrowser"
   if (params.userAgent) {
     klass.prototype.userAgent = params.userAgent;
