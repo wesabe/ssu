@@ -61,8 +61,10 @@ wesabe.download.Player.create = function(params, callback) {
     klass.prototype.filters.push({
       name: 'frame blocker',
       test: function() {
-        if (page.defaultView.frameElement)
-            return false;
+        if (page.defaultView.frameElement) {
+          wesabe.info("skipping frame page load: ", page.title);
+          return false;
+        }
       }
     });
   }
