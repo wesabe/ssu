@@ -422,11 +422,15 @@ wesabe.dom.page =
 
   dumpStructure: (document, scope, level = 0) ->
     indent = ""
-    for i in [0...level]
-      for node in @select(document, '*', scope || document)
-        wesabe.debug(indent, '<', wesabe.untaint(node.tagName.toLowerCase()), ' id=', wesabe.util.inspect(wesabe.untaint(node.id)), '>')
-        @dumpStructure(document, node, level + 1)
-        wesabe.debug(indent, '</', wesabe.untaint(node.tagName.toLowerCase()), '>')
+    indent += '  ' for i in [0...level]
+    for node in @select(document, '*', scope || document)
+      selector = wesabe.untaint(node.tagName.toLowerCase())
+      selector += "##{node.id}" if node.id
+      selector += ".#{node.className.replace(/\s+/g, '.')}" if node.className
+      wesabe.debug(indent, selector)
+      @dumpStructure(document, node, level + 1)
+
+    return null
 
   # This method replaces all words in text nodes with asterisks unless
   # the word is a dictionary word (defined in wesabe.util.words.list),
