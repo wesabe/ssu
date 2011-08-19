@@ -465,7 +465,8 @@ wesabe.download.Player.prototype.onDocumentLoaded = function(browser, page) {
   var self = this, module = this.constructor.fid;
 
   // log when alert and confirm are called
-  new wesabe.dom.Bridge(page.proxyTarget, function() {
+  var bridge = wesabe.dom.Bridge.forDocument(page.proxyTarget);
+  bridge.connect(function() {
     this.evaluate(
       // evaluated on the page
       function() {
@@ -475,6 +476,11 @@ wesabe.download.Player.prototype.onDocumentLoaded = function(browser, page) {
       },
       // evaluated here
       function(data) {
+        if (!data) {
+          wesabe.debug("Bridge connected");
+          return;
+        }
+
         var type = data[0], message = data[1];
 
         switch (type) {
@@ -510,7 +516,8 @@ wesabe.download.Player.prototype.onDocumentLoaded = function(browser, page) {
             wesabe.info(type, ' called with url=', wesabe.util.inspectForLog(message), ' ignoring it');
             break;
         }
-      });
+      }
+    );
   });
 
   if (!this.shouldDispatch(browser, page)) {
