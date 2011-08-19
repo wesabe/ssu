@@ -33,6 +33,11 @@ bridges = []
 #
 class wesabe.dom.Bridge
   constructor: (document, callback) ->
+    @document = document
+    @requests = {}
+    @messageid = 1
+    @connect(@callback) if @callback
+
   @forDocument: (doc) ->
     for {bridge, document} in bridges
       return bridge if doc is document
@@ -41,11 +46,6 @@ class wesabe.dom.Bridge
     bridges.push {bridge, document}
     return bridge
 
-    @document = document
-    @callback = callback
-    @requests = {}
-    @messageid = 1
-    @connect(@callback) if @callback
 
   connect: (fn) ->
     wesabe.dom.page.inject(@document, "(#{wesabe.dom.Bridge.bootstrap.toSource()})()")
@@ -88,10 +88,6 @@ class wesabe.dom.Bridge
   dispatch: (response) ->
     if response.id
       request = @requests[response.id]
-
-      if !request.connected
-        request.connected = true
-        return
 
       try
         request.callback?.call(response, response.data)
@@ -173,11 +169,7 @@ class wesabe.dom.Bridge
         var fn = new Function('__scope__',
           'return eval("with(__scope__){'+request.data.replace(/"/g, '\\"')+'}")');
         var self = this, scope = {callback: function() {
-          var data = [];
-          for (var i = 0; i < arguments.length; i++) {
-            data.push(arguments[i]);
-          }
-          self.notifyXul(request.id, data)
+          self.notifyXul(request.id, Array.prototype.slice.call(arguments));
         }};
         return fn.call(this, scope);
       };
