@@ -106,14 +106,14 @@ class wesabe.download.Job
 
     @player.onLastGoalFinished()
 
-  recordSuccessfulDownload: (file, suggestedFilename, metadata) ->
+  recordSuccessfulDownload: (file, suggestedFilename, metadata, reload=true) ->
     wesabe.info 'successfully downloaded file to ', file.path
     @data.downloads ||= []
     @data.downloads.push(wesabe.lang.extend({path: file.path, suggestedFilename: suggestedFilename, status: 'ok'}, metadata || {}))
-    @player.onDownloadSuccessful @player.browser, wesabe.dom.page.wrap(@player.browser.contentDocument)
+    @player.onDownloadSuccessful @player.browser, wesabe.dom.page.wrap(@player.browser.contentDocument) if reload
 
-  recordFailedDownload: (metadata) ->
+  recordFailedDownload: (metadata, reload=true) ->
     wesabe.error 'failed to download file'
     @data.downloads ||= []
     @data.downloads.push(wesabe.lang.extend({status: 'error'}, metadata || {}))
-    @player.onDownloadSuccessful @player.browser, wesabe.dom.page.wrap(@player.browser.contentDocument)
+    @player.onDownloadSuccessful @player.browser, wesabe.dom.page.wrap(@player.browser.contentDocument) if reload
