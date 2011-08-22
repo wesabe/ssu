@@ -496,7 +496,6 @@ wesabe.download.Player.prototype.onDocumentLoaded = function(browser, page) {
                   answers: self.answers,
                   options: self.job.options,
                       log: wesabe,
-                       go: go,
                       tmp: self.tmp,
                    action: self.getActionProxy(browser, page),
                       job: self.getJobProxy(),
@@ -546,10 +545,6 @@ wesabe.download.Player.prototype.triggerDispatch = function(browser, page) {
   this.browser = browser;
   this.page = page;
 
-  var go = function(name) {
-    self.runAction(name, browser, page);
-  };
-
   this.job.timer.start('Sleep', {overlap: false});
 
   setTimeout(function() {
@@ -569,7 +564,6 @@ wesabe.download.Player.prototype.triggerDispatch = function(browser, page) {
           answers: self.answers,
           options: self.job.options,
               log: log,
-               go: go,
               tmp: self.tmp,
            action: self.getActionProxy(browser, page),
               job: self.getJobProxy(),
