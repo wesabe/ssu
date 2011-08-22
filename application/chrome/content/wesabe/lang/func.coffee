@@ -23,32 +23,37 @@ wesabe.provide 'lang.func',
   # parameters and the values of +scope+ as their values, using +context+
   # as "this" inside the function body. Example:
   #
-  #   var foo = function() { alert(bar) };
+  #   foo = -> alert(bar)
   #
   #   // fails with "bar is not defined (ReferenceError)"
   #   foo();
   #
   #   // alerts 4
-  #   wesabe.lang.func.callWithScope(foo, this, {bar: 4});
+  #   wesabe.lang.func.callWithScope foo, this, bar: 4
   #
   # IMPORTANT: Scope is ignored when called this way. Example:
   #
-  #   (function() {
-  #     var bar = 4;
-  #     var foo = function() { alert(bar) };
+  #   (->
+  #     bar = 4
+  #     foo = -> alert(bar)
   #
-  #     // alerts 4
-  #     foo();
+  #     # alerts 4
+  #     foo()
   #
-  #     // fails with "bar is not defined (ReferenceError)"
-  #    wesabe.lang.func.callWithScope(foo, this, {});
-  #   })();
+  #     # fails with "bar is not defined (ReferenceError)"
+  #     wesabe.lang.func.callWithScope foo, this, {}
+  #   )()
   #
-  callWithScope: (fn, context, scope={}) ->
-    body = if wesabe.isString(fn)
-             fn
-           else
-             fn.toString().match(/^[^\{]*\{((.*\n*)*)\}/m)[1]
+  callWithScope: (fn, context, scope={}, args=[]) ->
+    if wesabe.isString(fn)
+       body = fn
+     else
+       body = fn.toString().match(/^[^\{]*\{((.*\n*)*)\}/m)[1]
+       argNames = fn.toString().match(/^function\s*\((.*)\)/)?[1].split(/\s*,\s*/)
+       if argNames
+         for name, i in argNames
+           name = wesabe.lang.string.trim(name)
+           scope[name] = args[i]
 
     return new Function('__scope__', support + "with(__scope__){\n#{body}\n}").call(context, scope)
 

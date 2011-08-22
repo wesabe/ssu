@@ -17,6 +17,24 @@ describe 'wesabe.lang.func', ->
         this,
         abc: 'def')
 
+    it 'allows calling a function with arguments', ->
+      func.callWithScope(
+        ((a, b) ->
+          expect(a).toBe(1)
+          expect(b).toBe(2)),
+        this,
+        {},
+        [1, 2])
+
+    it 'substitutes "undefined" for arguments that are not given', ->
+      func.callWithScope(
+        ((url, type) ->
+          expect(url).toBe('google.com')
+          expect(type).toBe(undefined)),
+        this,
+        {type: 'GET'},
+        ['google.com'])
+
     it 'works with CoffeeScript function binding', ->
       func.callWithScope(
         (->

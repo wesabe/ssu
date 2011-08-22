@@ -35,6 +35,10 @@ wesabe.download.Player.create = function(params, callback) {
   klass.prototype.afterLastGoalCallbacks = [];
   // any alert callbacks
   klass.prototype.alertReceivedCallbacks = [];
+  // any confirm callbacks
+  klass.prototype.confirmReceivedCallbacks = [];
+  // any open callbacks
+  klass.prototype.openReceivedCallbacks = [];
   // the Wesabe Financial Institution ID (e.g. us-001078)
   klass.fid = klass.prototype.fid = params.fid;
   // the name of the Financial Institution (e.g. Wells Fargo)
@@ -113,6 +117,14 @@ wesabe.download.Player.create = function(params, callback) {
 
     if (module.alertReceived) {
       klass.prototype.alertReceivedCallbacks.push(module.alertReceived);
+    }
+
+    if (module.confirmReceived) {
+      klass.prototype.confirmReceivedCallbacks.push(module.confirmReceived);
+    }
+
+    if (module.openReceived) {
+      klass.prototype.openReceivedCallbacks.push(module.openReceived);
     }
 
     if (module.filter) {
@@ -486,25 +498,6 @@ wesabe.download.Player.prototype.onDocumentLoaded = function(browser, page) {
         switch (type) {
           case 'alert':
             wesabe.info(type, ' called with message=', wesabe.util.inspectForLog(message));
-            if (self.alertReceivedCallbacks) {
-              self.alertReceivedCallbacks.forEach(function(callback) {
-                wesabe.lang.func.callWithScope(callback, self, {
-                  message: message,
-                  browser: browser,
-                     page: page,
-                        e: self.constructor.elements,
-                  answers: self.answers,
-                  options: self.job.options,
-                      log: wesabe,
-                      tmp: self.tmp,
-                   action: self.getActionProxy(browser, page),
-                      job: self.getJobProxy(),
-                   reload: function(){ self.triggerDispatch(browser, page) },
-              skipAccount: self.skipAccount,
-                 download: function(){ self.download.apply(self, arguments) },
-                });
-              });
-            }
             break;
 
           case 'confirm':
@@ -512,8 +505,29 @@ wesabe.download.Player.prototype.onDocumentLoaded = function(browser, page) {
             break;
 
           case 'open':
-            wesabe.info(type, ' called with url=', wesabe.util.inspectForLog(message), ' ignoring it');
+            wesabe.info(type, ' called with url=', wesabe.util.inspectForLog(message));
             break;
+        }
+
+        var callbacks = self[type+'ReceivedCallbacks'];
+        if (callbacks) {
+          callbacks.forEach(function(callback) {
+            wesabe.lang.func.callWithScope(callback, self, {
+              message: message,
+              browser: browser,
+                 page: page,
+                    e: self.constructor.elements,
+              answers: self.answers,
+              options: self.job.options,
+                  log: wesabe,
+                  tmp: self.tmp,
+               action: self.getActionProxy(browser, page),
+                  job: self.getJobProxy(),
+               reload: function(){ self.triggerDispatch(browser, page) },
+          skipAccount: self.skipAccount,
+             download: function(){ self.download.apply(self, arguments) },
+            }, [message]);
+          });
         }
       }
     );
