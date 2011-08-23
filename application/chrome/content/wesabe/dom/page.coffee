@@ -12,12 +12,19 @@ wesabe.require('xpath.*')
 #
 wesabe.dom.page =
   EVENT_TYPE_MAP:
-    click: 'MouseEvents'
+    click:     'MouseEvents'
     mousedown: 'MouseEvents'
-    mouseup: 'MouseEvents'
+    mouseup:   'MouseEvents'
     mousemove: 'MouseEvents'
-    change: 'HTMLEvents'
-    submit: 'HTMLEvents'
+    change:    'HTMLEvents'
+    submit:    'HTMLEvents'
+    keydown:   'KeyEvents'
+    keypress:  'KeyEvents'
+    keyup:     'KeyEvents'
+    focusin:   'UIEvents'
+    focus:     'UIEvents'
+    blur:      'UIEvents'
+    focusout:  'UIEvents'
 
   #
   # Finds the first node matching +xpathOrNode+ in +document+ with optional
@@ -100,29 +107,47 @@ wesabe.dom.page =
   # @public
   #
   fill: (document, xpathOrNode, valueOrXpathOrNode) ->
-    wesabe.tryThrow('page.fill', (log) =>
-      element = wesabe.dom.page.findStrict(document, xpathOrNode)
-      log.info('element=', element)
+    wesabe.tryThrow 'page.fill', (log) =>
+      element = wesabe.untaint(@findStrict(document, xpathOrNode))
+      log.info 'element=', wesabe.taint(element)
 
       value = wesabe.untaint(valueOrXpathOrNode)
       value = value.toString() if wesabe.isNumber(value)
 
-      if value && !wesabe.isString(value)
-        valueNode = @findStrict(document, value, element)
-        log.debug('valueNode=', valueNode)
-        value = wesabe.untaint(valueNode.value)
+      if value and not wesabe.isString(value)
+        valueNode = wesabe.untaint(@findStrict(document, value, element))
+        log.debug 'valueNode=', wesabe.taint(valueNode)
+        value = valueNode.value
 
-      log.radioactive('value=', value)
+      log.radioactive 'value=', value
 
-      maxlength = wesabe.untaint(element).getAttribute("maxlength")
-      if value && maxlength
-        maxlength = parseInt(maxlength, 10)
+      maxlength = element.getAttribute("maxlength")
+      if value and maxlength
+        maxlength = wesabe.lang.number.parse(maxlength)
         if maxlength
-          log.warn("Truncating value to ", maxlength, " characters")
+          log.warn "Truncating value to ", maxlength, " characters"
           value = value[0...maxlength]
 
-      wesabe.untaint(element).value = value
-      @fireEvent(document, element, 'change'))
+      ##
+      #
+      # Fill Event Order
+      #
+      # focusin
+      # focus
+      # change
+      # focusout
+      # blur
+      #
+      ##
+
+      @fireEvent document, element, 'focusin'
+      @fireEvent document, element, 'focus'
+
+      element.value = value
+      @fireEvent document, element, 'change'
+
+      @fireEvent document, element, 'focusout'
+      @fireEvent document, element, 'blur'
 
   #
   # Clicks the given node/xpath endpoint.
@@ -140,12 +165,12 @@ wesabe.dom.page =
   # @public
   #
   click: (document, xpathOrNode) ->
-    wesabe.tryThrow('page.click', (log) =>
-      element = @findStrict(document, xpathOrNode)
-      log.info('element=', element)
-      @fireEvent(document, element, 'mousedown')
-      @fireEvent(document, element, 'click')
-      @fireEvent(document, element, 'mouseup'))
+    wesabe.tryThrow 'page.click', (log) =>
+      element = @findStrict document, xpathOrNode
+      log.info 'element=', element
+      @fireEvent document, element, 'mousedown'
+      @fireEvent document, element, 'click'
+      @fireEvent document, element, 'mouseup'
 
   #
   # Checks the element given by +xpathOrNode+.
@@ -201,14 +226,14 @@ wesabe.dom.page =
   # @public
   #
   submit: (document, xpathOrNode) ->
-    wesabe.tryThrow('page.submit', (log) =>
-      element = @findStrict(document, xpathOrNode)
-      log.info('element=', element)
+    wesabe.tryThrow 'page.submit', (log) =>
+      element = @findStrict document, xpathOrNode
+      log.info 'element=', element
       # find the containing form
-      element = element.parentNode while element && element.tagName.toLowerCase() != 'form'
+      element = element.parentNode while element and element.tagName.toLowerCase() isnt 'form'
       throw new Error('No form found wrapping element! Cannot submit') unless element
 
-      @fireEvent(document, element, 'submit'))
+      @fireEvent document, element, 'submit'
 
   #
   # Fires an event on the given node/xpath endpoint.
@@ -220,10 +245,10 @@ wesabe.dom.page =
   #
   # @public
   #
-  fireEvent: (document, xpathOrNode, type) ->
+  fireEvent: (document, xpathOrNode, type, args...) ->
     element = wesabe.untaint(@findStrict(document, xpathOrNode))
     event = element.ownerDocument.createEvent(@EVENT_TYPE_MAP[type])
-    event.initEvent(type, true, true)
+    event.initEvent(type, true, true, args...)
     element.dispatchEvent(event)
 
   #
