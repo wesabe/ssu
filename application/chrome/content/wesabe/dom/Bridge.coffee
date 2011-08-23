@@ -1,7 +1,7 @@
 wesabe.provide('dom.Bridge')
 wesabe.require('dom.page')
 
-bridges = {}
+bridges = []
 
 #
 # Provides communication between XUL and HTML documents. Create a
@@ -32,8 +32,6 @@ bridges = {}
 #     });
 #
 class wesabe.dom.Bridge
-  @bridgeid: 1
-
   constructor: (document, callback) ->
     @document = document
     @requests = {}
@@ -41,8 +39,13 @@ class wesabe.dom.Bridge
     @connect(@callback) if @callback
 
   @forDocument: (doc) ->
-    doc._wesabeBridgeId ||= @bridgeid++
-    bridges[doc._wesabeBridgeId] ||= new @(doc)
+    for {bridge, document} in bridges
+      return bridge if doc is document
+
+    bridge = new @(doc)
+    bridges.push {bridge, document}
+    return bridge
+
 
   connect: (fn) ->
     wesabe.dom.page.inject(@document, "(#{wesabe.dom.Bridge.bootstrap.toSource()})()")

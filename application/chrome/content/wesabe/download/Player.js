@@ -477,8 +477,7 @@ wesabe.download.Player.prototype.onDocumentLoaded = function(browser, page) {
   var self = this, module = this.constructor.fid;
 
   // log when alert and confirm are called
-  var bridge = wesabe.dom.Bridge.forDocument(page.proxyTarget);
-  bridge.connect(function() {
+  new wesabe.dom.Bridge(page.proxyTarget, function() {
     this.evaluate(
       // evaluated on the page
       function() {
