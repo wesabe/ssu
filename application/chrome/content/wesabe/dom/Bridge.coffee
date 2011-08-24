@@ -32,11 +32,10 @@ bridges = []
 #     });
 #
 class wesabe.dom.Bridge
-  constructor: (document, callback) ->
-    @document = document
+  constructor: (@document, @callback) ->
     @requests = {}
     @messageid = 1
-    @connect(@callback) if @callback
+    @connect @callback if @callback
 
   @forDocument: (doc) ->
     for {bridge, document} in bridges
