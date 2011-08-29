@@ -143,6 +143,14 @@ wesabe.dom.page =
       @fireEvent document, element, 'focusin'
       @fireEvent document, element, 'focus'
 
+      if element.type is 'text'
+        # fill text inputs one character at a time
+        for i in [0...value.length]
+          charCode = value.charCodeAt(i)
+          @fireEvent document, element, 'keydown',  keyCode: charCode
+          @fireEvent document, element, 'keypress', keyCode: charCode, charCode: charCode
+          @fireEvent document, element, 'keyup',    keyCode: charCode
+
       element.value = value
       @fireEvent document, element, 'change'
 
@@ -246,9 +254,26 @@ wesabe.dom.page =
   # @public
   #
   fireEvent: (document, xpathOrNode, type, args...) ->
+    options = if args.length is 1 and typeof args[args.length-1] is 'object' then args.pop() else {}
     element = wesabe.untaint(@findStrict(document, xpathOrNode))
     event = element.ownerDocument.createEvent(@EVENT_TYPE_MAP[type])
-    event.initEvent(type, true, true, args...)
+
+    if type in ['keydown', 'keypress', 'keyup']
+      {bubbles, cancelable, view, ctrlKey, altKey, shiftKey, metaKey, keyCode, charCode} = options
+      bubbles ?= true
+      cancelable ?= true
+      view ?= element.ownerDocument.defaultView
+      ctrlKey ?= false
+      altKey ?= false
+      shiftKey ?= false
+      metaKey ?= false
+      keyCode ?= charCode or 0
+      charCode ?= 0
+      event.initKeyEvent(type, bubbles, cancelable, view, ctrlKey, altKey, shiftKey, metaKey, keyCode, charCode)
+    else
+      event.initEvent(type, true, true, args...)
+      event[key] = value for own key, value of options
+
     element.dispatchEvent(event)
 
   #
