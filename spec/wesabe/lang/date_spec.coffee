@@ -19,3 +19,28 @@ describe 'wesabe.lang.date', ->
 
     it 'parses dates in the format MMM DD, YYYY', ->
       expect(date.parse('Jul 15, 2011')).toEqual(new Date(2011, 6, 15))
+
+  describe '.add method', ->
+    it 'adds a certain number of milliseconds', ->
+      expect(date.add(new Date(2011, 6, 1, 0, 0, 0), 10*date.SECONDS).getSeconds()).toEqual(10)
+
+  describe '.addDays method', ->
+    it 'adds a certain number of days', ->
+      expect(date.addDays(new Date(2011, 6, 1), 1)).toEqual(new Date(2011, 6, 2))
+
+    it 'adds days to wrap the month', ->
+      expect(date.addDays(new Date(2011, 6, 30), 2)).toEqual(new Date(2011, 7, 1))
+
+  describe '.addMonths method', ->
+    it 'adds a certain number of months', ->
+      expect(date.addMonths(new Date(2011, 6, 1), 1)).toEqual(new Date(2011, 7, 1))
+
+    it 'adds months to wrap the year', ->
+      expect(date.addMonths(new Date(2011, 6, 1), 6)).toEqual(new Date(2012, 0, 1))
+
+    it 'adds negative months to wrap the year', ->
+      expect(date.addMonths(new Date(2011, 0, 1), -15)).toEqual(new Date(2009, 9, 1))
+
+  describe '.addYears method', ->
+    it 'adds a certain number of years', ->
+      expect(date.addYears(new Date(2011, 0, 1), 1)).toEqual(new Date(2012, 0, 1))

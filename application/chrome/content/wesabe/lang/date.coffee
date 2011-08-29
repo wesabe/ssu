@@ -40,6 +40,26 @@ wesabe.lang.date =
   add: (date, duration) ->
     new Date(date.getTime() + duration)
 
+  addDays: (date, days) ->
+    @add date, days*@DAYS
+
+  addMonths: (date, months) ->
+    year = date.getFullYear()
+    month = date.getMonth() + months
+
+    while month >= 12
+      month -= 12
+      year++
+
+    while month < 0
+      month += 12
+      year--
+
+    new Date(year, month, date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds())
+
+  addYears: (date, years) ->
+    new Date(date.getFullYear() + years, date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds())
+
   format: (date, format) ->
     format = format + ""
     result = ""
