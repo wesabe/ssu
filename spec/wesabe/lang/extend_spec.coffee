@@ -17,8 +17,15 @@ describe 'wesabe.lang.extend', ->
   it 'allows preventing overriding values in target', ->
     source = {a: 1, b: 2}
     target = {a: 3}
-    extend(target, source, false)
+    extend(target, source, override: false)
     expect(target.a).toEqual(3)
+
+  it 'allows merging subtrees if possible', ->
+    source = {a: 1, b: {c: 3}}
+    target = {a: 2, b: {d: 5}}
+    extend(target, source, merge: true)
+    expect(target.a).toEqual(1)
+    expect(target.b).toEqual(c: 3, d: 5)
 
   it 'copies getters', ->
     source = {}

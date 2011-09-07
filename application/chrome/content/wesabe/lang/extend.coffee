@@ -1,12 +1,16 @@
-wesabe.provide('lang')
+wesabe.provide 'lang.extend', (target, source, options={}) ->
+  options.override ?= true
+  options.merge ?= false
 
-wesabe.lang.extend = (target, source, override=true) ->
   for own key of source
-    if override || (typeof(target[key]) == 'undefined')
+    if key of target and options.merge and typeof target[key] is 'object' and typeof source[key] is 'object'
+        wesabe.lang.extend target[key], source[key], options
+
+    else if key not of target or options.override
       getter = source.__lookupGetter__(key)
       setter = source.__lookupSetter__(key)
 
-      if getter || setter
+      if getter or setter
         target.__defineGetter__(key, getter) if getter
         target.__defineSetter__(key, setter) if setter
       else

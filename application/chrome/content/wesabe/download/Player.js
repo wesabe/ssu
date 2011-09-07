@@ -15,7 +15,7 @@ wesabe.download.Player.register = function(params) {
 wesabe.download.Player.create = function(params, callback) {
   var klass = function() {
     // inherit from Player
-    wesabe.lang.extend(this, wesabe.download.Player.prototype, false);
+    wesabe.lang.extend(this, wesabe.download.Player.prototype, {override: false});
   };
 
   if (callback)
