@@ -520,11 +520,11 @@ wesabe.dom.page =
   #
   # ==== Example
   #   // allows accessing wesabe.dom.page methods directly
-  #   var page = wesabe.dom.page.wrap(document);
-  #   page.click('//a[@title="Wesabe"]');
+  #   page = wesabe.dom.page.wrap(document)
+  #   page.click('//a[@title="Wesabe"]')
   #
   #   // also allows direct access to existing methods/fields
-  #   alert(page.title);
+  #   alert(page.title)
   #
   wrap: (document) ->
     proxy = wesabe.util.proxy(document)
