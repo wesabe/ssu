@@ -96,7 +96,7 @@ wesabe.download.Player.create = function(params, callback) {
     }
 
     if (module.elements) {
-      wesabe.lang.extend(klass.elements, module.elements);
+      wesabe.lang.extend(klass.elements, module.elements, {merge: true});
     }
 
     if (module.actions) {
