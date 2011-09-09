@@ -285,22 +285,27 @@ wesabe.download.Player.prototype.download = function(url, metadata) {
     url = null;
 
     this.job.nextDownloadMetadata = metadata;
-    callback()
+    callback();
+
+    return;
+  } else if (metadata == undefined) {
+    metadata = url;
+    url = null;
+
+    if (!metadata.data)
+      throw new Error("Expected metadata "+metadata+" to have data to write");
+
+    var file = newStatementFile();
+    wesabe.io.file.write(file, metadata.data);
+    this.job.recordSuccessfulDownload(file, metadata.suggestedFilename, metadata);
 
     return;
   }
 
   metadata = wesabe.lang.extend({url: url}, metadata || {});
 
-  wesabe.tryThrow("Player#download("+url+")", function(log) {
-    var folder = wesabe.io.dir.profile;
-    folder.append('statements');
-    if (!folder.exists()) wesabe.io.dir.create(folder);
-
-    var statement = folder.clone();
-    statement.append(new wesabe.ofx.UUID().toString());
-
-    wesabe.io.download(url, statement, {
+  wesabe.tryThrow("Player#download(" + url + ")", function(log) {
+    wesabe.io.download(url, newStatementFile(), {
       success: function(file, suggestedFilename) {
         job.recordSuccessfulDownload(file, suggestedFilename, metadata);
       },
@@ -310,6 +315,17 @@ wesabe.download.Player.prototype.download = function(url, metadata) {
       }
     });
   });
+
+  function newStatementFile() {
+    var folder = wesabe.io.dir.profile;
+    folder.append('statements');
+    if (!folder.exists()) wesabe.io.dir.create(folder);
+
+    var statement = folder.clone();
+    statement.append(new wesabe.ofx.UUID().toString());
+
+    return statement;
+  }
 };
 
 /**
