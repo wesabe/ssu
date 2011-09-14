@@ -1,52 +1,34 @@
-wesabe.provide('lang.array')
+from = (object) ->
+  item for item in object
 
-wesabe.lang.array =
-  from: (object) ->
-    retval = []
+uniq = (array) ->
+  retval = []
 
-    for o, i in object
-      retval.push(o)
+  for item, i in array
+    retval.push(item) unless include retval, item
 
-    return retval
+  return retval
 
-  uniq: (array) ->
-    retval = []
+include = (array, object) ->
+  object = wesabe.untaint(object)
 
-    for item, i in array
-      retval.push(item) unless @include(retval, item)
+  for item in array
+    return true if wesabe.untaint(item) is object
 
-    return retval
+  return false
 
-  include: (array, object) ->
-    object = wesabe.untaint(object)
+compact = (array) ->
+  item for item in array when wesabe.untaint(item)
 
-    for item, i in array
-      return true if wesabe.untaint(array[i]) == object
+equal = (a, b) ->
+  return false if a.length isnt b.length
 
-    return false
+  for i in [0...a.length]
+    return false if a[i] isnt b[i]
 
-  compact: (array) ->
-    retval = []
+  return true
 
-    for item, i in array
-      retval.push(item) if wesabe.untaint(item)
+zip = (a, b) ->
+  [a[i], b[i]] for i in [0...Math.max(a.length, b.length)]
 
-    return retval
-
-  equal: (a, b) ->
-    return false if a.length != b.length
-
-    for i in [0...a.length]
-      return false if a[i] != b[i]
-
-    return true
-
-  zip: (array1, array2) ->
-    result = []
-
-    for i in [0...Math.max(array1.length, array2.length)]
-      result.push([array1[i], array2[i]])
-
-    return result
-
-exports?.array = wesabe.lang.array
+module.exports = {from, uniq, include, compact, equal, zip}
