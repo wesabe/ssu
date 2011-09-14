@@ -53,12 +53,12 @@ wesabe.provide 'download.Player', class Player
     if params.includes
       for include in params.includes
         try
-          modules.push(wesabe.require(include));
+          modules.push wesabe.require(include)
         catch ex
           throw new Error("Error while requiring #{include} -- check that the file exists and has the correct 'provide' line")
 
-    # dispatchFrames: false
-    if params.dispatchFrames is false
+    # dispatchFrames: off
+    if params.dispatchFrames is off
       klass::filters.push
         name: 'frame blocker'
         test: ->
@@ -86,7 +86,7 @@ wesabe.provide 'download.Player', class Player
           callback: module.dispatch
 
       if module.elements
-        wesabe.lang.extend klass.elements, module.elements, merge: true
+        wesabe.lang.extend klass.elements, module.elements, merge: on
 
       if module.actions
         wesabe.lang.extend klass::, module.actions
@@ -216,7 +216,7 @@ wesabe.provide 'download.Player', class Player
           download: (args...) => @download(args...)
         , scope or {})
 
-    @job.timer.start 'Navigate', overlap: false
+    @job.timer.start 'Navigate', overlap: off
 
     return retval
 
@@ -502,14 +502,14 @@ wesabe.provide 'download.Player', class Player
     @browser = browser
     @page = page
 
-    @job.timer.start 'Sleep', overlap: false
+    @job.timer.start 'Sleep', overlap: off
 
     setTimeout =>
       return if @job.done or @job.paused
 
       for dispatch in @dispatches
         result = wesabe.tryThrow "#{module}#dispatch(#{dispatch.name})", (log) =>
-          @job.timer.start 'Dispatch', overlap: false
+          @job.timer.start 'Dispatch', overlap: off
 
           wesabe.lang.func.callWithScope dispatch.callback, this,
             browser: browser
