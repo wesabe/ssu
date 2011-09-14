@@ -33,7 +33,7 @@ class wesabe.download.Job
       wesabe.one this, 'resume', ->
         wesabe.unbind player, 'timeout', callback
 
-    wesabe.warn('Suspending job for ', result, '=', data)
+    wesabe.warn 'Suspending job for ', result, '=', data
     wesabe.trigger this, 'update suspend'
 
   resume: (creds) ->
