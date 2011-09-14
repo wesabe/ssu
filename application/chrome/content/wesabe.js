@@ -114,7 +114,7 @@ var wesabe = {
     // split "A.B" into ["A", "B"]
     module = wesabe._parseModuleUri(module);
 
-    if (module.object) return module.object;
+    if (module.exports) return module.exports;
 
     var uris = wesabe._getUrisForParts(module.parts, module.scheme);
     module.exports = {};
@@ -123,25 +123,21 @@ var wesabe = {
       var uri = uris[i];
 
       if (wesabe._loadUri(uri, module)) {
-        base = wesabe;
-        module.parts.forEach(function(part) {
-          try { base = base[part] }
-          catch (e) {
-            var message = 'require: failed to get part '+part+' of module '+module.name;
-            dump(message+'\n');
-            throw new Error(message);
-          }
+        var exports;
+
+        wesabe.walk(module.name, function(part, mod, level, levels) {
+          if (level == levels.length - 1)
+            module.exports = mod[part] || (mod[part] = module.exports);
+          else
+            mod[part] || (mod[part] = {});
         });
 
-        if (!base)
-          base = wesabe.provide(module.name, module.exports);
-
-        base.__module__ = {
+        module.exports.__module__ = {
           name: module.parts[module.parts.length-1],
           fullName: module.name,
           uri: uri
         };
-        return base;
+        return module.exports;
       }
     }
 
@@ -156,11 +152,8 @@ var wesabe = {
     var parts = path.split(/[\.\/]/), base;
     var result = {scheme: scheme, name: module, parts: parts};
 
-    if (parts[parts.length-1] != '*') {
-      base = wesabe;
-      parts.forEach(function(part) { if (base) base = base[part] });
-      result.object = base;
-    }
+    if (parts[parts.length-1] != '*')
+      result.exports = wesabe.walk(module);
 
     return result;
   },
@@ -213,6 +206,20 @@ var wesabe = {
     }
     // start over with A/B
     return uris.concat(wesabe._getUrisForParts(parts.slice(0, parts.length-1), scheme, true, false));
+  },
+
+  walk: function(module, callback) {
+    var base, i, part, parts, _len;
+    base = wesabe;
+    parts = module.split('.');
+    for (i = 0, _len = parts.length; i < _len; i++) {
+      part = parts[i];
+      if (callback != null) {
+        callback(part, base, i, parts);
+      }
+      base && (base = base[part]);
+    }
+    return base;
   },
 
   /**

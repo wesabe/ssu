@@ -42,7 +42,7 @@ exports.wesabe =
     typeof object is 'string'
 
   is: (object, klass) ->
-    object?.constructor == klass
+    object?.constructor is klass
 
   isTainted: -> false
 
@@ -94,6 +94,6 @@ exports.wesabe =
 
     for part, i in parts
       callback part, base, i, parts if callback?
-      base = base[part]
+      base &&= base[part]
 
     return base
