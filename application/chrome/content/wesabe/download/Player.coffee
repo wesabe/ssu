@@ -201,20 +201,7 @@ wesabe.provide 'download.Player', class Player
 
         wesabe.info 'History is ', (hi.name for hi in @history).join(' -> ')
 
-        wesabe.lang.func.callWithScope fn, this, wesabe.lang.extend(
-          browser: browser
-          page: page
-          e: @constructor.elements
-          answers: @answers
-          options: @job.options
-          log: log
-          tmp: @tmp
-          action: @getActionProxy(browser, page)
-          job: @getJobProxy()
-          skipAccount: @skipAccount
-          reload: => @triggerDispatch(browser, page)
-          download: (args...) => @download(args...)
-        , scope or {})
+        @callWithMagicScope fn, browser, page, wesabe.lang.extend({log}, scope or {})
 
     @job.timer.start 'Navigate', overlap: off
 
@@ -462,21 +449,7 @@ wesabe.provide 'download.Player', class Player
           callbacks = @["#{type}ReceivedCallbacks"]
           if callbacks
             for callback in callbacks
-              wesabe.lang.func.callWithScope callback, this,
-                message: message
-                browser: browser
-                page: page
-                e: @constructor.elements
-                answers: @answers
-                options: @job.options
-                log: wesabe
-                tmp: @tmp
-                action: @getActionProxy browser, page
-                job: @getJobProxy()
-                reload: => @triggerDispatch browser, page
-                skipAccount: @skipAccount
-                download: (args...) => @download args...
-              , [message]
+              @callWithMagicScope callback, browser, page, wesabe.lang.extend({message, log: wesabe}), message
 
     unless @shouldDispatch browser, page
       wesabe.info 'skipping document load'
@@ -510,20 +483,7 @@ wesabe.provide 'download.Player', class Player
       for dispatch in @dispatches
         result = wesabe.tryThrow "#{module}#dispatch(#{dispatch.name})", (log) =>
           @job.timer.start 'Dispatch', overlap: off
-
-          wesabe.lang.func.callWithScope dispatch.callback, this,
-            browser: browser
-            page: page
-            e: @constructor.elements
-            answers: @answers
-            options: @job.options
-            log: log
-            tmp: @tmp
-            action: @getActionProxy browser, page
-            job: @getJobProxy()
-            reload: => @triggerDispatch browser, page
-            skipAccount: @skipAccount
-            download: (args...) => @download args...
+          @callWithMagicScope dispatch.callback, browser, page, {log}
 
         if result is false
           wesabe.info "dispatch chain halted"
@@ -537,19 +497,11 @@ wesabe.provide 'download.Player', class Player
   shouldDispatch: (browser, page) ->
     for filter in @filters
       result = wesabe.tryCatch "#{@constructor.fid}#filter(#{filter.name})", (log) =>
-        r = wesabe.lang.func.callWithScope filter.test, this,
-          browser: browser
-          page: page
-          e: @constructor.elements
-          log: log
-          tmp: @tmp
-          job: @getJobProxy()
-          skipAccount: @skipAccount
-
-        if r is true
-          log.debug "forcing dispatch"
-        else if r is false
-          log.debug "aborting dispatch"
+        switch r = @callWithMagicScope filter.test, browser, page, {log}
+          when true
+            log.debug "forcing dispatch"
+          when false
+            log.debug "aborting dispatch"
 
         return r
 
@@ -558,6 +510,22 @@ wesabe.provide 'download.Player', class Player
 
     wesabe.debug "no filter voted to force or abort dispatch, so forcing dispatch by default"
     return true
+
+  callWithMagicScope: (fn, browser, page, scope, args...) ->
+    wesabe.lang.func.callWithScope fn, this, wesabe.lang.extend({
+      browser
+      page
+      e: @constructor.elements
+      answers: @answers
+      options: @job.options
+      tmp: @tmp
+      action: @getActionProxy browser, page
+      job: @getJobProxy()
+      skipAccount: @skipAccount
+      reload: => @triggerDispatch browser, page
+      download: (args...) => @download args...
+    }, scope or {}), args...
+
 
   @::__defineGetter__ 'history', ->
     @_history ||= []
