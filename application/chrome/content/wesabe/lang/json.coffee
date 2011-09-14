@@ -1,4 +1,4 @@
-wesabe.provide 'lang.json',
+module.exports =
   parse: (string) ->
     JSON.parse(string)
 
