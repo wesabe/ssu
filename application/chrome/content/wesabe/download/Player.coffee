@@ -469,8 +469,6 @@ wesabe.provide 'download.Player', class Player
     wesabe.info 'url=', url
     wesabe.info 'title=', title
 
-    wesabe.trigger this, 'page-load', [browser, page]
-
     # these should not be used inside the FI scripts
     @browser = browser
     @page = page
