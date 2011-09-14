@@ -1,15 +1,21 @@
-wesabe.provide 'xml.Document'
-wesabe.require 'xml.*'
+type      = require 'lang/type'
+inspect   = require 'util/inspect'
+Colorizer = require 'util/Colorizer'
+
+Parser    = require 'xml/Parser'
+Element   = require 'xml/Element'
+Attribute = require 'xml/Attribute'
+Text      = require 'xml/Text'
+
 wesabe.require 'util.event'
 wesabe.require 'util.Colorizer'
-wesabe.require 'util.inspect'
 
-class wesabe.xml.Document
+class Document
   constructor: (xml, verboten) ->
-    @parse(xml, verboten) if xml?
+    @parse xml, verboten if xml?
 
   this::__defineGetter__ 'root', ->
-    this._root ||= new wesabe.xml.Element()
+    this._root ||= new Element()
 
   this::__defineGetter__ 'documentElement', ->
     @root.firstChild
@@ -28,17 +34,17 @@ class wesabe.xml.Document
     @documentElement.getElementsByTagName(name)
 
   parse: (xml, verboten) ->
-    parser = new wesabe.xml.Parser()
+    parser = new Parser()
 
     work =
       stack: []
 
       push: (node) ->
-        if wesabe.is(node, wesabe.xml.Text)
+        if type.is(node, Text)
           @stack.push(node)
-        else if wesabe.is(node, wesabe.xml.Attribute)
+        else if type.is(node, Attribute)
           @stack[@stack.length-1].setAttribute(node.name, node.value)
-        else if wesabe.is(node, wesabe.xml.Element)
+        else if type.is(node, Element)
           node.parsing = !node.selfclosing
           @stack.push(node)
         else
@@ -47,7 +53,7 @@ class wesabe.xml.Document
       setName: (name) ->
         for i in [@stack.length-1..0]
           node = @stack[i]
-          if wesabe.is(node, wesabe.xml.Element)
+          if type.is(node, Element)
             node.name = name
             return
 
@@ -59,7 +65,7 @@ class wesabe.xml.Document
 
         while @stack.length
           node = @stack.pop()
-          if wesabe.is(node, wesabe.xml.Element) && node.parsing
+          if type.is(node, Element) && node.parsing
             # found the matching opening tag, push all children into it
             if node.name == closeTag.name
               for child in popped
@@ -72,11 +78,11 @@ class wesabe.xml.Document
             wesabe.error("NODE IS ", node)
 
           # push a dangling text node onto the adjacent element if that element is unclosed
-          if wesabe.is(popped[0], wesabe.xml.Text) && wesabe.is(node, wesabe.xml.Element) && node.parsing
+          if type.is(popped[0], Text) && type.is(node, Element) && node.parsing
             node.appendChild(popped.shift())
           popped.unshift(node)
 
-        throw new Error("Unexpected closing tag #{wesabe.util.inspect(closeTag)}")
+        throw new Error("Unexpected closing tag #{inspect(closeTag)}")
 
     wesabe.bind parser, 'start-open-tag', (event, tag) =>
       work.push(tag.toElement())
@@ -103,9 +109,11 @@ class wesabe.xml.Document
     if typeof refs is 'number'
       refs = null
 
-    s = new wesabe.util.Colorizer()
+    s = new Colorizer()
     s.disabled = !color
     s.yellow('#<')
      .bold(@constructor?.__module__?.name || 'Object')
     s.print(' ', @documentElement.inspect(refs, color, tainted)) if @documentElement
     return s.yellow('>').toString()
+
+module.exports = Document

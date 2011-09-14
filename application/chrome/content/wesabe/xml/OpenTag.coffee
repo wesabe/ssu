@@ -1,18 +1,20 @@
-wesabe.provide('xml.OpenTag')
+Element = require 'xml/Element'
 
-class wesabe.xml.OpenTag
+class OpenTag
   constructor: (name) ->
-    @name = name || ''
+    @name = name or ''
 
   beginParsing: (parser) ->
-    @trigger('start-open-tag', parser)
+    @trigger 'start-open-tag', parser
 
   doneParsing: (parser) ->
     @parsed = true
-    @trigger('end-open-tag open-tag node', parser)
+    @trigger 'end-open-tag open-tag node', parser
 
   trigger: (events, parser) ->
-    parser.trigger(events, [this])
+    parser.trigger events, [this]
 
   toElement: ->
-    new wesabe.xml.Element(@name, @selfclosing)
+    new Element @name, @selfclosing
+
+module.exports = OpenTag

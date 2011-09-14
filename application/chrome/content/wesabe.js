@@ -85,6 +85,10 @@ var wesabe = {
     run(module);
   },
 
+  CommonJSRequire: function(path) {
+    return wesabe.require(path.replace(/\//g, '.'));
+  },
+
   /**
    * Loads a file in an attempt to load the specified module/class.
    *
@@ -290,7 +294,8 @@ var wesabe = {
 
     try {
       var _exportsOriginal = module.exports,
-          exports = module.exports;
+          exports = module.exports,
+          require = wesabe.CommonJSRequire;
 
       // run the file code inside a closure with exports as the context
       (function() {

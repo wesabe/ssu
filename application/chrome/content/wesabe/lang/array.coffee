@@ -10,6 +10,9 @@ uniq = (array) ->
   return retval
 
 include = (array, object) ->
+  # check without considering taintedness
+  return true if object in array
+
   object = wesabe.untaint(object)
 
   for item in array

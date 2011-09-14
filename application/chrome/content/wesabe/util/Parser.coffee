@@ -1,10 +1,13 @@
-wesabe.provide('util.Parser')
+{isFunction} = require 'lang/type'
+# FIXME: make wesabe.util.inspect module sane so regular require will work with it
+inspect = wesabe.require 'util.inspect'
+event   = require 'util/event'
 
-class wesabe.util.Parser
+
+class Parser
   this::__defineSetter__ 'tokens', (tokens) ->
     @__tokens__ = for own tok, callback of tokens
-                    {pattern: new RegExp("^#{tok}$")
-                    callback: callback}
+                    {pattern: new RegExp("^#{tok}$"), callback}
 
   parse: (what) ->
     @parsing = what
@@ -12,12 +15,12 @@ class wesabe.util.Parser
 
     eof = true
 
-    while !@hasStopRequest && @offset < what.length
-      if !@process(what[@offset])
+    while not @hasStopRequest and @offset < what.length
+      if not @process(what[@offset])
         eof = false
         break
 
-    @process('EOF') if eof && !@hasStopRequest
+    @process 'EOF' if eof unless @hasStopRequest
     delete @parsing
 
   stop: ->
@@ -29,7 +32,7 @@ class wesabe.util.Parser
     for {pattern, callback} in @__tokens__
       patterns.push(pattern)
       if pattern.test(p)
-        if wesabe.isFunction(callback)
+        if isFunction callback
           # call the provided callback function
           retval = callback(p)
         else
@@ -39,13 +42,15 @@ class wesabe.util.Parser
         return retval != false
 
     throw new Error("Unexpected #{p} (offset=#{@offset}, before=#{
-                    wesabe.util.inspect(@parsing[@offset-15...@offset])
+                    inspect @parsing[@offset-15...@offset]
                     }, after=#{
-                    wesabe.util.inspect(@parsing[@offset...@offset+15])
+                    inspect @parsing[@offset...@offset+15]
                     }, together=#{
-                    wesabe.util.inspect(@parsing[@offset-15...@offset+15])
+                    inspect @parsing[@offset-15...@offset+15]
                     }) while looking for one of #{
-                    wesabe.util.inspect(patterns)}")
+                    inspect patterns}")
 
   trigger: (events, args) ->
-    wesabe.trigger(this, events, args)
+    event.trigger this, events, args
+
+module.exports = Parser

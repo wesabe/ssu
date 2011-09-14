@@ -24,7 +24,8 @@ fs = require 'fs'
 path = require 'path'
 root = path.join(path.dirname(fs.realpathSync(__filename)), '..')
 
-require.paths.push("#{root}/lib")
+require.paths.unshift "#{root}/lib"
+require.paths.unshift "#{root}/application/chrome/content/wesabe"
 {wesabe} = require 'wesabe'
 GLOBAL.wesabe = wesabe
 

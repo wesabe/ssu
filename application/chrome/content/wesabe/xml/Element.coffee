@@ -1,8 +1,12 @@
-wesabe.provide 'xml.Element'
-wesabe.require 'dom.Selector'
-wesabe.require 'util.inspect'
+type       = require 'lang/type'
+inspect    = require 'util/inspect'
+{sanitize} = require 'util/privacy'
+Colorizer  = require 'util/Colorizer'
 
-class wesabe.xml.Element
+NodeList  = require 'xml/NodeList'
+Attribute = require 'xml/Attribute'
+
+class Element
   constructor: (name, selfclosing) ->
     @name = name
     @selfclosing = true if selfclosing
@@ -22,7 +26,7 @@ class wesabe.xml.Element
     @__attributes__.class || ''
 
   @::__defineGetter__ 'childNodes', ->
-    new wesabe.xml.NodeList(@__children__)
+    new NodeList @__children__
 
   @::__defineGetter__ 'nodeName', ->
     @name
@@ -38,7 +42,7 @@ class wesabe.xml.Element
 
   @::__defineGetter__ 'attributes', ->
     for name, value of @__attributes__
-      new wesabe.xml.Attribute(name, value)
+      new Attribute name, value
 
   # child stuff
 
@@ -62,7 +66,7 @@ class wesabe.xml.Element
         node.parentNode = this
         return node
 
-    throw new Error("Element#insertBefore: Could not find adjacentNode #{wesabe.util.inspect(adjacentNode)}")
+    throw new Error("Element#insertBefore: Could not find adjacentNode #{inspect(adjacentNode)}")
 
   insertAfter: (node, adjacentNode) ->
     for child, i in @__children__
@@ -71,7 +75,7 @@ class wesabe.xml.Element
         node.parentNode = this
         return node
 
-    throw new Error("Element#insertAfter: Could not find adjacentNode #{wesabe.util.inspect(adjacentNode)}")
+    throw new Error("Element#insertAfter: Could not find adjacentNode #{inspect(adjacentNode)}")
 
   # finders
 
@@ -85,7 +89,7 @@ class wesabe.xml.Element
         return child if one
         found.push(child)
 
-      if wesabe.isArray(child.__children__)
+      if type.isArray(child.__children__)
         descendants = descendants.concat(child.__children__)
 
     return found unless one
@@ -128,7 +132,7 @@ class wesabe.xml.Element
     if typeof refs is 'number'
       refs = null
 
-    s = new wesabe.util.Colorizer()
+    s = new Colorizer()
     s.disabled = !color
     s.reset()
      .bold("{#{if @selfclosing then 'empty' else ''}elem ")
@@ -140,7 +144,7 @@ class wesabe.xml.Element
     # print out the attributes
     for attr in @attributes
       value = attr.nodeValue.toString()
-      value = wesabe.util.privacy.sanitize(value) if tainted
+      value = sanitize(value) if tainted
 
       s.print(' ')
        .reset()
@@ -154,8 +158,8 @@ class wesabe.xml.Element
     # print the children
     hasElementChildren = false
     for child in @__children__
-      hasElementChildren = hasElementChildren || wesabe.is(child, wesabe.xml.Element)
-      s.print(' ', wesabe.util.inspect(child, refs, color, tainted))
+      hasElementChildren = hasElementChildren or type.is(child, Element)
+      s.print(' ', inspect(child, refs, color, tainted))
 
     # only show the closing tag if there are child elements (not text)
     if hasElementChildren
@@ -167,3 +171,5 @@ class wesabe.xml.Element
        .yellow('>')
 
     return s.bold('}').toString()
+
+module.exports = Element

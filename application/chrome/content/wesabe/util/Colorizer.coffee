@@ -1,4 +1,21 @@
-extend = wesabe.require('lang.extend')
+extend = require 'lang/extend'
+
+COLORS =
+  black: '30'
+  red: '31'
+  green: '32'
+  yellow: '33'
+  blue: '34'
+  magenta: '35'
+  cyan: '36'
+  white: '37'
+
+STYLES =
+  reset: '0'
+  normal: '0'
+  bold: '1'
+  underlined: '2'
+  negative: '5'
 
 #
 # Provides an easy way to generate ANSI color strings for the shell.
@@ -12,32 +29,14 @@ extend = wesabe.require('lang.extend')
 #   s.reset();
 #   dump(s.toString());
 #
-wesabe.provide 'util.Colorizer',
 class Colorizer
-  @COLORS =
-    black: '30'
-    red: '31'
-    green: '32'
-    yellow: '33'
-    blue: '34'
-    magenta: '35'
-    cyan: '36'
-    white: '37'
-
-  @STYLES =
-    reset: '0'
-    normal: '0'
-    bold: '1'
-    underlined: '2'
-    negative: '5'
-
   # add colors and styles as methods
-  for name, code of extend(extend({}, @COLORS), @STYLES)
+  for name, code of extend(extend({}, COLORS), STYLES)
     do (name, code) =>
-      this::[name] = ->
+      @::[name] = ->
         @print("\x1b[#{code}m") unless @disabled
         @print.apply(this, arguments) if arguments.length
-        @print("\x1b[#{@constructor.STYLES.reset}m") unless @disabled
+        @print("\x1b[#{STYLES.reset}m") unless @disabled
         return this
 
   constructor: ->
@@ -49,3 +48,5 @@ class Colorizer
 
   toString: ->
     @output
+
+module.exports = Colorizer

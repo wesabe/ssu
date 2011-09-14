@@ -1,4 +1,10 @@
-wesabe.provide('util.inspect')
+type       = require 'lang/type'
+array      = require 'lang/array'
+{trim}     = require 'lang/string'
+{sanitize} = require 'util/privacy'
+Colorizer  = require 'util/Colorizer'
+
+wesabe.provide 'util.inspect'
 
 #
 # Converts +object+ into a string representation suitable for debugging.
@@ -37,10 +43,10 @@ _inspect = (object, refs, color, tainted) ->
 
   t = typeof object
 
-  if wesabe.isTainted(object)
+  if type.isTainted(object)
     _inspectTainted(object, refs, color)
   else if t == 'function'
-    s = new wesabe.util.Colorizer()
+    s = new Colorizer()
     s.print('#<Function')
     if object.name
       s.print(_inspectAttribute('name', object.name, refs, color, tainted))
@@ -67,7 +73,7 @@ _inspect = (object, refs, color, tainted) ->
     _inspectWindow(object, color, tainted)
   else if object instanceof RegExp
     _inspectRegExp(object, color, tainted)
-  else if wesabe.isDate(object)
+  else if type.isDate(object)
     _inspectString(object.toString(), color, tainted)
   else if object.nodeType == Node.TEXT_NODE
     "{text #{inspect(object.nodeValue, tainted)}}"
@@ -82,7 +88,7 @@ _inspect = (object, refs, color, tainted) ->
     _inspectObject(object, refs, color, tainted)
 
 _inspectError = (error, refs, color, tainted) ->
-  s = new wesabe.util.Colorizer()
+  s = new Colorizer()
   s.disabled = !color
   s.reset()
    .print('An exception has occurred:\n    ')
@@ -134,7 +140,7 @@ _inspectError = (error, refs, color, tainted) ->
             break
 
   if lineText = trace[0]?.lineText
-    lineText = wesabe.lang.string.trim(lineText)
+    lineText = trim(lineText)
     lineText = lineText[0...38]+'...'+lineText[lineText.length-35...lineText.length] if lineText.length > 76
 
     s.print('On:\n    ')
@@ -158,7 +164,7 @@ _inspectTainted = (object, refs, color) ->
     # don't sanitize on radioactive
     return _inspect(object.untaint(), refs, color, false)
 
-  s = new wesabe.util.Colorizer()
+  s = new Colorizer()
   s.disabled = !color
 
   s.bold('{sanitized ')
@@ -167,7 +173,7 @@ _inspectTainted = (object, refs, color) ->
    .toString()
 
 _inspectObject = (object, refs, color, tainted) ->
-  s = new wesabe.util.Colorizer()
+  s = new Colorizer()
   s.disabled = !color
   modName = (o, prefix) ->
     name = o?.__module__?.fullName
@@ -189,18 +195,18 @@ _inspectObject = (object, refs, color, tainted) ->
 # @private
 #
 _inspectString = (string, color, tainted) ->
-  s = new wesabe.util.Colorizer()
+  s = new Colorizer()
   s.disabled = !color
   map = {"\n": "\\n", "\t": "\\t", '"': '\\"', "\r": "\\r"}
   value = string.replace(/(["\n\r\t])/g, (s) -> map[s])  # fix syntax highlighter in vim "
 
   if tainted
-    value = wesabe.util.privacy.sanitize(value)
+    value = sanitize(value)
 
   s.yellow('"').green(value).yellow('"').toString()
 
 _inspectRegExp = (regexp, color, tainted) ->
-  s = new wesabe.util.Colorizer()
+  s = new Colorizer()
   s.disabled = !color
 
   s.yellow(regexp.toSource()).toString()
@@ -213,7 +219,7 @@ _inspectRegExp = (regexp, color, tainted) ->
 # @private
 #
 _inspectAttributes = (object, refs, color, tainted) ->
-  s = new wesabe.util.Colorizer()
+  s = new Colorizer()
   s.disabled = !color
   pairs = []
   keys = []
@@ -222,13 +228,13 @@ _inspectAttributes = (object, refs, color, tainted) ->
     keys.push(key)
 
   for key in keys.sort()
-    continue if wesabe.isFunction(object[key]) || key.match(/^__/)
+    continue if type.isFunction(object[key]) || key.match(/^__/)
     s.print(_inspectAttribute(key, object[key], refs, color, tainted))
 
   return s.toString()
 
 _inspectAttribute = (key, value, refs, color, tainted) ->
-    new wesabe.util.Colorizer().print(' ')
+    new Colorizer().print(' ')
                                .underlined(key)
                                .yellow('=')
                                .print(_inspect(value, refs, color, tainted))
@@ -241,7 +247,7 @@ _inspectAttribute = (key, value, refs, color, tainted) ->
 # @private
 #
 _inspectElement = (element, color, tainted) ->
-  s = new wesabe.util.Colorizer()
+  s = new Colorizer()
   s.disabled = !color
   s.yellow('<')
    .white()
@@ -249,9 +255,9 @@ _inspectElement = (element, color, tainted) ->
    .print(element.tagName.toLowerCase())
    .reset()
 
-  for attr in wesabe.lang.array.from(element.attributes)
+  for attr in array.from(element.attributes)
     value = attr.nodeValue.toString()
-    value = wesabe.util.privacy.sanitize(value) if tainted
+    value = sanitize(value) if tainted
 
     s.print(' ')
      .underlined(attr.nodeName)
@@ -265,7 +271,7 @@ _inspectElement = (element, color, tainted) ->
 # Generate a string inspecting the given +window+.
 #
 _inspectWindow = (window, color, tainted) ->
-  s = new wesabe.util.Colorizer()
+  s = new Colorizer()
   s.disabled = !color
 
   s.yellow('#<')
