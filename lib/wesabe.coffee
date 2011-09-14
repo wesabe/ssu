@@ -17,8 +17,13 @@ exports.wesabe =
       parts[parts.length-1] = '__package__'
       module = parts[0..-2].join('.')
 
-    require "../application/chrome/content/wesabe/#{parts.join('/')}"
-    @walk module
+    loaded = require "../application/chrome/content/wesabe/#{parts.join('/')}"
+
+    @walk module, (part, mod, level, levels) ->
+      mod[part] ||= if level is levels.length - 1
+        loaded
+      else
+        {}
 
   ## (STUB) TAINT HELPERS
 

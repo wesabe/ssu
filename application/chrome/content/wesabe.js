@@ -117,11 +117,12 @@ var wesabe = {
     if (module.object) return module.object;
 
     var uris = wesabe._getUrisForParts(module.parts, module.scheme);
+    module.exports = {};
 
     for (var i = 0; i < uris.length; i++) {
       var uri = uris[i];
 
-      if (wesabe._loadUri(uri)) {
+      if (wesabe._loadUri(uri, module)) {
         base = wesabe;
         module.parts.forEach(function(part) {
           try { base = base[part] }
@@ -131,6 +132,10 @@ var wesabe = {
             throw new Error(message);
           }
         });
+
+        if (!base)
+          base = wesabe.provide(module.name, module.exports);
+
         base.__module__ = {
           name: module.parts[module.parts.length-1],
           fullName: module.name,
@@ -243,7 +248,7 @@ var wesabe = {
    * @param uri {String} The uri to the JS file to load and eval.
    * @private
    */
-  _loadUri: function(uri) {
+  _loadUri: function(uri, module) {
     if (wesabe._loadedUris[uri]) {
       return true;
     }
@@ -277,7 +282,19 @@ var wesabe = {
     wesabe._locOffset += loc;
 
     try {
-      eval(padding + contents + '\r\n//@ sourceUri=' + uri); // __EVAL__
+      var _exportsOriginal = module.exports,
+          exports = module.exports;
+
+      // run the file code inside a closure with exports as the context
+      (function() {
+        eval(padding + contents + '\r\n//@ sourceUri=' + uri); // __EVAL__
+
+        // if the file changed exports, re-save it
+        if (_exportsOriginal !== exports)
+          module.exports = exports;
+
+      }).call(exports);
+
     } catch (e) {
       dump('!! Error while evaluating code from '+uri+': '+e+'\n');
       dump('\n\n'+contents+'\n\n');

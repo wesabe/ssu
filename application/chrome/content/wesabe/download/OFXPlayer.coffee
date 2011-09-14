@@ -1,9 +1,8 @@
-wesabe.provide 'download.OFXPlayer'
 wesabe.require 'ofx.*'
 
 # public methods
 
-class wesabe.download.OFXPlayer
+class OFXPlayer
   DAYS_OF_HISTORY: 365
 
   @register: (params) ->
@@ -191,3 +190,5 @@ class wesabe.download.OFXPlayer
     request.appId = @appId if @appId
     request.appVersion = @appVersion if @appVersion
     return request
+
+module.exports = OFXPlayer
