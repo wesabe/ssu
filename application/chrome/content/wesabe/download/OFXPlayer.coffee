@@ -106,7 +106,6 @@ class wesabe.download.OFXPlayer
         before: =>
           # tell anyone who cares that we're starting to download an account
           job.update('account.download')
-          job.timer.start('Download')
 
         success: (response) =>
           @onDownloadComplete(response)
@@ -115,7 +114,6 @@ class wesabe.download.OFXPlayer
           @onDownloadFailure(response)
 
         after: (response) =>
-          job.timer.end('Download')
 
   #
   # Skips the current account and continues with the rest.

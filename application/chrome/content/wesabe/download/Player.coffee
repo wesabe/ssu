@@ -183,8 +183,6 @@ wesabe.provide 'download.Player', class Player
     fn = if wesabe.isFunction(name) then name else @[name]
     name = if wesabe.isFunction(name) then (name.name or '(anonymous)') else name
 
-    @job.timer.end 'Navigate'
-
     unless fn
       throw new Error "Cannot find action '#{name}'! Typo? Forgot to include a file?"
 
@@ -192,18 +190,15 @@ wesabe.provide 'download.Player', class Player
       url = page and wesabe.taint(page.defaultView.location.href)
       title = page && wesabe.taint(page.title)
 
-      @job.timer.start 'Action', =>
-        @setErrorTimeout 'action'
-        @history.push
-          name: name
-          url: url
-          title: title
+      @setErrorTimeout 'action'
+      @history.push
+        name: name
+        url: url
+        title: title
 
-        wesabe.info 'History is ', (hi.name for hi in @history).join(' -> ')
+      wesabe.info 'History is ', (hi.name for hi in @history).join(' -> ')
 
-        @callWithMagicScope fn, browser, page, wesabe.lang.extend({log}, scope or {})
-
-    @job.timer.start 'Navigate', overlap: off
+      @callWithMagicScope fn, browser, page, wesabe.lang.extend({log}, scope or {})
 
     return retval
 
@@ -473,14 +468,11 @@ wesabe.provide 'download.Player', class Player
     @browser = browser
     @page = page
 
-    @job.timer.start 'Sleep', overlap: off
-
     setTimeout =>
       return if @job.done or @job.paused
 
       for dispatch in @dispatches
         result = wesabe.tryThrow "#{module}#dispatch(#{dispatch.name})", (log) =>
-          @job.timer.start 'Dispatch', overlap: off
           @callWithMagicScope dispatch.callback, browser, page, {log}
 
         if result is false
