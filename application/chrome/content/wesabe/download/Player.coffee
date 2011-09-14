@@ -460,8 +460,8 @@ wesabe.provide 'download.Player', class Player
   triggerDispatch: (browser, page) ->
     module = @constructor.fid
 
-    browser = browser or @browser
-    page = page or @page
+    browser ||= @browser
+    page ||= @page
 
     url = wesabe.taint(page.defaultView.location.href)
     title = wesabe.taint(page.title)

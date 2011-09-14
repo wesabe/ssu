@@ -1,4 +1,4 @@
-wesabe.provide('download.Job')
+wesabe.provide 'download.Job'
 
 class wesabe.download.Job
   constructor: (jobid, fid, creds, user_id, options) ->
@@ -10,8 +10,8 @@ class wesabe.download.Job
     @done = false
     @version = 0
     @data = {}
-    @options = options || {}
-    @options.goals = @options.goals || ['statements']
+    @options = options or {}
+    @options.goals ||= ['statements']
     @options.since &&= wesabe.lang.date.parse(@options.since)
     @timer = new wesabe.util.Timer()
 
@@ -19,8 +19,8 @@ class wesabe.download.Job
     @version++
     @result = result
     @data[result] = data if data
-    wesabe.info('Updating job to: ', result)
-    wesabe.trigger(this, 'update')
+    wesabe.info 'Updating job to: ', result
+    wesabe.trigger this, 'update'
 
   suspend: (result, data, callback) ->
     @version++
@@ -29,35 +29,34 @@ class wesabe.download.Job
     @data[result] = data
 
     if callback
-      wesabe.bind(player, 'timeout', callback)
+      wesabe.bind player, 'timeout', callback
       wesabe.one this, 'resume', ->
-        wesabe.unbind(player, 'timeout', callback)
+        wesabe.unbind player, 'timeout', callback
 
     wesabe.warn('Suspending job for ', result, '=', data)
-    wesabe.trigger(this, 'update suspend')
+    wesabe.trigger this, 'update suspend'
 
   resume: (creds) ->
-    wesabe.warn('Resuming job')
-    wesabe.trigger(this, 'resume')
-    @update('resumed')
-    @player.resume(creds)
+    wesabe.warn 'Resuming job'
+    wesabe.trigger this, 'resume'
+    @update 'resumed'
+    @player.resume creds
 
   fail: (status, result) ->
-    @finish(status, result, false)
+    @finish status, result, false
 
   succeed: (status, result) ->
-    @finish(status, result, true)
+    @finish status, result, true
 
   finish: (status, result, successful) ->
     @version++
     event = if successful then 'succeed' else 'fail'
     @done = true
-    if typeof @player.finish == 'function'
-      @player.finish()
-    @status = status || (if successful then 200 else 400)
-    @result = result || (if successful then 'ok' else 'fail')
-    wesabe.trigger(this, "update #{event} complete")
-    @timer.end('Total')
+    @player.finish() if wesabe.isFunction @player.finish
+    @status = status or (if successful then 200 else 400)
+    @result = result or (if successful then 'ok' else 'fail')
+    wesabe.trigger this, "update #{event} complete"
+    @timer.end 'Total'
 
     org = @player.org
     summary = @timer.summarize()
@@ -88,16 +87,16 @@ class wesabe.download.Job
     @player.job = this
     @nextGoal()
 
-    wesabe.info("Starting job for #{@player.org} (#{@fid})")
-    @player.start(@creds, document.getElementById('playback-browser'))
+    wesabe.info "Starting job for #{@player.org} (#{@fid})"
+    @player.start @creds, document.getElementById('playback-browser')
 
-    wesabe.trigger(this, 'begin')
-    @timer.start('Total')
+    wesabe.trigger this, 'begin'
+    @timer.start 'Total'
 
   nextGoal: ->
     if @options.goals.length
       @goal = @options.goals.shift()
-      wesabe.info('Starting new goal: ', @goal)
+      wesabe.info 'Starting new goal: ', @goal
 
       if @player.page
         @player.triggerDispatch()
@@ -109,11 +108,11 @@ class wesabe.download.Job
   recordSuccessfulDownload: (file, suggestedFilename, metadata, reload=true) ->
     wesabe.info 'successfully downloaded file to ', file.path
     @data.downloads ||= []
-    @data.downloads.push(wesabe.lang.extend({path: file.path, suggestedFilename: suggestedFilename, status: 'ok'}, metadata || {}))
+    @data.downloads.push wesabe.lang.extend({path: file.path, suggestedFilename: suggestedFilename, status: 'ok'}, metadata or {})
     @player.onDownloadSuccessful @player.browser, wesabe.dom.page.wrap(@player.browser.contentDocument) if reload
 
   recordFailedDownload: (metadata, reload=true) ->
     wesabe.error 'failed to download file'
     @data.downloads ||= []
-    @data.downloads.push(wesabe.lang.extend({status: 'error'}, metadata || {}))
+    @data.downloads.push(wesabe.lang.extend({status: 'error'}, metadata or {}))
     @player.onDownloadSuccessful @player.browser, wesabe.dom.page.wrap(@player.browser.contentDocument) if reload
