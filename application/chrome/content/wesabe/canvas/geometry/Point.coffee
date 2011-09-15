@@ -1,32 +1,30 @@
-wesabe.provide('canvas.geometry.Point')
+Colorizer = require 'util/Colorizer'
 
-class wesabe.canvas.geometry.Point
-  constructor: (x, y) ->
-    @x = x
-    @y = y
+class Point
+  constructor: (@x, @y) ->
 
   @__defineGetter__ 'ZeroPoint', ->
-    new this(0, 0)
+    new this 0, 0
 
-  this::__defineGetter__ 'nearestPixel',
-    new this.constructor(Math.round(@x, @y))
+  @::__defineGetter__ 'nearestPixel',
+    new @constructor Math.round(@x), Math.round(@y)
 
   withOffset: (x, y) ->
     if not y?
-      y = x.y || x.height
-      x = x.x || x.width
+      y = x.y or x.height
+      x = x.x or x.width
 
-    new this.constructor(@x + x, @y + y)
+    new @constructor @x + x, @y + y
 
   clone: ->
-    new this.constructor(@x, @y)
+    new @constructor @x, @y
 
   inspect: (refs, color, tainted) ->
-    s = new wesabe.util.Colorizer()
+    s = new Colorizer()
     s.disabled = !color
     s
       .yellow('#<')
-      .bold(this.constructor?.__module__?.name || 'Object')
+      .bold(@constructor?.__module__?.name || 'Object')
       .print(' ')
       .yellow('{')
       .print(@x)
@@ -35,3 +33,6 @@ class wesabe.canvas.geometry.Point
       .yellow('}')
       .yellow('>')
       .toString()
+
+
+module.exports = Point
