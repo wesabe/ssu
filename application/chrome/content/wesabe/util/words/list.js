@@ -1,5 +1,4 @@
-wesabe.provide("util.words.list");
-wesabe.util.words.list = {
+module.exports = {
   "a": true,
   "abandon": true,
   "abandoned": true,

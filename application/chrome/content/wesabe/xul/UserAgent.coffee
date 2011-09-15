@@ -1,11 +1,13 @@
-wesabe.require('util.prefs')
-wesabe.provide 'xul.UserAgent',
+prefs = require 'util/prefs'
+type  = require 'lang/type'
+
+module.exports =
   toString: ->
-    return navigator.userAgent
+    navigator.userAgent
 
   #
   # Set the User Agent string.
-  # 
+  #
   # @param [String,Object] ua
   #   Either a user agent string (e.g. "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)")
   #   or an object containing all or part of the user agent string you wish to set. Example:
@@ -13,14 +15,14 @@ wesabe.provide 'xul.UserAgent',
   #     {appname: "Mozilla Firefox", appversion: "3.1"}
   #
   set: (ua) ->
-    ua = {useragent: ua} if wesabe.isString(ua)
+    ua = {useragent: ua} if type.isString ua
 
-    wesabe.util.prefs.set("general.appname.override", ua.appname) if ua.appname
-    wesabe.util.prefs.set("general.appversion.override", ua.appversion) if ua.appversion
-    wesabe.util.prefs.set("general.platform.override", ua.platform) if ua.platform
-    wesabe.util.prefs.set("general.useragent.override", ua.useragent) if ua.useragent
-    wesabe.util.prefs.set("general.useragent.vendor", ua.vendor) if ua.vendor
-    wesabe.util.prefs.set("general.useragent.vendorSub", ua.vendorSub) if ua.vendorSub
+    prefs.set "general.appname.override", ua.appname if ua.appname
+    prefs.set "general.appversion.override", ua.appversion if ua.appversion
+    prefs.set "general.platform.override", ua.platform if ua.platform
+    prefs.set "general.useragent.override", ua.useragent if ua.useragent
+    prefs.set "general.useragent.vendor", ua.vendor if ua.vendor
+    prefs.set "general.useragent.vendorSub", ua.vendorSub if ua.vendorSub
 
     wesabe.info "User Agent changed to ", @toString()
 
@@ -32,12 +34,12 @@ wesabe.provide 'xul.UserAgent',
   #   in interpreting the alias, and it'll warn you if it can't figure it out.
   #
   setByNamedAlias: (alias) ->
-    userAgent = @getByNamedAlias(alias)
+    userAgent = @getByNamedAlias alias
 
     if userAgent
-      @set(userAgent)
+      @set userAgent
     else
-      wesabe.warn("Unrecognized User Agent alias: ", alias)
+      wesabe.warn "Unrecognized User Agent alias: ", alias
 
   #
   # Get the User Agent data by an alias.
@@ -71,10 +73,10 @@ wesabe.provide 'xul.UserAgent',
   # Resets the User Agent string to the default value.
   #
   revertToDefault: ->
-    wesabe.util.prefs.clear("general.appname.override")
-    wesabe.util.prefs.clear("general.appversion.override")
-    wesabe.util.prefs.clear("general.platform.override")
-    wesabe.util.prefs.clear("general.useragent.override")
-    wesabe.util.prefs.clear("general.useragent.vendor")
-    wesabe.util.prefs.clear("general.useragent.vendorSub")
-    wesabe.info("Reverted User Agent to the default value: ", navigator.userAgent)
+    prefs.clear "general.appname.override"
+    prefs.clear "general.appversion.override"
+    prefs.clear "general.platform.override"
+    prefs.clear "general.useragent.override"
+    prefs.clear "general.useragent.vendor"
+    prefs.clear "general.useragent.vendorSub"
+    wesabe.info "Reverted User Agent to the default value: ", navigator.userAgent

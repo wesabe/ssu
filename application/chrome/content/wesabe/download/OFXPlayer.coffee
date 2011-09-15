@@ -1,4 +1,6 @@
-wesabe.require 'ofx.*'
+date = require 'lang/date'
+
+Request = require 'ofx/Request'
 
 # public methods
 
@@ -6,7 +8,7 @@ class OFXPlayer
   DAYS_OF_HISTORY: 365
 
   @register: (params) ->
-    klass = @create(params)
+    klass = @create params
 
     # make sure we put it where wesabe.require expects it
     wesabe.provide "fi-scripts.#{params.fid}", klass
@@ -14,11 +16,10 @@ class OFXPlayer
     return klass
 
   @create: (params) ->
-    return ->
-      # inherit from OFXPlayer
-      wesabe.lang.extend this, wesabe.download.OFXPlayer.prototype
-      # subclass it
-      wesabe.lang.extend this, params
+    class klass extends this
+      constructor: ->
+        # subclass it
+        wesabe.lang.extend this, params
 
   #
   # Starts retrieving statements from the FI's OFX server.
@@ -97,14 +98,14 @@ class OFXPlayer
 
       @account = @accounts.shift()
       dtstart = if options.since
-                  new Date(options.since)
+                  new Date options.since
                 else
-                  wesabe.lang.date.add(new Date(), -@DAYS_OF_HISTORY * wesabe.lang.date.DAYS)
+                  date.add new Date(), -@DAYS_OF_HISTORY * date.DAYS
 
-      @buildRequest().requestStatement @account, {dtstart: dtstart},
+      @buildRequest().requestStatement @account, {dtstart},
         before: =>
           # tell anyone who cares that we're starting to download an account
-          job.update('account.download')
+          job.update 'account.download'
 
         success: (response) =>
           @onDownloadComplete response
@@ -117,12 +118,9 @@ class OFXPlayer
   #
   # Skips the current account and continues with the rest.
   #
-  skipAccount: ->
-    if arguments.length
-      args = arguments
-    else
-      args = ["Skipping account=", @account]
-    wesabe.warn.apply(wesabe, args)
+  skipAccount: (args...) ->
+    args = ["Skipping account=", @account] if args.length
+    wesabe.warn(args...)
     delete @account
     @processAccounts()
 
@@ -186,7 +184,7 @@ class OFXPlayer
   # Returns a new Request instance ready to be used.
   #
   buildRequest: ->
-    request = new wesabe.ofx.Request @fi, @creds.username, @creds.password, @job
+    request = new Request @fi, @creds.username, @creds.password, @job
     request.appId = @appId if @appId
     request.appVersion = @appVersion if @appVersion
     return request

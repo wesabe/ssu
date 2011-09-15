@@ -1,14 +1,7 @@
-wesabe.require("io.*")
+list = null
 
-wesabe.provide "util.words",
-  list: null
+exist = (word) ->
+  list ||= require "util/words/list"
+  list.hasOwnProperty(word.toLowerCase())
 
-  exist: (word) ->
-    @ensureLoaded()
-    @list.hasOwnProperty(word.toLowerCase())
-
-  ensureLoaded: ->
-    wesabe.require("util.words.list")
-
-  loaded: ->
-    !!@list
+module.exports = {exist}

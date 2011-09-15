@@ -1,20 +1,21 @@
-wesabe.provide 'crypto',
-  md5: (object) -> md5Impl(object)
+type = require 'lang/type'
+
+md5 = null
 
 try
   # assume we're in xulrunner
   cryptoHash = Cc['@mozilla.org/security/hash;1'].createInstance(Ci.nsICryptoHash)
 
   # adapted from https://developer.mozilla.org/en/nsICryptoHash#Computing_the_Hash_of_a_String
-  md5Impl = (object) ->
+  md5 = (object) ->
     arr = []
 
-    if wesabe.isArray(object)
+    if type.isArray object
       arr = object
-    else if wesabe.isString(object)
+    else if type.isString object
       converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter)
       converter.charset = "UTF-8"
-      arr = converter.convertToByteArray(object, {})
+      arr = converter.convertToByteArray object, {}
 
     cryptoHash.init(Ci.nsICryptoHash.MD5)
     cryptoHash.update(arr, arr.length)
@@ -28,7 +29,10 @@ catch xulErr
     # maybe we're in node.js
     crypto = require 'crypto'
 
-    md5Impl = (object) ->
+    md5 = (object) ->
       crypto.createHash('md5').update(object).digest('hex')
   catch nodeErr
-    wesabe.error('Could not load xulrunner or node.js crypto package: ', xulErr, nodeErr)
+    wesabe.error 'Could not load xulrunner or node.js crypto package: ', xulErr, nodeErr
+
+
+module.exports = {md5}
