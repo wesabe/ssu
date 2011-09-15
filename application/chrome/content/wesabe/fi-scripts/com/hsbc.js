@@ -7,7 +7,7 @@ wesabe.download.Player.register({
 
   actions: {
     main: function() {
-      wesabe.dom.browser.go(browser, "https://www.us.hsbc.com/1/2/3/personal/online-services/personal-internet-banking/log-on");
+      browser.go("https://www.us.hsbc.com/1/2/3/personal/online-services/personal-internet-banking/log-on");
     },
 
     login: function() {
@@ -22,7 +22,7 @@ wesabe.download.Player.register({
       // click on each letter in turn on the virtual keyboard
       for (var i = 0; i < answers.securityKey.length; i++) {
         try {
-          page.click(wesabe.xpath.bind(e.passwordSecurityKey, {n: answers.securityKey[i].toUpperCase()}));
+          page.click(bind(e.passwordSecurityKey, {n: answers.securityKey[i].toUpperCase()}));
         } catch (e) {
           log.warn("Skipping character in security key because: ", e);
         }

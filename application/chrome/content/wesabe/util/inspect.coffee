@@ -45,13 +45,12 @@ _inspect = (object, refs, color, tainted) ->
 
   if type.isTainted(object)
     _inspectTainted(object, refs, color)
-  else if t == 'function'
+  else if t is 'function'
     s = new Colorizer()
-    s.print('#<Function')
-    if object.name
-      s.print(_inspectAttribute('name', object.name, refs, color, tainted))
-    s.print('>').toString()
-  else if t == 'number'
+    s.print('[Function')
+    s.print(": #{object.name}") if object.name
+    s.print(']').toString()
+  else if t is 'number'
     object.toString()
   else if object == null
     'null'

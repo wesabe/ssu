@@ -3,8 +3,9 @@ extend = require 'lang/extend'
 type   = require 'lang/type'
 Timer  = require 'util/Timer'
 
-page   = require 'dom/page'
-Player = require 'download/Player'
+Page    = require 'dom/Page'
+Browser = require 'dom/Browser'
+Player  = require 'download/Player'
 
 class Job
   constructor: (jobid, fid, creds, user_id, options) ->
@@ -98,12 +99,18 @@ class Job
     wesabe.info 'successfully downloaded file to ', file.path
     @data.downloads ||= []
     @data.downloads.push extend({path: file.path, suggestedFilename: suggestedFilename, status: 'ok'}, metadata or {})
-    @player.onDownloadSuccessful @player.browser, page.wrap(@player.browser.contentDocument) if reload
+
+    if reload
+      browser = Browser.wrap(@player.browser)
+      @player.onDownloadSuccessful browser, browser.mainPage
 
   recordFailedDownload: (metadata, reload=true) ->
     wesabe.error 'failed to download file'
     @data.downloads ||= []
     @data.downloads.push(extend({status: 'error'}, metadata or {}))
-    @player.onDownloadSuccessful @player.browser, page.wrap(@player.browser.contentDocument) if reload
+
+    if reload
+      browser = Browser.wrap(@player.browser)
+      @player.onDownloadSuccessful browser, browser.mainPage
 
 module.exports = Job

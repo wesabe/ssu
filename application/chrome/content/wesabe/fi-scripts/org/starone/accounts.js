@@ -1,10 +1,7 @@
 wesabe.provide('fi-scripts.org.starone.accounts', {
   actions: {
     main: function() {
-      wesabe.dom.browser.go(
-        browser,
-        "https://www.starone.org/"
-      );
+      browser.go("https://www.starone.org/");
     },
 
     login: function() {
@@ -15,12 +12,12 @@ wesabe.provide('fi-scripts.org.starone.accounts', {
     },
 
     goAccountsPage: function() {
-      var nav_page = wesabe.dom.page.wrap(page.defaultView.top.frames[1].document);
+      var nav_page = page.topPage.framePages[1];
       nav_page.click(e.accountsButton);
     },
 
     goAccountHistoryPage: function() {
-      page.click(wesabe.xpath.bind(
+      page.click(bind(
         e.specificAccountHistoryLink, { 'href' : wesabe.untaint(tmp.accountId) }
       ));
     },
@@ -45,13 +42,13 @@ wesabe.provide('fi-scripts.org.starone.accounts', {
 
     logout: function() {
       job.succeed();
-      var nav_page = wesabe.dom.page.wrap(page.defaultView.top.frames[1].document);
+      var nav_page = page.topPage.framePages[1];
       nav_page.click(e.logoutButton);
     }
   },
 
   dispatch: function() {
-    if (!page.defaultView.frameElement) {
+    if (!page.framed) {
       // not a frame
       if (page.visible(e.security.questions)) {
         action.answerSecurityQuestions();
@@ -69,7 +66,7 @@ wesabe.provide('fi-scripts.org.starone.accounts', {
     }
     else {
       // is a frame
-      var nav_page = wesabe.dom.page.wrap(page.defaultView.top.frames[1].document);
+      var nav_page = page.topPage.framePages[1];
       tmp.authenticated = nav_page.visible(e.logoutButton);
     }
 
@@ -115,7 +112,7 @@ wesabe.provide('fi-scripts.org.starone.accounts', {
         else {
           action.goAccountsPage();
         }
-      } else if(page.defaultView.frameElement.name == "body") {
+      } else if(page.name == "body") {
         wesabe.info("Found body page we don't care about. Going to accounts page");
         action.goAccountsPage();
       }
@@ -128,8 +125,8 @@ wesabe.provide('fi-scripts.org.starone.accounts', {
       // this.onDocumentLoaded(browser, page);
       wesabe.debug('upload successful, re-dispatching');
       this.onDocumentLoaded(
-        browser,
-        wesabe.dom.page.wrap(page.defaultView.top.frames[3].document)
+        wesabe.dom.Browser.wrap(browser),
+        page.topPage.framePages[3]
       );
     },
   },

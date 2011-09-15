@@ -7,7 +7,7 @@ wesabe.download.Player.register({
 
   actions: {
     main: function() {
-      wesabe.dom.browser.go(browser, "http://www.hsbc.co.uk/1/2/HSBCINTEGRATION");
+      browser.go("http://www.hsbc.co.uk/1/2/HSBCINTEGRATION");
     },
   },
 

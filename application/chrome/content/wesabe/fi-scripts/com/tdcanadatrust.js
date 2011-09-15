@@ -11,7 +11,7 @@ wesabe.download.Player.register({
 
   actions: {
     main: function() {
-      wesabe.dom.browser.go(browser, "https://easyweb.tdcanadatrust.com/");
+      browser.go("https://easyweb.tdcanadatrust.com/");
     },
   },
 

@@ -7,7 +7,7 @@ wesabe.download.Player.register({
 
   actions: {
     main: function() {
-      wesabe.dom.browser.go(browser, "https://cibng.ibanking-services.com/cib/CEBMainServlet/Signon?BRCHID=220&FIFID=063092110&FIORG=220");
+      browser.go("https://cibng.ibanking-services.com/cib/CEBMainServlet/Signon?BRCHID=220&FIFID=063092110&FIORG=220");
     },
 
     userId: function() {
@@ -24,7 +24,7 @@ wesabe.download.Player.register({
 
     goToDownloadPage: function() {
       job.update('account.download');
-      wesabe.dom.browser.go(browser, '/cib/CEBMainServlet/DownloadTxns');
+      browser.go('/cib/CEBMainServlet/DownloadTxns');
     },
 
     download: function() {

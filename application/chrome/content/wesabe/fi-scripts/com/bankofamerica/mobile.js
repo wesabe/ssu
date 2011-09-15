@@ -31,7 +31,7 @@ wesabe.provide('fi-scripts.com.bankofamerica.mobile', {
 
   actions: {
     mobileMain: function() {
-      wesabe.dom.browser.go(browser, "https://www.bankofamerica.com/mobile");
+      browser.go("https://www.bankofamerica.com/mobile");
     },
 
     mobileBeginLogin: function() {
@@ -53,7 +53,7 @@ wesabe.provide('fi-scripts.com.bankofamerica.mobile', {
     },
 
     mobileGoMainLoginPage: function() {
-      wesabe.dom.browser.go(browser, 'https://www.bankofamerica.com/');
+      browser.go('https://www.bankofamerica.com/');
     },
   },
 

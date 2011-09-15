@@ -33,7 +33,7 @@ wesabe.download.CompoundPlayer.register({
 
       actions: {
         main: function() {
-          wesabe.dom.browser.go(browser, "https://www.americanexpress.com/");
+          browser.go("https://www.americanexpress.com/");
         },
       },
 

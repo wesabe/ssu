@@ -1,7 +1,7 @@
 list = null
 
-exist = (word) ->
+contains = (word) ->
   list ||= require "util/words/list"
   list.hasOwnProperty(word.toLowerCase())
 
-module.exports = {exist}
+module.exports = {contains}

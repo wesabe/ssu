@@ -1,6 +1,6 @@
 wesabe.provide('fi-scripts.com.tdcanadatrust.promos', {
   dispatch: function() {
-    if (page.defaultView && page.defaultView.location.href.match(/DirectMarketingServlet/)) {
+    if (page.url.match(/DirectMarketingServlet/)) {
       if (page.present(e.promos.mortgage.indicator)) {
         action.bypassMortgage();
       } else {

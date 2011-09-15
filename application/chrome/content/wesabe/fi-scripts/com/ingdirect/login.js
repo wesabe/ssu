@@ -4,14 +4,14 @@ wesabe.provide('fi-scripts.com.ingdirect.login', {
     if (tmp.authenticated)
       return;
 
-    var uri = wesabe.dom.browser.getURI(browser);
+    var uri = browser.getURI();
     if (uri && (uri.indexOf('pin_change_newpin') != -1)) {
       // user is being asked to change their PIN
       job.fail(403, 'auth.pass.expired');
       return;
     }
 
-    var pinIsPresent = page.present(wesabe.xpath.bind(e.pinNumericButton, {n: 1}));
+    var pinIsPresent = page.present(bind(e.pinNumericButton, {n: 1}));
 
     if (page.present(e.login.errors.badCreds)) {
       job.fail(401, 'auth.creds.invalid');
@@ -30,7 +30,7 @@ wesabe.provide('fi-scripts.com.ingdirect.login', {
 
   actions: {
     main: function() {
-      wesabe.dom.browser.go(browser, 'https://secure.ingdirect.com/myaccount/');
+      browser.go('https://secure.ingdirect.com/myaccount/');
     },
 
     customerNumber: function() {
@@ -66,8 +66,8 @@ wesabe.provide('fi-scripts.com.ingdirect.login', {
       for (var i = 0; i < pin.length; i++) {
         // map letters to numbers using the above (telephone) mapping
         var n = pinmap[pin[i].toLowerCase()] || pin[i];
-        //page.click(wesabe.xpath.bind(e.pinNumericButton, {n: n}));
-        var numericButton = page.findStrict(wesabe.xpath.bind(e.pinNumericButton, {n: n})),
+        //page.click(bind(e.pinNumericButton, {n: n}));
+        var numericButton = page.findStrict(bind(e.pinNumericButton, {n: n})),
             charButton = page.next(numericButton, numericButton.nodeName);
 
         pinAsLetters += wesabe.untaint(charButton.getAttribute('alt'));

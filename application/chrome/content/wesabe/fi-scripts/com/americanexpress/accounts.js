@@ -24,7 +24,7 @@ wesabe.provide('fi-scripts.com.americanexpress.accounts', {
       // we click that link
       page.click(e.accounts.activity.downloadLink);
       // and then we navigate to the url we get from the hidden input
-      wesabe.dom.browser.go(browser, page.findStrict(e.accounts.activity.ofxDownloadLinkHiddenField).value);
+      browser.go(page.findStrict(e.accounts.activity.ofxDownloadLinkHiddenField).value);
     },
 
     changeFormat: function() {

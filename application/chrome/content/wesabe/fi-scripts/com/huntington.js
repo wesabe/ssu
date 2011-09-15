@@ -4,7 +4,7 @@ wesabe.download.Player.register({
 
   actions: {
     main: function() {
-      wesabe.dom.browser.go(browser, "https://onlinebanking.huntington.com/");
+      browser.go("https://onlinebanking.huntington.com/");
     },
 
     login: function() {
@@ -55,8 +55,8 @@ wesabe.download.Player.register({
 
   extensions: {
     shouldDispatch: function(browser, page) {
-      if (page.defaultView.frameElement && page.defaultView.frameElement.name != 'main') {
-        log.debug("Skipping dispatch because frame isn't main (actual=", page.defaultView.frameElement.name, ")");
+      if (page.framed && page.name != 'main') {
+        log.debug("Skipping dispatch because frame isn't main (actual=", page.name, ")");
         return false;
       }
       return true;

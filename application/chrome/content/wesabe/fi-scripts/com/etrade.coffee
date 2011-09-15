@@ -8,7 +8,7 @@ wesabe.download.Player.register
 
   actions:
     main: ->
-      wesabe.dom.browser.go browser, "https://us.etrade.com/e/t/user/login"
+      browser.go "https://us.etrade.com/e/t/user/login"
 
     login: ->
       job.update 'auth.creds'
@@ -18,7 +18,7 @@ wesabe.download.Player.register
 
     goDownloadPage: ->
       job.update 'account.download'
-      wesabe.dom.browser.go browser, "https://bankus.etrade.com/e/t/ibank/downloadofxtransactions"
+      browser.go "https://bankus.etrade.com/e/t/ibank/downloadofxtransactions"
 
     beginDownloads: ->
       options = page.select(e.downloadAccountOption)

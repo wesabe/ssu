@@ -14,7 +14,4 @@ wesabe.download.Player.register
 
   actions:
     main: ->
-      wesabe.dom.browser.go browser, 'https://client.schwab.com/login/signon/customercenterlogin.aspx'
-
-
-  # wesabe.util.privacy.registerSanitizer('Wells Fargo Session ID', /sessargs=[^=&\?]*/g);
+      browser.go 'https://client.schwab.com/login/signon/customercenterlogin.aspx'

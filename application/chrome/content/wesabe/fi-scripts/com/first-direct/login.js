@@ -41,7 +41,7 @@ wesabe.provide("fi-scripts.com.first-direct.login", {
       };
 
       var getLabelForInput = function(input) {
-        return page.findStrict(wesabe.xpath.bind(e.login.pass.labelForId, {id: input.id}));
+        return page.findStrict(bind(e.login.pass.labelForId, {id: input.id}));
       };
 
       getInputsForPin().forEach(function(input) {

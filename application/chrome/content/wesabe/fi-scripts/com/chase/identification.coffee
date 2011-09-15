@@ -72,7 +72,7 @@ wesabe.provide 'fi-scripts.com.chase.identification',
 
     chooseIdentificationDeliveryMethod: ->
       if answers.identificationCodeDeliveryMethod
-        option = page.find(wesabe.xpath.bind(e.identification.contacts.optionTemplate, {value: answers.identificationCodeDeliveryMethod}))
+        option = page.find(bind(e.identification.contacts.optionTemplate, {value: answers.identificationCodeDeliveryMethod}))
         if not option
           log.warn "Unrecognized identification code delivery method choice: ", answers.identificationCodeDeliveryMethod
         else

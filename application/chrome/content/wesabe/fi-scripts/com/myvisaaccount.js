@@ -14,7 +14,7 @@ wesabe.download.Player.register({
     // and is the first thing that is run. It should trigger
     // a page load, which calls "dispatch" (see login.js).
     main: function() {
-      wesabe.dom.browser.go(browser, "https://www.myvisaaccount.com/Vancity_Consumer/Login.do");
+      browser.go("https://www.myvisaaccount.com/Vancity_Consumer/Login.do");
     },
   },
 

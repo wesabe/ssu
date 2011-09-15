@@ -19,7 +19,7 @@ wesabe.provide('fi-scripts.com.bankofamerica.accounts', {
     },
 
     chooseAccount: function() {
-      wesabe.dom.browser.go(browser, tmp.account);
+      browser.go(tmp.account);
     },
 
     downloadSelectedAccount: function() {

@@ -18,7 +18,7 @@ wesabe.download.Player.register({
 
   actions: {
     main: function() {
-      wesabe.dom.browser.go(browser, "https://www.secure.bnpparibas.net/banque/portail/particulier/HomeConnexion?type=homeconnex");
+      browser.go("https://www.secure.bnpparibas.net/banque/portail/particulier/HomeConnexion?type=homeconnex");
     },
   },
 

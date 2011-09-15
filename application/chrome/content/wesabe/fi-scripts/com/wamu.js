@@ -58,7 +58,7 @@ wesabe.download.Player.register({
 
   actions: {
     main: function() {
-      wesabe.dom.browser.go(browser, "https://online.wamu.com/IdentityManagement/Logon.aspx");
+      browser.go("https://online.wamu.com/IdentityManagement/Logon.aspx");
     },
 
     login: function() {
@@ -70,13 +70,13 @@ wesabe.download.Player.register({
     },
 
     goDownloadPage: function() {
-      wesabe.dom.browser.go(browser, '/Servicing/Servicing.aspx?targetPage=TransactionDownload');
+      browser.go('/Servicing/Servicing.aspx?targetPage=TransactionDownload');
     },
 
     collectAccounts: function() {
       tmp.accounts = page.select(e.downloadAccountCheckbox).map(function(el) {
         var account = { value: el.name };
-        try { account.name = page.find(wesabe.xpath.bind(e.downloadAccountLabel, { id: el.id })).innerHTML }
+        try { account.name = page.find(bind(e.downloadAccountLabel, { id: el.id })).innerHTML }
         catch (e) { /* oh well, no name */ }
         return account;
       });
@@ -92,7 +92,7 @@ wesabe.download.Player.register({
       });
 
       // select this account
-      page.check(wesabe.xpath.bind(e.downloadSpecificAccountCheckbox, {name: tmp.account.value}));
+      page.check(bind(e.downloadSpecificAccountCheckbox, {name: tmp.account.value}));
 
       // fill in the dates
       action.fillDateRange();

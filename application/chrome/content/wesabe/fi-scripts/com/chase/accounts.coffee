@@ -56,7 +56,7 @@ wesabe.provide 'fi-scripts.com.chase.accounts',
 
   actions:
     goToNextAccount: ->
-      wesabe.dom.browser.go browser, tmp.account
+      browser.go tmp.account
 
     selectDownloadNowMethod: ->
       page.click e.download.method.choices.now.radio

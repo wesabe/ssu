@@ -1,7 +1,7 @@
 wesabe.provide('fi-scripts.com.bankofamerica.login', {
   actions: {
     main: function() {
-      wesabe.dom.browser.go(browser, "https://www.bankofamerica.com/");
+      browser.go("https://www.bankofamerica.com/");
     },
 
     login: function() {

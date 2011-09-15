@@ -1,16 +1,23 @@
 wesabe.provide 'fi-scripts'
 wesabe.require 'logger.*'
-wesabe.require 'dom.*'
-wesabe.require 'xul.UserAgent'
 
-wesabe.provide 'download.Player', class Player
+extend         = require 'lang/extend'
+date           = require 'lang/date'
+dateForElement = (require 'dom/date').forElement
+Page           = require 'dom/Page'
+Browser        = require 'dom/Browser'
+UserAgent      = require 'xul/UserAgent'
+Bridge         = require 'dom/Bridge'
+{Pathway}      = require 'xpath'
+
+class Player
   @register: (params) ->
     @create params, (klass) ->
       # make sure we put it where wesabe.require expects it
       wesabe.provide "fi-scripts.#{params.fid}", klass
 
   @create: (params, callback) ->
-    class klass extends wesabe.download.Player
+    class klass extends Player
       # the Wesabe Financial Institution ID (e.g. com.Chase)
       @fid: params.fid
 
@@ -62,7 +69,7 @@ wesabe.provide 'download.Player', class Player
       klass::filters.push
         name: 'frame blocker'
         test: ->
-          if page.defaultView.frameElement
+          if page.framed
             wesabe.info "skipping frame page load: ", page.title
             return false
 
@@ -77,7 +84,7 @@ wesabe.provide 'download.Player', class Player
 
     # userAgentAlias: "Firefox"
     if params.userAgentAlias
-      klass::userAgent = wesabe.xul.UserAgent.getByNamedAlias(params.userAgentAlias)
+      klass::userAgent = UserAgent.getByNamedAlias(params.userAgentAlias)
 
     for module in modules
       if module.dispatch
@@ -86,13 +93,13 @@ wesabe.provide 'download.Player', class Player
           callback: module.dispatch
 
       if module.elements
-        wesabe.lang.extend klass.elements, module.elements, merge: on
+        extend klass.elements, module.elements, merge: on
 
       if module.actions
-        wesabe.lang.extend klass::, module.actions
+        extend klass::, module.actions
 
       if module.extensions
-        wesabe.lang.extend klass::, module.extensions
+        extend klass::, module.extensions
 
       if module.afterDownload
         klass::afterDownloadCallbacks.push module.afterDownload
@@ -118,13 +125,13 @@ wesabe.provide 'download.Player', class Player
 
   start: (answers, browser) ->
     if @userAgent
-      wesabe.xul.UserAgent.set @userAgent
+      UserAgent.set @userAgent
     else
-      wesabe.xul.UserAgent.revertToDefault()
+      UserAgent.revertToDefault()
 
     # set up the callbacks for page load and download done
     wesabe.bind browser, 'DOMContentLoaded', (event) =>
-      @onDocumentLoaded browser, wesabe.dom.page.wrap(event.target)
+      @onDocumentLoaded Browser.wrap(browser), Page.wrap(event.target)
 
     wesabe.bind 'downloadSuccess', (event, data, filename) =>
       @job.update 'account.download.success'
@@ -148,7 +155,8 @@ wesabe.provide 'download.Player', class Player
       wesabe.warn 'Failed to download a statement! This is bad, but a failed job is worse, so we press on'
       @job.update 'account.download.failure'
       @setErrorTimeout 'global'
-      @onDownloadSuccessful browser, wesabe.dom.page.wrap(browser.contentDocument)
+      browser = Browser.wrap(browser)
+      @onDownloadSuccessful browser, browser.mainPage
 
     @setErrorTimeout 'global'
     # start the security question timeout when the job is suspended
@@ -162,7 +170,7 @@ wesabe.provide 'download.Player', class Player
       @setErrorTimeout 'global'
 
     @answers = answers
-    @runAction 'main', browser
+    @runAction 'main', Browser.wrap(browser)
 
   nextGoal: ->
     @job.nextGoal()
@@ -187,8 +195,8 @@ wesabe.provide 'download.Player', class Player
       throw new Error "Cannot find action '#{name}'! Typo? Forgot to include a file?"
 
     retval = wesabe.tryThrow "#{module}##{name}", (log) =>
-      url = page and wesabe.taint(page.defaultView.location.href)
-      title = page && wesabe.taint(page.title)
+      url = page?.url
+      title = page?.title
 
       @setErrorTimeout 'action'
       @history.push
@@ -198,7 +206,7 @@ wesabe.provide 'download.Player', class Player
 
       wesabe.info 'History is ', (hi.name for hi in @history).join(' -> ')
 
-      @callWithMagicScope fn, browser, page, wesabe.lang.extend({log}, scope or {})
+      @callWithMagicScope fn, browser, page, extend({log}, scope or {})
 
     return retval
 
@@ -208,7 +216,7 @@ wesabe.provide 'download.Player', class Player
         @answers[key] = value
     else if wesabe.isObject(answers)
       # TODO: 2008-11-24 <brian@wesabe.com> -- this is only here until the new style (Array) is in PFC and SSU Service
-      wesabe.lang.extend @answers, answers
+      extend @answers, answers
 
     @onDocumentLoaded @browser, @page
 
@@ -253,7 +261,7 @@ wesabe.provide 'download.Player', class Player
 
       return
 
-    metadata = wesabe.lang.extend url: url, (metadata or {})
+    metadata = extend url: url, (metadata or {})
 
     wesabe.tryThrow "Player#download(#{url})", (log) =>
       wesabe.io.download url, newStatementFile(),
@@ -338,10 +346,10 @@ wesabe.provide 'download.Player', class Player
       if wesabe.isFunction(defaultValue)
         defaultValue = defaultValue(existing)
 
-      wesabe.lang.date.parse(defaultValue) if defaultValue
+      date.parse(defaultValue) if defaultValue
 
     if toEl
-      to = wesabe.dom.date.forElement(toEl, formatString)
+      to = dateForElement(toEl, formatString)
       # use default or today's date if we can't get a date from the field
       to.date ||= getDefault(opts.defaults && opts.defaults.to) or new Date()
 
@@ -352,7 +360,7 @@ wesabe.provide 'download.Player', class Player
       since = options.since and (options.since - 7 * wesabe.lang.date.DAYS)
 
       # get a date if there's already one in the field
-      from = wesabe.dom.date.forElement fromEl, formatString
+      from = dateForElement fromEl, formatString
 
       if from.date and since
         # choose the most recent of the pre-populated date and the lower bound
@@ -363,7 +371,7 @@ wesabe.provide 'download.Player', class Player
       else if to
         # pick the default or an 89 day window
         from.date = getDefault(opts.defaults and opts.defaults.from, to: to.date) or
-          wesabe.lang.date.add(to.date, -89 * wesabe.lang.date.DAYS)
+          date.add(to.date, -89 * wesabe.lang.date.DAYS)
 
       log.info "Adjusting date lower bound: ", from.date
 
@@ -410,7 +418,7 @@ wesabe.provide 'download.Player', class Player
     module = @constructor.fid
 
     # log when alert and confirm are called
-    new wesabe.dom.Bridge page.proxyTarget, ->
+    new Bridge page, ->
       @evaluate ->
         # evaluated on the page
         window.alert = (message) ->
@@ -444,7 +452,7 @@ wesabe.provide 'download.Player', class Player
           callbacks = @["#{type}ReceivedCallbacks"]
           if callbacks
             for callback in callbacks
-              @callWithMagicScope callback, browser, page, wesabe.lang.extend({message, log: wesabe}), message
+              @callWithMagicScope callback, browser, page, extend({message, log: wesabe}), message
 
     unless @shouldDispatch browser, page
       wesabe.info 'skipping document load'
@@ -458,11 +466,8 @@ wesabe.provide 'download.Player', class Player
     browser ||= @browser
     page ||= @page
 
-    url = wesabe.taint(page.defaultView.location.href)
-    title = wesabe.taint(page.title)
-
-    wesabe.info 'url=', url
-    wesabe.info 'title=', title
+    wesabe.info 'url=', page.url
+    wesabe.info 'title=', page.title
 
     # these should not be used inside the FI scripts
     @browser = browser
@@ -502,7 +507,7 @@ wesabe.provide 'download.Player', class Player
     return true
 
   callWithMagicScope: (fn, browser, page, scope, args...) ->
-    wesabe.lang.func.callWithScope fn, this, wesabe.lang.extend({
+    wesabe.lang.func.callWithScope fn, this, extend({
       browser
       page
       e: @constructor.elements
@@ -514,6 +519,7 @@ wesabe.provide 'download.Player', class Player
       skipAccount: @skipAccount
       reload: => @triggerDispatch browser, page
       download: (args...) => @download args...
+      bind: (args...) => Pathway.bind(args...)
     }, scope or {}), args...
 
 
@@ -535,3 +541,6 @@ class ActionProxy
 
   __noSuchMethod__: (method, args) ->
     @player.runAction method, @browser, @page
+
+
+module.exports = Player

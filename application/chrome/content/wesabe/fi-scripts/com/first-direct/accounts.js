@@ -55,7 +55,7 @@ wesabe.provide("fi-scripts.com.first-direct.accounts", {
 
     selectAccount: function() {
       log.info('account=', tmp.account);
-      page.click(wesabe.xpath.bind(e.accounts.page.index.accountLinkById, {id: tmp.account.id}));
+      page.click(bind(e.accounts.page.index.accountLinkById, {id: tmp.account.id}));
     },
 
     goToDownloadPage: function() {

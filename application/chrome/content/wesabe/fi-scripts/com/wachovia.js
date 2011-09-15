@@ -41,7 +41,7 @@ wesabe.download.Player.register({
 
   actions: {
     main: function() {
-      wesabe.dom.browser.go(browser, "https://onlineservices.wachovia.com/auth/AuthService");
+      browser.go("https://onlineservices.wachovia.com/auth/AuthService");
     },
 
     login: function() {
@@ -70,7 +70,7 @@ wesabe.download.Player.register({
         page.click(e.accountDownloadLink);
       } else {
         wesabe.warn("the download link isn't here, maybe just try going to the url?");
-        wesabe.dom.browser.go(browser, 'AccountDownload.aspx');
+        browser.go('AccountDownload.aspx');
       }
     },
 
