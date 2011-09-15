@@ -55,7 +55,7 @@ open = (path) ->
     null
 
 read = (file, charset) ->
-  if type.isString(file)
+  if type.isString file
     path = file
     file = open path
   else if file
@@ -80,6 +80,12 @@ eachLine = (file, callback) ->
     callback stream.readLine()
 
 write = (file, data, mode, charset) ->
+  if type.isString file
+    path = file
+    file = open path
+  else if file
+    path = file.path
+
   try
     foStream = Components.classes[foutstreamCID].createInstance(foutstreamIID)
     data = fromUnicode charset, data if charset
@@ -94,7 +100,7 @@ write = (file, data, mode, charset) ->
     foStream.close()
     return true
   catch e
-    wesabe.error('wesabe.io.file.write error: ', e)
+    wesabe.error 'file.write error: ', e
     return false
 
 create = (file) ->
