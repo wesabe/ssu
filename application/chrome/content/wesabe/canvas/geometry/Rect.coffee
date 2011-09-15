@@ -1,61 +1,55 @@
-wesabe.provide('canvas.geometry.Rect')
+Point     = require 'canvas/geometry/Point'
+Size      = require 'canvas/geometry/Size'
+Colorizer = require 'util/Colorizer'
 
-class wesabe.canvas.geometry.Rect
-  constructor: (origin, size) ->
-    @origin = origin
-    @size = size
+class Rect
+  constructor: (@origin, @size) ->
 
   contains: (point) ->
-    (@origin.x <= point.x) &&
-    (@origin.y <= point.y) &&
-    (point.x <= @origin.x + @size.width) &&
+    (@origin.x <= point.x) and
+    (@origin.y <= point.y) and
+    (point.x <= @origin.x + @size.width) and
     (point.y <= @origin.y + @size.height)
 
-  this::__defineGetter__ 'width', ->
+  @::__defineGetter__ 'width', ->
     @size.width
 
-  this::__defineGetter__ 'height', ->
+  @::__defineGetter__ 'height', ->
     @size.height
 
-  this::__defineGetter__ 'left', ->
+  @::__defineGetter__ 'left', ->
     @origin.x
 
-  this::__defineGetter__ 'top', ->
+  @::__defineGetter__ 'top', ->
     @origin.y
 
-  this::__defineGetter__ 'right', ->
+  @::__defineGetter__ 'right', ->
     @origin.x + @size.width
 
-  this::__defineGetter__ 'bottom', ->
+  @::__defineGetter__ 'bottom', ->
     @origin.y + @size.height
 
-  this::__defineGetter__ 'center', ->
-    new wesabe.canvas.geometry.Point(@origin.x + @size.width / 2, @origin.y + @size.height / 2)
+  @::__defineGetter__ 'center', ->
+    new Point @origin.x + @size.width / 2, @origin.y + @size.height / 2
 
   @make: (x, y, w, h) ->
-    new this(
-      new wesabe.canvas.geometry.Point(x, y),
-      new wesabe.canvas.geometry.Size(w, h))
+    new this new Point(x, y), new Size(w, h)
 
   @fromPoints: (p1, p2) ->
-    origin = new wesabe.canvas.geometry.Point(
-      Math.min(p1.x, p2.x),
-      Math.min(p1.y, p2.y))
-    size = new wesabe.canvas.geometry.Size(
-      Math.max(p1.x, p2.x) - origin.x,
-      Math.max(p1.y, p2.y) - origin.y)
+    origin = new Point Math.min(p1.x, p2.x), Math.min(p1.y, p2.y)
+    size = new Size Math.max(p1.x, p2.x) - origin.x, Math.max(p1.y, p2.y) - origin.y
 
-    new this(origin, size)
+    new this origin, size
 
   @__defineGetter__ 'ZeroRect', ->
-    @make(0, 0, 0, 0)
+    @make 0, 0, 0, 0
 
   inspect: (refs, color, tainted) ->
-    s = new wesabe.util.Colorizer()
+    s = new Colorizer()
     s.disabled = !color
     s
       .yellow('#<')
-      .bold(@constructor?.__module__?.name || 'Object')
+      .bold(@constructor?.__module__?.name or 'Object')
       .print(' ')
       .yellow('{')
       .print(@left)
@@ -68,3 +62,6 @@ class wesabe.canvas.geometry.Rect
       .print('}')
       .yellow('>')
       .toString()
+
+
+module.exports = Rect
