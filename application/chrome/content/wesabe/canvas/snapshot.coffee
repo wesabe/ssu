@@ -1,38 +1,34 @@
-wesabe.provide('canvas.snapshot')
-wesabe.require('io.file')
+file = require 'io/file'
 
-wesabe.canvas.snapshot =
-  TYPE: 'image/png',
+TYPE = 'image/png'
 
-  writeToFile: (window, path) ->
-    canvas = @canvasWithContentsOfWindow(window)
+writeToFile = (window, path) ->
+  write path, serializeCanvas(canvasWithContentsOfWindow(window))
 
-    data = @serializeCanvas(canvas)
-    file = wesabe.io.file.open(path)
+  return true
 
-    wesabe.io.file.write(file, data)
+canvasWithContentsOfWindow = (window) ->
+  document = window.document
+  canvas   = document.createElement 'canvas'
+  width    = window.innerWidth + window.scrollMaxX
+  height   = window.innerHeight + window.scrollMaxY
 
-    return true
+  canvas.setAttribute 'width', width
+  canvas.setAttribute 'height', height
 
-  canvasWithContentsOfWindow: (window) ->
-    document = window.document
-    canvas   = document.createElement('canvas')
-    width    = window.innerWidth + window.scrollMaxX
-    height   = window.innerHeight + window.scrollMaxY
+  context  = canvas.getContext '2d'
+  context.drawWindow window,
+    0,                 #left
+    0,                 #top
+    width,
+    height,
+    'rgb(255,255,255)' #bgcolor
 
-    canvas.setAttribute('width', width)
-    canvas.setAttribute('height', height)
+  return canvas
 
-    context  = canvas.getContext('2d')
-    context.drawWindow window,
-      0,                 #left
-      0,                 #top
-      width,
-      height,
-      'rgb(255,255,255)' #bgcolor
+serializeCanvas = (canvas) ->
+  dataurl = canvas.toDataURL TYPE
+  return atob(dataurl.substring(13 + TYPE.length)) # hack off scheme
 
-    return canvas
 
-  serializeCanvas: (canvas) ->
-    dataurl = canvas.toDataURL(wesabe.canvas.snapshot.TYPE)
-    return atob(dataurl.substring(13 + @TYPE.length)) # hack off scheme
+module.exports = {writeToFile}
