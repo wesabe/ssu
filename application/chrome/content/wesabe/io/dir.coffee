@@ -83,7 +83,7 @@ $dir =
 
   read: (dir, recursive=false) ->
     list = []
-    wesabe.tryCatch "dir.read(#{dir})", =>
+    tryCatch "dir.read(#{dir})", =>
       if dir.isDirectory()
         files = dir.directoryEntries
         list = _read files, recursive

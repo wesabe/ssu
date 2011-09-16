@@ -6,6 +6,7 @@ type    = require 'lang/type'
 func    = require 'lang/func'
 file    = require 'io/file'
 inspect = wesabe.require 'util/inspect'
+{tryCatch, tryThrow} = require 'util/try'
 
 getPreferencesRoot = ->
   service = Components.classes['@mozilla.org/preferences-service;1']
@@ -29,7 +30,7 @@ getPreferencesRoot = ->
 # contents of the file in a non-safe way. Please know what you're doing.
 #
 load = (path) ->
-  wesabe.tryCatch "prefs.load(#{path})", (log) =>
+  tryCatch "prefs.load(#{path})", (log) =>
     data = file.read(path)
 
     if /^#/.test(data)

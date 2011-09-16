@@ -1,31 +1,30 @@
-wesabe.provide('dom.Selector')
+Parser = require 'util/Parser'
+{tryCatch, tryThrow} = require 'util/try'
 
-wesabe.require('util.Parser')
-
-class wesabe.dom.Selector
+class Selector
   constructor: ->
     @classNames = []
 
-  this::__defineGetter__ 'className', ->
+  @::__defineGetter__ 'className', ->
     @classNames[@classNames.length-1]
 
-  this::__defineSetter__ 'className', (className) ->
+  @::__defineSetter__ 'className', (className) ->
     @classNames[@classNames.length-1] = className
 
   test: (el) ->
-    return false if el.nodeType != 1
-    return false if @id && @id != el.id
-    return false if @tag && @tag != el.tagName
+    return false if el.nodeType isnt 1
+    return false if @id and @id isnt el.id
+    return false if @tag and @tag isnt el.tagName
 
     for className in @classNames
-      pattern = new RegExp(" #{className} ", 'i')
-      return false unless pattern.test(" #{el.className} ")
+      pattern = new RegExp " #{className} ", 'i'
+      return false unless pattern.test " #{el.className} "
 
     return true
 
   parse: (sel) ->
-    parser = new wesabe.util.Parser()
-    selector = new wesabe.dom.Selector()
+    parser = new Parser()
+    selector = new @constructor()
 
     noop = -> null
 
@@ -84,7 +83,10 @@ class wesabe.dom.Selector
       '\\.': klass.start
       EOF: noop
 
-    wesabe.tryCatch 'PARSING', =>
+    tryCatch 'PARSING', =>
       parser.parse(sel)
 
     return selector
+
+
+module.exports = Selector

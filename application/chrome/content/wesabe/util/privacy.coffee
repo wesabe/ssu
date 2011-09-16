@@ -1,13 +1,15 @@
 sanitizers = []
 wrappers = []
 
+{tryCatch, tryThrow} = require 'util/try'
+
 wesabe.provide 'util.privacy',
   #
   # Clears all private information.
   # @method clearAllPrivateData
   #
   clearAllPrivateData: ->
-    wesabe.tryCatch 'wesabe.util.privacy.clearAllPrivateData', =>
+    tryCatch 'wesabe.util.privacy.clearAllPrivateData', =>
       @clearCookies()
       @clearHistory()
       @clearCache()
@@ -18,13 +20,13 @@ wesabe.provide 'util.privacy',
   # @method clearCookies
   #
   clearCookies: ->
-    wesabe.tryCatch 'wesabe.util.privacy.clearCookies', =>
+    tryCatch 'wesabe.util.privacy.clearCookies', =>
       cookieManager = Components.classes["@mozilla.org/cookiemanager;1"]
                         .getService(Components.interfaces.nsICookieManager)
       cookieManager.removeAll()
 
   clearHistory: ->
-    wesabe.tryCatch 'wesabe.util.privacy.clearHistory', =>
+    tryCatch 'wesabe.util.privacy.clearHistory', =>
       globalHistory = Components.classes["@mozilla.org/browser/global-history;2"]
                         .getService(Components.interfaces.nsIBrowserHistory)
       globalHistory.removeAllPages()

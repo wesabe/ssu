@@ -10,6 +10,8 @@ UserAgent      = require 'xul/UserAgent'
 Bridge         = require 'dom/Bridge'
 {Pathway}      = require 'xpath'
 
+{tryThrow, tryCatch} = require 'util/try'
+
 class Player
   @register: (params) ->
     @create params, (klass) ->
@@ -137,7 +139,7 @@ class Player
       @job.update 'account.download.success'
       @setErrorTimeout 'global'
 
-      wesabe.tryThrow 'Player#downloadSuccess', (log) =>
+      tryThrow 'Player#downloadSuccess', (log) =>
         folder = wesabe.io.dir.profile
         folder.append 'statements'
         unless folder.exists()
@@ -194,7 +196,7 @@ class Player
     unless fn
       throw new Error "Cannot find action '#{name}'! Typo? Forgot to include a file?"
 
-    retval = wesabe.tryThrow "#{module}##{name}", (log) =>
+    retval = tryThrow "#{module}##{name}", (log) =>
       url = page?.url
       title = page?.title
 
@@ -263,7 +265,7 @@ class Player
 
     metadata = extend url: url, (metadata or {})
 
-    wesabe.tryThrow "Player#download(#{url})", (log) =>
+    tryThrow "Player#download(#{url})", (log) =>
       wesabe.io.download url, newStatementFile(),
         success: (file, suggestedFilename) =>
           @job.recordSuccessfulDownload file, suggestedFilename, metadata
@@ -402,7 +404,7 @@ class Player
       wesabe.trigger this, 'timeout', [type]
       return if @job.done
       wesabe.error "Timeout ",type," (",duration,") reached, abandoning job"
-      wesabe.tryCatch "Player#setErrorTimeout(page dump)", =>
+      tryCatch "Player#setErrorTimeout(page dump)", =>
         @page?.dumpPrivately()
       @job.fail 504, "timeout.#{type}"
     , duration
@@ -477,7 +479,7 @@ class Player
       return if @job.done or @job.paused
 
       for dispatch in @dispatches
-        result = wesabe.tryThrow "#{module}#dispatch(#{dispatch.name})", (log) =>
+        result = tryThrow "#{module}#dispatch(#{dispatch.name})", (log) =>
           @callWithMagicScope dispatch.callback, browser, page, {log}
 
         if result is false
@@ -491,7 +493,7 @@ class Player
 
   shouldDispatch: (browser, page) ->
     for filter in @filters
-      result = wesabe.tryCatch "#{@constructor.fid}#filter(#{filter.name})", (log) =>
+      result = tryCatch "#{@constructor.fid}#filter(#{filter.name})", (log) =>
         switch r = @callWithMagicScope filter.test, browser, page, {log}
           when true
             log.debug "forcing dispatch"
@@ -530,8 +532,8 @@ class Player
     @_tmp ||= {}
 
   @build: (fid) ->
-    wesabe.tryThrow "download.Player.build(fid=#{fid})", (log) =>
-      klass = wesabe.tryThrow "loading fi-scripts.#{fid}", =>
+    tryThrow "download.Player.build(fid=#{fid})", (log) =>
+      klass = tryThrow "loading fi-scripts.#{fid}", =>
         wesabe.require 'fi-scripts.' + fid
 
       new klass(fid)

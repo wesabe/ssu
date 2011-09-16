@@ -43,48 +43,6 @@ var wesabe = {
     return base;
   },
 
-  /**
-   * Takes a callback to be run once the given module has been loaded.
-   *
-   * ==== Parameters
-   * module<String>:: The dot-separated name of the module/class to watch for.
-   * callback<Function>:: A function to call when the module is ready.
-   *
-   * ==== Example
-   *   wesabe.ready("util.privacy", function() {
-   *     wesabe.util.privacy.registerSanitizer(...);
-   *   });
-   *
-   * @public
-   */
-  ready: function(module, callback) {
-    var test = function(module) {
-      module = module.replace(/^wesabe\./, '');
-      var parts = module.split('.'), base = wesabe;
-
-      for (var i = 0; i < parts.length; i++) {
-        if (!base[parts[i]]) return false;
-        base = base[parts[i]];
-      }
-
-      // the __module__ part is only available when it's done loading
-      return base.__module__;
-    };
-
-    var run = function(module) {
-      if (test(module)) {
-        // got it, fire the callback
-        wesabe.tryCatch('ready('+module+') callback', callback);
-      } else {
-        wesabe.debug('still waiting for ', module);
-        // not yet, try again in 50ms
-        setTimeout(function(){ run(module) }, 50);
-      }
-    };
-
-    run(module);
-  },
-
   CommonJSRequire: function(path) {
     return wesabe.require(path.replace(/\//g, '.'));
   },
@@ -363,34 +321,6 @@ var wesabe = {
     }
 
     return this._evalTextByURI[uri] = text;
-  },
-
-  /**
-   * Tries to run the given method, logging an error on an exception.
-   * @method tryCatch
-   * @return Returns the value returned by +callback+.
-   */
-  tryCatch: function(name, callback) {
-    try {
-      wesabe.debug('BEGIN ', name);
-      var result = callback(wesabe.log4 && wesabe.log4(name));
-      wesabe.debug('END   ', name);
-      return result;
-    } catch(ex) { wesabe.error(name, ': error: \n', ex); }
-  },
-
-  /**
-   * Tries to run the given method, logging an error and rethrowing on an exception.
-   * @method tryThrow
-   * @return Returns the value returned by +callback+.
-   */
-  tryThrow: function(name, callback) {
-    try {
-      wesabe.debug('BEGIN ', name);
-      var result = callback(wesabe.log4 && wesabe.log4(name));
-      wesabe.debug('END   ', name);
-      return result;
-    } catch(ex) { wesabe.error(name, ': error: \n', ex); throw ex; }
   },
 
   get SSU_VERSION() {

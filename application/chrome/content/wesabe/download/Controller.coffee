@@ -1,9 +1,6 @@
-wesabe.provide('download.Controller')
-wesabe.require('download.Player')
-wesabe.require('download.CompoundPlayer')
-wesabe.require('canvas.snapshot')
+{tryCatch, tryThrow} = require 'util/try'
 
-class wesabe.download.Controller
+class Controller
   createServerSocket: ->
     Components.classes['@mozilla.org/network/server-socket;1']
       .createInstance(Components.interfaces.nsIServerSocket)
@@ -19,7 +16,7 @@ class wesabe.download.Controller
       retriesLeft = 100
       port = 5000
 
-    wesabe.tryCatch 'Controller#start', (log) =>
+    tryCatch 'Controller#start', (log) =>
       @server = @createServerSocket()
       while !bindSuccessful && retriesLeft > 0
         try
@@ -38,7 +35,7 @@ class wesabe.download.Controller
         log.error("Failed to start listener")
 
   onSocketAccepted: (serv, transport) ->
-    wesabe.tryCatch 'Controller#onSocketAccepted', (log) =>
+    tryCatch 'Controller#onSocketAccepted', (log) =>
       outstream = transport.openOutputStream(Components.interfaces.nsITransport.OPEN_BLOCKING, 0, 0)
 
       stream = transport.openInputStream(0, 0, 0)
@@ -84,7 +81,7 @@ class wesabe.download.Controller
 
   dispatch: (request) ->
     request.action = request.action.replace('.', '_')
-    wesabe.tryCatch 'Controller#dispatch', (log) =>
+    tryCatch 'Controller#dispatch', (log) =>
       if wesabe.isFunction(this[request.action])
         return this[request.action].call(this, request.body)
       else
@@ -225,3 +222,6 @@ class wesabe.download.Controller
       response:
         status: 'error'
         error: e.toString()
+
+
+module.exports = Controller

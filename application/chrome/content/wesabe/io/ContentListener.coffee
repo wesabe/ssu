@@ -1,10 +1,10 @@
-wesabe.provide('io.ContentListener')
-wesabe.require('logger.*')
-wesabe.require('io.StreamListener')
+wesabe.require 'io.StreamListener'
+
+{trigger} = require 'util/event'
 
 sharedContentListener = null
 
-class wesabe.io.ContentListener
+class ContentListener
   @__defineGetter__ 'sharedInstance', ->
     sharedContentListener ||= new this()
 
@@ -33,12 +33,12 @@ class wesabe.io.ContentListener
     return false
 
   doContent: (contentType, isContentPreferred, request, contentHandler) ->
-    wesabe.tryCatch "ContentListener#doContent(contentType=#{contentType})", (log) =>
+    tryCatch "ContentListener#doContent(contentType=#{contentType})", (log) =>
       contentHandler.value = new wesabe.io.StreamListener((
         (data) =>
           filename = @suggestedFilenameForRequest(request)
           log.debug("got some data (filename=#{filename})")
-          wesabe.trigger(this, 'after-receive', [data, filename])
+          trigger this, 'after-receive', [data, filename]
         ), contentType)
 
     return false
@@ -52,10 +52,10 @@ class wesabe.io.ContentListener
       match = header.match(/filename="([^"]+)"/i)
       return match?[1]
     catch err
-      wesabe.debug("suggestedFilenameForRequest error: #{err}")
+      wesabe.debug "suggestedFilenameForRequest error: #{err}"
 
       httpChannel.visitResponseHeaders
-        visitHeader: (key, value) -> wesabe.debug("HEADER: #{key}=#{value}")
+        visitHeader: (key, value) -> wesabe.debug "HEADER: #{key}=#{value}"
 
       match = httpChannel.URI?.spec?.match(/.+\/([^\/\?]+)/)
       return match?[1]
@@ -68,3 +68,6 @@ class wesabe.io.ContentListener
 
   GetWeakReference: ->
     this
+
+
+module.exports = ContentListener

@@ -166,5 +166,5 @@ wesabe.log4 = (prefix) ->
 # Convenience methods on the base wesabe object.
 for own method of wesabe.logger.levels
   do (method) ->
-    wesabe[method] = ->
-      sharedLogger[method].apply(sharedLogger, arguments)
+    wesabe[method] = (args...) ->
+      sharedLogger[method](args...)
