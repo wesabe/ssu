@@ -2,6 +2,8 @@ Page      = require 'dom/Page'
 type      = require 'lang/type'
 {trigger} = require 'util/event'
 
+{tryThrow, tryCatch} = require 'util/try'
+
 bridges = []
 
 #
@@ -28,7 +30,7 @@ bridges = []
 #     # run on the XUL side
 #     if data
 #       id = data[0]
-#       wesabe.info "id of clicked element was ", id
+#       logger.info "id of clicked element was ", id
 #
 class Bridge
   constructor: (@document, @callback) ->
@@ -64,7 +66,7 @@ class Bridge
     @document.byId("_xulBridge")
 
   evaluate: (script, fn) ->
-    wesabe.tryThrow 'Bridge.evaluate', =>
+    tryThrow 'Bridge.evaluate', =>
       script = "(#{script.toSource()})()" if type.isFunction(script)
       @request 'evaluate', script, fn
 
@@ -92,10 +94,10 @@ class Bridge
       try
         request.callback?.call response, response.data
       catch e
-        wesabe.error 'Bridge XUL callback function threw an error with response: ', response
-        wesabe.error e
+        logger.error 'Bridge XUL callback function threw an error with response: ', response
+        logger.error e
     else
-      wesabe.warn 'bridge response did not contain an id'
+      logger.warn 'bridge response did not contain an id'
 
     trigger this, 'response', [response]
 

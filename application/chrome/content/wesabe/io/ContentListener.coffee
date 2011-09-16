@@ -1,4 +1,4 @@
-wesabe.require 'io.StreamListener'
+StreamListener = require 'io/StreamListener'
 
 {trigger} = require 'util/event'
 
@@ -9,32 +9,32 @@ class ContentListener
     sharedContentListener ||= new this()
 
   init: (contentWin, contentType) ->
-    wesabe.debug("ContentListener#init(contentWin=#{contentWin}, contentType=#{contentType})")
+    logger.debug "ContentListener#init(contentWin=#{contentWin}, contentType=#{contentType})"
 
     @contentWin = contentWin
     @contentType = contentType
-    uriLoader = Components.classes["@mozilla.org/uriloader;1"].getService(Components.interfaces.nsIURILoader)
+    uriLoader = Cc["@mozilla.org/uriloader;1"].getService(Ci.nsIURILoader)
     uriLoader.registerContentListener(this)
 
   close: ->
-    uriLoader = Components.classes["@mozilla.org/uriloader;1"].getService(Components.interfaces.nsIURILoader)
+    uriLoader = Cc["@mozilla.org/uriloader;1"].getService(Ci.nsIURILoader)
     uriLoader.unRegisterContentListener(this)
 
   QueryInterface: (iid) ->
-    if iid.equals(Components.interfaces.nsIURIContentListener) ||
-       iid.equals(Components.interfaces.nsISupportsWeakReference) ||
-       iid.equals(Components.interfaces.nsISupports)
+    if iid.equals(Ci.nsIURIContentListener) ||
+       iid.equals(Ci.nsISupportsWeakReference) ||
+       iid.equals(Ci.nsISupports)
           return this
 
     throw Components.results.NS_NOINTERFACE
 
   onStartURIOpen: (uri) ->
-    wesabe.debug("onStartURIOpen ", uri)
+    logger.debug "onStartURIOpen(", uri, ")"
     return false
 
   doContent: (contentType, isContentPreferred, request, contentHandler) ->
     tryCatch "ContentListener#doContent(contentType=#{contentType})", (log) =>
-      contentHandler.value = new wesabe.io.StreamListener((
+      contentHandler.value = new StreamListener((
         (data) =>
           filename = @suggestedFilenameForRequest(request)
           log.debug("got some data (filename=#{filename})")
@@ -48,11 +48,11 @@ class ContentListener
 
     try
       header = httpChannel.getResponseHeader('X-SSU-Content-Disposition')
-      wesabe.debug('X-SSU-Content-Disposition header = ', header)
+      logger.debug 'X-SSU-Content-Disposition header = ', header
       match = header.match(/filename="([^"]+)"/i)
       return match?[1]
     catch err
-      wesabe.debug "suggestedFilenameForRequest error: #{err}"
+      logger.debug "suggestedFilenameForRequest error: #{err}"
 
       httpChannel.visitResponseHeaders
         visitHeader: (key, value) -> wesabe.debug "HEADER: #{key}=#{value}"

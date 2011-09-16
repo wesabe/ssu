@@ -23,8 +23,8 @@ getPreferencesRoot = ->
 #   pref('network.proxy.http_port', 8080);
 #   pref('network.proxy.type', 1);
 #
-#   wesabe.util.prefs.load('prefs.js');
-#   wesabe.util.prefs.get('network.proxy.type'); // => 1
+#   prefs.load('prefs.js');
+#   prefs.get('network.proxy.type'); // => 1
 #
 # WARNING: At this point this function is NOT SAFE and will eval the
 # contents of the file in a non-safe way. Please know what you're doing.
@@ -42,7 +42,7 @@ load = (path) ->
 #
 # Get a preference by its full name. Example:
 #
-#   wesabe.util.prefs.get('browser.dom.window.dump.enabled'); // => false
+#   prefs.get('browser.dom.window.dump.enabled'); // => false
 #
 get = (key, defaultValue) ->
   root = getPreferencesRoot()
@@ -85,7 +85,7 @@ set = (key, value) ->
 #
 # Clears a preference by its full name. Example:
 #
-#   wesabe.util.prefs.clear('general.useragent.override');
+#   prefs.clear('general.useragent.override');
 #
 clear = (key) ->
   try
@@ -93,6 +93,6 @@ clear = (key) ->
   catch e
     # pref probably didn't exist, but make sure it's gone
     if not type.isUndefined get(key)
-      wesabe.error "Could not clear pref with key=", key, " due to an error: ", e
+      logger.error "Could not clear pref with key=", key, " due to an error: ", e
 
 module.exports = {load, get, set, clear}

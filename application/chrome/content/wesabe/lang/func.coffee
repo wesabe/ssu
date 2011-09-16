@@ -1,3 +1,7 @@
+type                 = require 'lang/type'
+{trim}               = require 'lang/string'
+{tryCatch, tryThrow} = require 'util/try'
+
 # Taken from https://github.com/mauricemach/coffeekup/blob/7eed6ea2bf404f36e1f9da51500969fe346428f3/src/coffeekup.coffee#L100
 support = '''
   var __slice = Array.prototype.slice;
@@ -44,14 +48,14 @@ support = '''
 #   )()
 #
 callWithScope = (fn, context, scope={}, args=[]) ->
-  if wesabe.isString(fn)
+  if type.isString fn
      body = fn
    else
      body = fn.toString().match(/^[^\{]*\{((.*\n*)*)\}/m)[1]
      argNames = fn.toString().match(/^function\s*\((.*)\)/)?[1].split(/\s*,\s*/)
      if argNames
        for name, i in argNames
-         name = wesabe.lang.string.trim(name)
+         name = trim name
          scope[name] = args[i]
 
   return new Function('__scope__', support + "with(__scope__){\n#{body}\n}").call(context, scope)
@@ -75,9 +79,9 @@ callWithScope = (fn, context, scope={}, args=[]) ->
 #
 #
 executeCallback = (callback, which, args) ->
-  wesabe.tryThrow("executeCallback(#{which})", ->
-    cb = callback?[which] || callback
-    return wesabe.isFunction(cb) && cb.apply(cb, args))
+  tryThrow "executeCallback(#{which})", ->
+    cb = callback?[which] or callback
+    cb?(args...)
 
 #
 # Returns a function that will call the given function with the second argument
@@ -91,8 +95,8 @@ executeCallback = (callback, which, args) ->
 #
 #   obj2 = bar: 1
 #
-#   obj.foo()                                // => 4
-#   wesabe.lang.func.wrap(obj.foo, obj2)()   // => 1
+#   obj.foo()                    // => 4
+#   func.wrap(obj.foo, obj2)()   // => 1
 #
 #
 wrap = (fn, self) ->

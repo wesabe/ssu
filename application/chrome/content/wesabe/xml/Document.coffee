@@ -1,4 +1,5 @@
 type      = require 'lang/type'
+event     = require 'util/event'
 inspect   = require 'util/inspect'
 Colorizer = require 'util/Colorizer'
 
@@ -6,9 +7,6 @@ Parser    = require 'xml/Parser'
 Element   = require 'xml/Element'
 Attribute = require 'xml/Attribute'
 Text      = require 'xml/Text'
-
-wesabe.require 'util.event'
-wesabe.require 'util.Colorizer'
 
 class Document
   constructor: (xml, verboten) ->
@@ -67,7 +65,7 @@ class Document
           node = @stack.pop()
           if type.is(node, Element) && node.parsing
             # found the matching opening tag, push all children into it
-            if node.name == closeTag.name
+            if node.name is closeTag.name
               for child in popped
                 node.appendChild(child)
 
@@ -75,7 +73,7 @@ class Document
               @stack.push(node)
               return
           else if node.parsing
-            wesabe.error("NODE IS ", node)
+            logger.error "NODE IS ", node
 
           # push a dangling text node onto the adjacent element if that element is unclosed
           if type.is(popped[0], Text) && type.is(node, Element) && node.parsing
@@ -84,19 +82,19 @@ class Document
 
         throw new Error("Unexpected closing tag #{inspect(closeTag)}")
 
-    wesabe.bind parser, 'start-open-tag', (event, tag) =>
+    event.add parser, 'start-open-tag', (event, tag) =>
       work.push(tag.toElement())
 
-    wesabe.bind parser, 'end-open-tag', (event, tag) =>
+    event.add parser, 'end-open-tag', (event, tag) =>
       work.setName(tag.name)
 
-    wesabe.bind parser, 'close-tag', (event, tag) =>
+    event.add parser, 'close-tag', (event, tag) =>
       work.pop(tag)
 
-    wesabe.bind parser, 'text', (event, text) =>
+    event.add parser, 'text', (event, text) =>
       work.push(text)
 
-    wesabe.bind parser, 'attribute', (event, attr) =>
+    event.add parser, 'attribute', (event, attr) =>
       work.push(attr)
 
     # parse the xml, executing all the callbacks above

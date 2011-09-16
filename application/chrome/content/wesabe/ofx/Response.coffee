@@ -3,6 +3,8 @@ wesabe.require('ofx.Status')
 wesabe.require('util.privacy')
 wesabe.require('xml.*')
 
+{tryThrow, tryCatch} = require 'util/try'
+
 # Response - parse an OFX response message for needed information
 
 # Takes the raw text of an OFX response of any supported kind (account info,
@@ -164,7 +166,7 @@ class wesabe.ofx.Response
         wesabe.warn("Skipping unknown account type: ", acct)
 
   _find_statuses: ->
-    wesabe.tryThrow 'Response#_find_statuses', =>
+    tryThrow 'Response#_find_statuses', =>
       @statuses = for status in @responseXML.getElementsByTagName('STATUS')
                     wesabe.radioactive(status)
                     [code]      = status.getElementsByTagName('CODE')

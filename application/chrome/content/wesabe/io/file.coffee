@@ -14,19 +14,20 @@
 ################################################
 
 # Example use:
-# var fileIn = wesabe.io.file.open('/test.txt');
+# var fileIn = file.open('/test.txt');
 # if (fileIn.exists()) {
-#  var fileOut = wesabe.io.file.open('/copy of test.txt');
-#  var str = wesabe.io.file.read(fileIn);
-#  var rv = wesabe.io.file.write(fileOut, str);
+#  var fileOut = file.open('/copy of test.txt');
+#  var str = file.read(fileIn);
+#  var rv = file.write(fileOut, str);
 #  alert('File write: ' + rv);
-#  rv = wesabe.io.file.write(fileOut, str, 'a');
+#  rv = file.write(fileOut, str, 'a');
 #  alert('File append: ' + rv);
-#  rv = wesabe.io.file.unlink(fileOut);
+#  rv = file.unlink(fileOut);
 #  alert('File unlink: ' + rv);
 # }
 
 type = require 'lang/type'
+{tryThrow, tryCatch} = require 'util/try'
 
 localfileCID  = '@mozilla.org/file/local;1'
 localfileIID  = Components.interfaces.nsILocalFile
@@ -61,7 +62,7 @@ read = (file, charset) ->
   else if file
     path = file.path
 
-  wesabe.tryThrow "file.read(#{path})", =>
+  tryThrow "file.read(#{path})", =>
     fiStream = Components.classes[finstreamCID].createInstance(finstreamIID)
     siStream = Components.classes[sinstreamCID].createInstance(sinstreamIID)
     fiStream.init(file, 1, 0, false)
@@ -100,7 +101,7 @@ write = (file, data, mode, charset) ->
     foStream.close()
     return true
   catch e
-    wesabe.error 'file.write error: ', e
+    logger.error 'file.write error: ', e
     return false
 
 create = (file) ->

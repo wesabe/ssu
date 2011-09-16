@@ -1,3 +1,5 @@
+privacy = require 'util/privacy'
+
 wesabe.provide 'fi-scripts.com.chase.transfers',
   dispatch: ->
     return if job.goal isnt 'transfer'
@@ -5,7 +7,7 @@ wesabe.provide 'fi-scripts.com.chase.transfers',
     transfer = job.options.transfer
 
     if not transfer or not transfer.source or not transfer.destination or not transfer.amount
-      wesabe.error "Some transfer data was missing (requires 'source', 'destination', and 'amount'), given:", wesabe.taint(transfer)
+      logger.error "Some transfer data was missing (requires 'source', 'destination', and 'amount'), given:", privacy.taint(transfer)
       return
 
     if not page.present e.transfers.indicator

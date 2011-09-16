@@ -1,9 +1,15 @@
 wesabe.provide 'fi-scripts'
-wesabe.require 'logger.*'
 
 extend         = require 'lang/extend'
 date           = require 'lang/date'
+{trim}         = require 'lang/string'
+func           = require 'lang/func'
+event          = require 'util/event'
 dateForElement = (require 'dom/date').forElement
+dir            = require 'io/dir'
+{download}     = require 'io/Downloader'
+uuid           = (require 'ofx/UUID').string
+privacy        = require 'util/privacy'
 Page           = require 'dom/Page'
 Browser        = require 'dom/Browser'
 UserAgent      = require 'xul/UserAgent'
@@ -64,7 +70,7 @@ class Player
         try
           modules.push wesabe.require(include)
         catch ex
-          throw new Error("Error while requiring #{include} -- check that the file exists and has the correct 'provide' line")
+          throw new Error "Error while requiring #{include} -- check that the file exists and has the correct 'provide' line"
 
     # dispatchFrames: off
     if params.dispatchFrames is off
@@ -72,7 +78,7 @@ class Player
         name: 'frame blocker'
         test: ->
           if page.framed
-            wesabe.info "skipping frame page load: ", page.title
+            logger.info "skipping frame page load: ", page.title
             return false
 
     if params.filter
@@ -132,29 +138,29 @@ class Player
       UserAgent.revertToDefault()
 
     # set up the callbacks for page load and download done
-    wesabe.bind browser, 'DOMContentLoaded', (event) =>
+    event.add browser, 'DOMContentLoaded', (event) =>
       @onDocumentLoaded Browser.wrap(browser), Page.wrap(event.target)
 
-    wesabe.bind 'downloadSuccess', (event, data, filename) =>
+    event.add 'downloadSuccess', (event, data, filename) =>
       @job.update 'account.download.success'
       @setErrorTimeout 'global'
 
       tryThrow 'Player#downloadSuccess', (log) =>
-        folder = wesabe.io.dir.profile
+        folder = dir.profile
         folder.append 'statements'
         unless folder.exists()
-          wesabe.io.dir.create(folder)
+          dir.create(folder)
 
         statement = folder.clone()
-        statement.append new wesabe.ofx.UUID().toString()
+        statement.append uuid()
 
-        wesabe.io.file.write statement, data
+        file.write statement, data
 
         @job.recordSuccessfulDownload statement, filename, @job.nextDownloadMetadata
         delete @job.nextDownloadMetadata
 
-    wesabe.bind 'downloadFail', (event) =>
-      wesabe.warn 'Failed to download a statement! This is bad, but a failed job is worse, so we press on'
+    event.add 'downloadFail', (event) =>
+      logger.warn 'Failed to download a statement! This is bad, but a failed job is worse, so we press on'
       @job.update 'account.download.failure'
       @setErrorTimeout 'global'
       browser = Browser.wrap(browser)
@@ -162,12 +168,12 @@ class Player
 
     @setErrorTimeout 'global'
     # start the security question timeout when the job is suspended
-    wesabe.bind @job, 'suspend', =>
+    event.add @job, 'suspend', =>
       @clearErrorTimeout 'action'
       @clearErrorTimeout 'global'
       @setErrorTimeout 'security'
 
-    wesabe.bind @job, 'resume', =>
+    event.add @job, 'resume', =>
       @clearErrorTimeout 'security'
       @setErrorTimeout 'global'
 
@@ -178,7 +184,7 @@ class Player
     @job.nextGoal()
 
   onLastGoalFinished: ->
-    wesabe.info 'Finished all goals, running callbacks'
+    logger.info 'Finished all goals, running callbacks'
     for callback in @afterLastGoalCallbacks
       @runAction callback, @browser, @page
 
@@ -190,8 +196,10 @@ class Player
   runAction: (name, browser, page, scope) ->
     module = @constructor.fid
 
-    fn = if wesabe.isFunction(name) then name else @[name]
-    name = if wesabe.isFunction(name) then (name.name or '(anonymous)') else name
+    [fn, name] = if type.isFunction name
+                   [name, name.name or '(anonymous)']
+                 else
+                   [@[name], name]
 
     unless fn
       throw new Error "Cannot find action '#{name}'! Typo? Forgot to include a file?"
@@ -206,17 +214,18 @@ class Player
         url: url
         title: title
 
-      wesabe.info 'History is ', (hi.name for hi in @history).join(' -> ')
+      logger.info 'History is ', (hi.name for hi in @history).join(' -> ')
 
       @callWithMagicScope fn, browser, page, extend({log}, scope or {})
 
     return retval
 
   resume: (answers) ->
-    if wesabe.isArray(answers)
+    if type.isArray answers
       for {key, value} in answers
         @answers[key] = value
-    else if wesabe.isObject(answers)
+
+    else if type.isObject answers
       # TODO: 2008-11-24 <brian@wesabe.com> -- this is only here until the new style (Array) is in PFC and SSU Service
       extend @answers, answers
 
@@ -230,18 +239,18 @@ class Player
 
   download: (url, metadata) ->
     newStatementFile = =>
-      folder = wesabe.io.dir.profile
+      folder = dir.profile
       folder.append 'statements'
-      wesabe.io.dir.create(folder) unless folder.exists()
+      dir.create(folder) unless folder.exists()
 
       statement = folder.clone()
-      statement.append new wesabe.ofx.UUID().toString()
+      statement.append uuid()
 
       return statement
 
 
     # allow pre-registering information about the next download
-    if wesabe.isFunction(metadata)
+    if type.isFunction metadata
       callback = metadata
       metadata = url
       url = null
@@ -257,18 +266,18 @@ class Player
       unless metadata.data
         throw new Error "Expected metadata #{metadata} to have data to write"
 
-      file = newStatementFile()
-      wesabe.io.file.write file, metadata.data
-      @job.recordSuccessfulDownload file, metadata.suggestedFilename, metadata
+      statement = newStatementFile()
+      file.write statement, metadata.data
+      @job.recordSuccessfulDownload statement, metadata.suggestedFilename, metadata
 
       return
 
     metadata = extend url: url, (metadata or {})
 
     tryThrow "Player#download(#{url})", (log) =>
-      wesabe.io.download url, newStatementFile(),
-        success: (file, suggestedFilename) =>
-          @job.recordSuccessfulDownload file, suggestedFilename, metadata
+      download url, newStatementFile(),
+        success: (path, suggestedFilename) =>
+          @job.recordSuccessfulDownload path, suggestedFilename, metadata
 
         failure: =>
           @job.recordFailedDownload metadata
@@ -278,26 +287,28 @@ class Player
   # Answers whatever security questions are on the page by
   # using the xpaths given in e.security.
   #
+  # NOTE: Called with magic scope!
+  #
   answerSecurityQuestions: ->
 
     questions = page.select e.security.questions
     qanswers  = page.select e.security.answers
 
     if questions.length isnt qanswers.length
-      wesabe.error "Found ", questions.length, " security questions, but ",
+      logger.error "Found ", questions.length, " security questions, but ",
         qanswers.length, " security question answers to fill"
-      wesabe.error "questions = ", questions
-      wesabe.error "qanswers = ", qanswers
+      logger.error "questions = ", questions
+      logger.error "qanswers = ", qanswers
       return false
 
     if questions.length is 0
-      wesabe.error "Failed to find any security questions"
+      logger.error "Failed to find any security questions"
       return false
 
-    questions = (wesabe.lang.string.trim(page.text(q)) for q in questions)
+    questions = (trim page.text(q) for q in questions)
 
-    wesabe.info "Found security questions: ", questions
-    questions = wesabe.untaint questions
+    logger.info "Found security questions: ", questions
+    questions = privacy.untaint questions
 
     data = questions: []
     for question, i in questions
@@ -312,7 +323,7 @@ class Player
           key: question
           label: question
           persistent: true
-          type: wesabe.untaint(element.type) or "text"
+          type: privacy.untaint(element.type) or "text"
 
     if data.questions.length
       job.suspend 'suspended.missing-answer.auth.security', data
@@ -341,11 +352,11 @@ class Player
     formatString = e.download.date.format or 'MM/dd/yyyy'
 
     opts   = e.download.date
-    fromEl = wesabe.untaint page.find(opts.from)
-    toEl   = wesabe.untaint page.find(opts.to)
+    fromEl = privacy.untaint page.find(opts.from)
+    toEl   = privacy.untaint page.find(opts.to)
 
     getDefault = (defaultValue, existing) =>
-      if wesabe.isFunction(defaultValue)
+      if type.isFunction defaultValue
         defaultValue = defaultValue(existing)
 
       date.parse(defaultValue) if defaultValue
@@ -359,21 +370,21 @@ class Player
 
     if fromEl
       # if there's a lower bound, choose a week before it to ensure some overlap
-      since = options.since and (options.since - 7 * wesabe.lang.date.DAYS)
+      since = options.since and (options.since - 7 * date.DAYS)
 
       # get a date if there's already one in the field
       from = dateForElement fromEl, formatString
 
       if from.date and since
         # choose the most recent of the pre-populated date and the lower bound
-        from.date = new Date(Math.max(since, from.date.getTime()))
+        from.date = new Date Math.max(since, from.date.getTime())
       else if since
         # choose the lower bound
-        from.date = new Date(since)
+        from.date = new Date since
       else if to
         # pick the default or an 89 day window
         from.date = getDefault(opts.defaults and opts.defaults.from, to: to.date) or
-          date.add(to.date, -89 * wesabe.lang.date.DAYS)
+          date.add(to.date, -89 * date.DAYS)
 
       log.info "Adjusting date lower bound: ", from.date
 
@@ -384,35 +395,35 @@ class Player
 
 
   skipAccount: (args...) ->
-    wesabe.warn(args...) if args.length
+    logger.warn args... if args.length
     delete @tmp.account
 
   actionTimeoutDuration: 60000 # 1m
   globalTimeoutDuration: 300000 # 5m
   securityTimeoutDuration: 180000 # 3m
 
-  setErrorTimeout: (type) ->
-    duration = @["#{type}TimeoutDuration"]
+  setErrorTimeout: (timeoutType) ->
+    duration = @["#{timeoutType}TimeoutDuration"]
     tt = @_timeouts
     tt ||= @_timeouts = {}
 
-    @clearErrorTimeout type
+    @clearErrorTimeout timeoutType
 
-    wesabe.debug "Timeout ", type, " set (",duration,")"
+    logger.debug "Timeout ", timeoutType, " set (", duration, ")"
 
-    tt[type] = setTimeout =>
-      wesabe.trigger this, 'timeout', [type]
+    tt[timeoutType] = setTimeout =>
+      event.trigger this, 'timeout', [timeoutType]
       return if @job.done
-      wesabe.error "Timeout ",type," (",duration,") reached, abandoning job"
+      logger.error "Timeout ", timeoutType, " (", duration, ") reached, abandoning job"
       tryCatch "Player#setErrorTimeout(page dump)", =>
         @page?.dumpPrivately()
-      @job.fail 504, "timeout.#{type}"
+      @job.fail 504, "timeout.#{timeoutType}"
     , duration
 
-  clearErrorTimeout: (type) ->
-    if @_timeouts?[type]
-      wesabe.debug "Timeout ", type, " cleared"
-      clearTimeout @_timeouts[type]
+  clearErrorTimeout: (timeoutType) ->
+    if @_timeouts?[timeoutType]
+      logger.debug "Timeout ", timeoutType, " cleared"
+      clearTimeout @_timeouts[timeoutType]
 
   onDocumentLoaded: (browser, page) ->
     return if @job.done or @job.paused
@@ -436,28 +447,28 @@ class Player
       , (data) ->
         # evaluated here
           unless data
-            wesabe.debug "Bridge connected"
+            logger.debug "Bridge connected"
             return
 
           [type, message] = data
 
           switch type
             when 'alert'
-              wesabe.info type, ' called with message=', wesabe.util.inspectForLog(message)
+              logger.info type, ' called with message=', wesabe.util.inspectForLog(message)
 
             when 'confirm'
-              wesabe.info type, ' called with message=', wesabe.util.inspectForLog(message), ', automatically answered YES'
+              logger.info type, ' called with message=', wesabe.util.inspectForLog(message), ', automatically answered YES'
 
             when 'open'
-              wesabe.info type, ' called with url=', wesabe.util.inspectForLog(message)
+              logger.info type, ' called with url=', wesabe.util.inspectForLog(message)
 
           callbacks = @["#{type}ReceivedCallbacks"]
           if callbacks
             for callback in callbacks
-              @callWithMagicScope callback, browser, page, extend({message, log: wesabe}), message
+              @callWithMagicScope callback, browser, page, extend({message, log: (require 'Logger')}), message
 
     unless @shouldDispatch browser, page
-      wesabe.info 'skipping document load'
+      logger.info 'skipping document load'
       return
 
     @triggerDispatch browser, page
@@ -468,8 +479,8 @@ class Player
     browser ||= @browser
     page ||= @page
 
-    wesabe.info 'url=', page.url
-    wesabe.info 'title=', page.title
+    logger.info 'url=', page.url
+    logger.info 'title=', page.title
 
     # these should not be used inside the FI scripts
     @browser = browser
@@ -483,7 +494,7 @@ class Player
           @callWithMagicScope dispatch.callback, browser, page, {log}
 
         if result is false
-          wesabe.info "dispatch chain halted"
+          logger.info "dispatch chain halted"
           return
     , 2000
 
@@ -503,13 +514,13 @@ class Player
         return r
 
       # check for a definite answer
-      return result if wesabe.isBoolean result
+      return result if type.isBoolean result
 
-    wesabe.debug "no filter voted to force or abort dispatch, so forcing dispatch by default"
+    logger.debug "no filter voted to force or abort dispatch, so forcing dispatch by default"
     return true
 
   callWithMagicScope: (fn, browser, page, scope, args...) ->
-    wesabe.lang.func.callWithScope fn, this, extend({
+    func.callWithScope fn, this, extend({
       browser
       page
       e: @constructor.elements
@@ -534,7 +545,7 @@ class Player
   @build: (fid) ->
     tryThrow "download.Player.build(fid=#{fid})", (log) =>
       klass = tryThrow "loading fi-scripts.#{fid}", =>
-        wesabe.require 'fi-scripts.' + fid
+        wesabe.require "fi-scripts.#{fid}"
 
       new klass(fid)
 

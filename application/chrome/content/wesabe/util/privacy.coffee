@@ -1,15 +1,17 @@
+type = require 'lang/type'
+
 sanitizers = []
 wrappers = []
 
 {tryCatch, tryThrow} = require 'util/try'
 
-wesabe.provide 'util.privacy',
+privacy =
   #
   # Clears all private information.
   # @method clearAllPrivateData
   #
   clearAllPrivateData: ->
-    tryCatch 'wesabe.util.privacy.clearAllPrivateData', =>
+    tryCatch 'privacy.clearAllPrivateData', =>
       @clearCookies()
       @clearHistory()
       @clearCache()
@@ -20,13 +22,13 @@ wesabe.provide 'util.privacy',
   # @method clearCookies
   #
   clearCookies: ->
-    tryCatch 'wesabe.util.privacy.clearCookies', =>
+    tryCatch 'privacy.clearCookies', =>
       cookieManager = Components.classes["@mozilla.org/cookiemanager;1"]
                         .getService(Components.interfaces.nsICookieManager)
       cookieManager.removeAll()
 
   clearHistory: ->
-    tryCatch 'wesabe.util.privacy.clearHistory', =>
+    tryCatch 'privacy.clearHistory', =>
       globalHistory = Components.classes["@mozilla.org/browser/global-history;2"]
                         .getService(Components.interfaces.nsIBrowserHistory)
       globalHistory.removeAllPages()
@@ -36,19 +38,19 @@ wesabe.provide 'util.privacy',
   # @method clearCache
   #
   clearCache: ->
-    wesabe.warn('wesabe.util.privacy.clearCache is not implemented')
+    logger.warn 'privacy.clearCache is not implemented'
 
   #
   # Clears all authenticated sessions -- NOT IMPLEMENTED.
   # @method clearAuthenticatedSessions
   #
   clearAuthenticatedSessions: ->
-    wesabe.warn('wesabe.util.privacy.clearAuthenticatedSessions is not implemented')
+    logger.warn 'privacy.clearAuthenticatedSessions is not implemented'
 
   #
   # Clears anything that looks like an account number from the string.
   #
-  #   wesabe.util.privacy.sanitize("123-456-7890"); // "xxx-xxx-xxxx"
+  #   privacy.sanitize("123-456-7890"); // "xxx-xxx-xxxx"
   #
   sanitize: (string) ->
     for [_, sanitizer] in sanitizers
@@ -68,7 +70,7 @@ wesabe.provide 'util.privacy',
   # Convenience method for tainting objects.
   #
   taint: (o) ->
-    return o if wesabe.isTainted(o)
+    return o if type.isTainted(o)
 
     for wrapper in wrappers
       if wrapper.canHandle(o)
@@ -97,7 +99,7 @@ wesabe.provide 'util.privacy',
     # handle method calls
     wrapper::__noSuchMethod__ = (method, args) ->
       untaintedResult = @__wrapped__[method].apply(@__wrapped__, args)
-      wesabe.util.privacy.taint(untaintedResult)
+      privacy.taint(untaintedResult)
 
     # handle getters
     getters ||= []
@@ -105,7 +107,7 @@ wesabe.provide 'util.privacy',
     for getter in getters
       wrapper::__defineGetter__ getter, ->
         untaintedResult = @__wrapped__[getter]
-        wesabe.util.privacy.taint(untaintedResult)
+        privacy.taint(untaintedResult)
 
     # handle custom methods
     wrapper::isTainted = -> true
@@ -115,7 +117,7 @@ wesabe.provide 'util.privacy',
       if sanitizer
         sanitizer(@__wrapped__)
       else
-        wesabe.util.privacy.sanitize(@__wrapped__)
+        privacy.sanitize(@__wrapped__)
 
     wrapper::toString = -> @sanitize()
 
@@ -127,28 +129,28 @@ wesabe.provide 'util.privacy',
 
 # Standard sanitizers & wrappers
 
-wesabe.util.privacy.registerSanitizer 'Account Number', (string) ->
+privacy.registerSanitizer 'Account Number', (string) ->
   string.toString().replace /([-\d]{4,})/g, (num) ->
     num.replace(/\d/g, 'x')
 
 # wrapper for String
-wesabe.util.privacy.registerTaintWrapper
+privacy.registerTaintWrapper
   detector: wesabe.isString
   getters: ['length']
 
 # wrapper for Array
-wesabe.util.privacy.registerTaintWrapper
+privacy.registerTaintWrapper
   detector: (o) -> o && wesabe.isFunction(o.map)
   generator: (o) ->
-    tarray = (wesabe.util.privacy.taint(item) for item in o)
+    tarray = (privacy.taint(item) for item in o)
     tarray.isTainted = -> true
     tarray.untaint   = ->
-      wesabe.util.privacy.untaint(item) for item in this
+      privacy.untaint(item) for item in this
 
     return tarray
 
 # wrapper for Element
-wesabe.util.privacy.registerTaintWrapper
+privacy.registerTaintWrapper
   detector: (o) -> o instanceof Element
   getters: [
     "attributes", "childNodes", "className", "clientHeight", "clientLeft",
@@ -162,7 +164,7 @@ wesabe.util.privacy.registerTaintWrapper
   ]
 
 # wrapper for text nodes
-wesabe.util.privacy.registerTaintWrapper
+privacy.registerTaintWrapper
   detector: (o) -> o instanceof Text
   getters: [
     "ATTRIBUTE_NODE", "CDATA_SECTION_NODE", "COMMENT_NODE", "DOCUMENT_FRAGMENT_NODE",
@@ -177,15 +179,18 @@ wesabe.util.privacy.registerTaintWrapper
   ]
 
 # wrapper for null/undefined
-wesabe.util.privacy.registerTaintWrapper
+privacy.registerTaintWrapper
   detector: (o) -> wesabe.isNull(o) || wesabe.isUndefined(o)
   generator: (o) -> o
 
 # wrapper for Number
-wesabe.util.privacy.registerTaintWrapper
+privacy.registerTaintWrapper
   detector: wesabe.isNumber
   generator: (o) -> o
 
 
-wesabe.untaint = wesabe.util.privacy.untaint
-wesabe.taint = wesabe.util.privacy.taint
+wesabe.untaint = privacy.untaint
+wesabe.taint = privacy.taint
+
+
+module.exports = privacy

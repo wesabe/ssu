@@ -12,6 +12,7 @@ dir       = require 'io/dir'
 file      = require 'io/file'
 snapshot  = require 'canvas/snapshot'
 english   = require 'util/words'
+{tryCatch, tryThrow} = require 'util/try'
 
 # ==== Types (shortcuts for use in this file)
 # Xpath:: <String, Array[String], Pathway, Pathset>
@@ -156,7 +157,7 @@ class Page
   # @public
   #
   fill: (xpathOrNode, valueOrXpathOrNode) ->
-    wesabe.tryThrow 'Page.fill', (log) =>
+    tryThrow 'Page.fill', (log) =>
       element = wesabe.untaint @findStrict(xpathOrNode)
       log.info 'element=', wesabe.taint(element)
 
@@ -221,7 +222,7 @@ class Page
   # @public
   #
   click: (xpathOrNode) ->
-    wesabe.tryThrow 'Page.click', (log) =>
+    tryThrow 'Page.click', (log) =>
       element = @findStrict xpathOrNode
       log.info 'element=', element
       @fireEvent element, 'mousedown'
@@ -240,7 +241,7 @@ class Page
   # @public
   #
   check: (xpathOrNode) ->
-    wesabe.tryThrow 'Page.check', (log) =>
+    tryThrow 'Page.check', (log) =>
       element = @findStrict xpathOrNode
       log.info 'element=', element
       wesabe.untaint(element).checked = true
@@ -257,7 +258,7 @@ class Page
   # @public
   #
   uncheck: (xpathOrNode) ->
-    wesabe.tryThrow 'Page.uncheck', (log) =>
+    tryThrow 'Page.uncheck', (log) =>
       element = @findStrict xpathOrNode
       log.info('element=', element)
       wesabe.untaint(element).checked = false
@@ -279,7 +280,7 @@ class Page
   # @public
   #
   submit: (xpathOrNode) ->
-    wesabe.tryThrow 'Page.submit', (log) =>
+    tryThrow 'Page.submit', (log) =>
       element = @findStrict xpathOrNode
       log.info 'element=', element
       # find the containing form
@@ -478,7 +479,7 @@ class Page
   # @public
   #
   dump: ->
-    wesabe.tryThrow 'Page.dump', =>
+    tryThrow 'Page.dump', =>
       folder = dir.profile
       folder.append 'wesabe-page-dumps'
       dir.create folder

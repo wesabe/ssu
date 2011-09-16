@@ -1,9 +1,9 @@
-wesabe.provide('util.Timer')
+type = require 'lang/type'
 
 #
 # Measure the time taken to perform actions given by a label. Example:
 #
-#   var timer = new wesabe.util.Timer();
+#   var timer = new Timer();
 #   timer.start('Compute');
 #   // do some computing
 #   timer.end('Compute');
@@ -27,7 +27,7 @@ wesabe.provide('util.Timer')
 #   // adds up all the 'Compute' durations
 #   timer.summarize();  // => {Compute: 12984}
 #
-class wesabe.util.Timer
+class Timer
   constructor: ->
     @data = {}
     @pending = []
@@ -44,13 +44,13 @@ class wesabe.util.Timer
 
     while @pending.length
       datum = @pending.shift()
-      @end(datum.label, datum.index)
+      @end datum.label, datum.index
 
-    if wesabe.isFunction(fn)
+    if type.isFunction fn
       retval = fn()
-      @end(label, index)
+      @end label, index
       return retval
-    else if fn && wesabe.isFalse(fn.overlap)
+    else if fn and type.isFalse(fn.overlap)
       @pending.push
         label: label
         index: index
@@ -59,14 +59,14 @@ class wesabe.util.Timer
 
   end: (label, index) ->
     if not @data[label]
-      wesabe.warn("No timer entry found for ", label)
+      logger.warn "No timer entry found for ", label
       return
 
-    if wesabe.isNumber(index)
+    if type.isNumber(index)
       if @data[label][index]
         @data[label][index].end = @now
       else
-        wesabe.warn("No timer entry found for ", label, " at index ", index)
+        logger.warn "No timer entry found for ", label, " at index ", index
     else
       for item in @data[label]
         # assume that the earliest one without an end is the one they want
@@ -74,7 +74,7 @@ class wesabe.util.Timer
           item.end = @now
           return
 
-      wesabe.warn("No unfinished timer entry found for ", label)
+      logger.warn "No unfinished timer entry found for ", label
 
   summarize: ->
     summary = {}
@@ -83,7 +83,7 @@ class wesabe.util.Timer
     for label, ranges of @data
       total = 0
       for {start, end} in ranges
-        total += (end || now) - start
+        total += (end or now) - start
       summary[label] = total
 
     return summary

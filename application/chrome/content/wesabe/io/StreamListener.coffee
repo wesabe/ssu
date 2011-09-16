@@ -1,9 +1,5 @@
-wesabe.provide('io.StreamListener')
-
-class wesabe.io.StreamListener
-  constructor: (callbackFunc, contentType) ->
-    @callbackFunc = callbackFunc
-    @contentType = contentType
+class StreamListener
+  constructor: (@callbackFunc, @contentType) ->
 
   mData: ""
 
@@ -11,22 +7,22 @@ class wesabe.io.StreamListener
     @mData = ""
 
   onDataAvailable: (aRequest, aContext, aStream, aSourceOffset, aLength) ->
-    bstream = Components.classes["@mozilla.org/binaryinputstream;1"].createInstance(Components.interfaces.nsIBinaryInputStream)
+    bstream = Cc["@mozilla.org/binaryinputstream;1"].createInstance(Ci.nsIBinaryInputStream)
     bstream.setInputStream(aStream)
     @mData += bstream.readBytes(aLength)
 
   onStopRequest: (aRequest, aContext, aStatus) ->
     if Components.isSuccessCode(aStatus)
-      @callbackFunc(@mData, @contentType)
+      @callbackFunc @mData, @contentType
     else
-      @callbackFunc("request failed")
+      @callbackFunc "request failed"
 
   onChannelRedirect: (aOldChannel, aNewChannel, aFlags) ->
     gChannel = aNewChannel
 
   getInterface: (aIID) ->
       try
-        this.QueryInterface(aIID)
+        @QueryInterface aIID
       catch e
         throw Components.results.NS_NOINTERFACE
 
@@ -35,12 +31,15 @@ class wesabe.io.StreamListener
   onRedirect: (aOldChannel, aNewChannel) ->
 
   QueryInterface: (aIID) ->
-    if aIID.equals(Ci.nsISupports) ||
-       aIID.equals(Ci.nsIInterfaceRequestor) ||
-       aIID.equals(Ci.nsIChannelEventSink) ||
-       aIID.equals(Ci.nsIProgressEventSink) ||
-       aIID.equals(Ci.nsIHttpEventSink) ||
+    if aIID.equals(Ci.nsISupports) or
+       aIID.equals(Ci.nsIInterfaceRequestor) or
+       aIID.equals(Ci.nsIChannelEventSink) or
+       aIID.equals(Ci.nsIProgressEventSink) or
+       aIID.equals(Ci.nsIHttpEventSink) or
        aIID.equals(Ci.nsIStreamListener)
         return this
 
     throw Components.results.NS_NOINTERFACE
+
+
+module.exports = StreamListener

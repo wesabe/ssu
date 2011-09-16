@@ -1,8 +1,12 @@
 type       = require 'lang/type'
 array      = require 'lang/array'
 {trim}     = require 'lang/string'
-{sanitize} = require 'util/privacy'
 Colorizer  = require 'util/Colorizer'
+
+# lazy-load the sanitize method
+sanitize = (args...) ->
+  {sanitize} = require 'util/privacy'
+  sanitize args...
 
 wesabe.provide 'util.inspect'
 

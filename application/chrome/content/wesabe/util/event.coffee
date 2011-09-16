@@ -101,4 +101,4 @@ wesabe.unbind = remove
 wesabe.trigger = trigger
 wesabe.one = one
 
-module.exports = {add, remove, trigger, forward}
+module.exports = {add, remove, trigger, forward, one}

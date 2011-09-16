@@ -1,12 +1,12 @@
-wesabe.provide('ofx.Parser')
-wesabe.require('xml.Parser')
-wesabe.require('util.Parser')
+XmlParser = require 'xml/Parser'
+Parser    = require 'util/Parser'
+event     = require 'util/event'
 
-class wesabe.ofx.Parser
+class OfxParser
   parse: (ofx) ->
-    hparser = @parser = new wesabe.util.Parser()
+    hparser = @parser = new Parser()
 
-    wesabe.util.event.forward(hparser, this)
+    event.forward hparser, this
 
     noop = ->
     quit = -> false
@@ -21,8 +21,8 @@ class wesabe.ofx.Parser
           name: ''
           value: ''
 
-        headers.push(currentHeader)
-        state.name(p)
+        headers.push currentHeader
+        state.name p
 
       # subsequent characters
       name: (p) ->
@@ -54,7 +54,7 @@ class wesabe.ofx.Parser
       '\\s': noop
       '<': quit
 
-    hparser.parse(ofx)
+    hparser.parse ofx
     delete @parser
     @offset = hparser.offset-1 # put the "<" we read back in the buffer
 
@@ -62,3 +62,6 @@ class wesabe.ofx.Parser
 
   stop: ->
     @parser.stop() if @parser
+
+
+module.exports = OfxParser

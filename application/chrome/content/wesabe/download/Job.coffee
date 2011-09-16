@@ -1,6 +1,7 @@
 date   = require 'lang/date'
 extend = require 'lang/extend'
 type   = require 'lang/type'
+event  = require 'util/event'
 Timer  = require 'util/Timer'
 
 Page    = require 'dom/Page'
@@ -26,8 +27,8 @@ class Job
     @version++
     @result = result
     @data[result] = data if data
-    wesabe.info 'Updating job to: ', result
-    wesabe.trigger this, 'update'
+    logger.info 'Updating job to: ', result
+    event.trigger this, 'update'
 
   suspend: (result, data, callback) ->
     @version++
@@ -36,16 +37,16 @@ class Job
     @data[result] = data
 
     if callback
-      wesabe.bind player, 'timeout', callback
-      wesabe.one this, 'resume', ->
-        wesabe.unbind player, 'timeout', callback
+      event.add player, 'timeout', callback
+      event.one this, 'resume', ->
+        event.remove player, 'timeout', callback
 
-    wesabe.warn 'Suspending job for ', result, '=', data
-    wesabe.trigger this, 'update suspend'
+    logger.warn 'Suspending job for ', result, '=', data
+    event.trigger this, 'update suspend'
 
   resume: (creds) ->
-    wesabe.warn 'Resuming job'
-    wesabe.trigger this, 'resume'
+    logger.warn 'Resuming job'
+    event.trigger this, 'resume'
     @update 'resumed'
     @player.resume creds
 
@@ -62,31 +63,31 @@ class Job
     @player.finish() if type.isFunction @player.finish
     @status = status or (if successful then 200 else 400)
     @result = result or (if successful then 'ok' else 'fail')
-    wesabe.trigger this, "update #{event} complete"
+    event.trigger this, "update #{event} complete"
     @timer.end 'Total'
 
     org = @player.org
     summary = @timer.summarize()
     line = []
-    total = Number(summary['Total'])
+    total = Number summary.Total
 
-    wesabe.info "Job completed #{if successful then '' else 'un'}sucessfully for #{org} (#{@fid}) with status #{@status} (#{@result}) in #{Math.round(total/1000,2)}s"
+    logger.info "Job completed #{if successful then '' else 'un'}sucessfully for #{org} (#{@fid}) with status #{@status} (#{@result}) in #{Math.round total/1000,2}s"
 
   start: ->
     @player = Player.build(@fid)
     @player.job = this
     @nextGoal()
 
-    wesabe.info "Starting job for #{@player.org} (#{@fid})"
+    logger.info "Starting job for #{@player.org} (#{@fid})"
     @player.start @creds, document.getElementById('playback-browser')
 
-    wesabe.trigger this, 'begin'
+    event.trigger this, 'begin'
     @timer.start 'Total'
 
   nextGoal: ->
     if @options.goals.length
       @goal = @options.goals.shift()
-      wesabe.info 'Starting new goal: ', @goal
+      logger.info 'Starting new goal: ', @goal
 
       if @player.page
         @player.triggerDispatch()
@@ -96,7 +97,7 @@ class Job
     @player.onLastGoalFinished()
 
   recordSuccessfulDownload: (file, suggestedFilename, metadata, reload=true) ->
-    wesabe.info 'successfully downloaded file to ', file.path
+    logger.info 'successfully downloaded file to ', file.path
     @data.downloads ||= []
     @data.downloads.push extend({path: file.path, suggestedFilename: suggestedFilename, status: 'ok'}, metadata or {})
 
@@ -105,7 +106,7 @@ class Job
       @player.onDownloadSuccessful browser, browser.mainPage
 
   recordFailedDownload: (metadata, reload=true) ->
-    wesabe.error 'failed to download file'
+    logger.error 'failed to download file'
     @data.downloads ||= []
     @data.downloads.push(extend({status: 'error'}, metadata or {}))
 

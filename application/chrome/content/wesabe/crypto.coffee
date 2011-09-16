@@ -32,7 +32,7 @@ catch xulErr
     md5 = (object) ->
       crypto.createHash('md5').update(object).digest('hex')
   catch nodeErr
-    wesabe.error 'Could not load xulrunner or node.js crypto package: ', xulErr, nodeErr
+    logger.error 'Could not load xulrunner or node.js crypto package: ', xulErr, nodeErr
 
 
 module.exports = {md5}

@@ -11,8 +11,41 @@
   <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
   <script type="application/x-javascript" src="coffee-script.js"/>
   <script type="application/x-javascript" src="json2.js"/>
-  <script type="application/x-javascript" src="wesabe.js"/>
-  <script type="application/x-javascript" src="main.js"/>
+  <script type="text/coffeescript" src="wesabe.coffee"/>
+  <script type="text/coffeescript" src="main.coffee"/>
+
+  <script type="text/javascript">
+    (function() {
+      var coffees, execute, index, length, s, scripts;
+      scripts = document.getElementsByTagName('script');
+      coffees = (function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = scripts.length; _i &lt; _len; _i++) {
+          s = scripts[_i];
+          if (s.getAttribute('type') === 'text/coffeescript') {
+            _results.push({src: s.getAttribute('src'), type: s.getAttribute('type')});
+          }
+        }
+        return _results;
+      })();
+      index = 0;
+      length = coffees.length;
+      (execute = function() {
+        var script;
+        script = coffees[index++];
+        if ((script != null ? script.type : void 0) === 'text/coffeescript') {
+          if (script.src) {
+            return CoffeeScript.load(script.src, execute);
+          } else {
+            CoffeeScript.run(script.innerHTML);
+            return execute();
+          }
+        }
+      })();
+      return null;
+    })();
+  </script>
 
   <keyset>
     <key modifiers="accel" key="W" oncommand="window.close()"/>
@@ -21,7 +54,7 @@
 
   <toolbox>
     <menubar>
-      <menu id="menu_file" label="File">
+      <menu id="menu_file" label="File" hidden="true">
         <menupopup>
           <menuitem id="menu_FileQuitItem" key="quit" label="Quit DesktopUploader" oncommand="goQuitApplication();"/>
         </menupopup>
@@ -30,4 +63,5 @@
   </toolbox>
 
   <browser id="playback-browser" flex="1" type="content-primary" />
+
 </window>
