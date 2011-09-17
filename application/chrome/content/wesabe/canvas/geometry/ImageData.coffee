@@ -1,8 +1,7 @@
 {md5}   = require 'crypto'
 type    = require 'lang/type'
 array   = require 'lang/array'
-# FIXME: make util.inspect more sane so it will work with require
-inspect = wesabe.require 'util.inspect'
+inspect = require 'util/inspect'
 
 Point = require 'canvas/geometry/Point'
 

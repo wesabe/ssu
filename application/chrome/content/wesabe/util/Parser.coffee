@@ -1,6 +1,5 @@
 {isFunction} = require 'lang/type'
-# FIXME: make wesabe.util.inspect module sane so regular require will work with it
-inspect = wesabe.require 'util.inspect'
+inspect = require 'util/inspect'
 event   = require 'util/event'
 
 

@@ -8,7 +8,7 @@
 #
 
 window.onerror = (error) ->
-  dump 'oh no!\n'
+  # dump "oh no! #{error}\n"
   if Logger?.rootLogger
     Logger.rootLogger.error "uncaught exception: ", error
   else
@@ -75,7 +75,6 @@ wesabe =
   #   # wesabe/math/__package__.js
   #
   require: (module) ->
-    dump "require(#{module})\n"
     # split "A.B" into ["A", "B"]
     module = wesabe._parseModuleUri(module)
 
@@ -320,3 +319,12 @@ wesabe =
 @require = wesabe.CommonJSRequire
 
 Logger = @require 'Logger'
+inspect = @require 'util/inspect'
+
+# colorize the logging
+Logger.rootLogger.printer = (object) ->
+  if typeof object is 'string'
+    # top-level strings don't get quotes or color since they're probably just log messages
+    object
+  else
+    inspect object, undefined, undefined, on

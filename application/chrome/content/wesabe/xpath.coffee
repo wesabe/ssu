@@ -1,7 +1,6 @@
 type    = require 'lang/type'
 array   = require 'lang/array'
-# FIXME: make util.inspect sane enough to use require
-inspect = wesabe.require 'util.inspect'
+inspect = require 'util/inspect'
 
 #
 # Provides methods for generating, manipulating, and searching by XPaths.

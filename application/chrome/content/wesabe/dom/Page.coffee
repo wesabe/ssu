@@ -4,8 +4,7 @@
 
 {Pathway} = require 'xpath'
 Colorizer = require 'util/Colorizer'
-# FIXME: make util.inspect sane enough to work with require
-inspect   = wesabe.require 'util.inspect'
+inspect   = require 'util/inspect'
 type      = require 'lang/type'
 number    = require 'lang/number'
 dir       = require 'io/dir'

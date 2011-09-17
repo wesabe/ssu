@@ -65,7 +65,7 @@ class Logger
     @_enabled = enabled
 
 
-  constructor: (@name='', @_parent) ->
+  constructor: (@name='', @_parent=Logger.rootLogger) ->
     @_enabled = null
 
   @__defineGetter__ 'rootLogger', ->
@@ -82,7 +82,7 @@ class Logger
     return if @level > level or @enabled is false
     objects = [objects] unless 'length' of objects
 
-    @appender(@format objects, level)
+    @appender @format objects, level
     null
 
   #

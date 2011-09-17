@@ -5,7 +5,7 @@
 type    = require 'lang/type'
 func    = require 'lang/func'
 file    = require 'io/file'
-inspect = wesabe.require 'util/inspect'
+inspect = require 'util/inspect'
 {tryCatch, tryThrow} = require 'util/try'
 
 getPreferencesRoot = ->

@@ -7,8 +7,8 @@ dir     = require 'io/dir'
 file    = require 'io/file'
 xhr     = require 'io/xhr'
 Job     = require 'download/Job'
-# FIXME: make util.inspect sane enough to use require
-inspect = wesabe.require 'util.inspect'
+Logger  = require 'Logger'
+inspect = require 'util/inspect'
 {tryCatch, tryThrow} = require 'util/try'
 
 class Controller
@@ -243,11 +243,12 @@ class Controller
         script = "(function(){#{script}})()" if /[;\n]/.test script
 
       script = "return #{script}"
-      result = func.callWithScope script, wesabe, {@job}
+      logger = Logger.loggerForFile 'repl'
+      result = func.callWithScope script, wesabe, {@job, logger}
 
       response:
         status: 'ok'
-        eval: inspect(result, null, null, data.color)
+        eval: inspect(result, undefined, undefined, data.color)
 
     catch e
       logger.error 'eval: error: ', e

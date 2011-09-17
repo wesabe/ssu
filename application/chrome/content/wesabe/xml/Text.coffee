@@ -23,7 +23,7 @@ class Text
     s.disabled = !color
 
     s.reset()
-     .print(_inspectString @text, color, tainted)
+     .print(inspect @text)
      .reset()
      .toString()
 
