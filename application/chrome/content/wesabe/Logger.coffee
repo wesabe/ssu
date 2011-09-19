@@ -82,7 +82,7 @@ class Logger
     return if @level > level or @enabled is false
     objects = [objects] unless 'length' of objects
 
-    @appender @format objects, level
+    @appender @format(objects, level)
     null
 
   #
@@ -135,6 +135,40 @@ class Logger
     return ("#{level} -- #{@name and "#{@name}: "}#{line}" for line in lines).join('\n')
 
 rootLogger = new Logger()
+fileAppender = null
+
+
+Logger.getFileAppender = ->
+  return fileAppender if fileAppender
+
+  Logger.rootLogger.debug 'Registering file logger'
+
+  try
+    # Wesabe Logger registration - if not already registered.
+    catMgr = Cc["@mozilla.org/categorymanager;1"].getService(Ci.nsICategoryManager)
+    shouldRegister = true
+    cats = catMgr.enumerateCategories()
+    while cats.hasMoreElements() && shouldRegister
+      cat = cats.getNext()
+      catName = cat.QueryInterface(Ci.nsISupportsCString).data
+      if catName is "loggers"
+        catEntries = catMgr.enumerateCategory(cat)
+        while catEntries.hasMoreElements()
+          catEntry = catEntries.getNext()
+          catEntryName = catEntry.QueryInterface(Ci.nsISupportsCString).data
+          shouldRegister = false if catEntryName is "Wesabe Logger"
+
+    if shouldRegister
+      Logger.rootLogger.debug 'registering Wesabe Logger with category manager'
+      catMgr.addCategoryEntry "loggers", "Wesabe Logger", "@wesabe.com/logger;1", false, true
+
+    fileLogger = Cc["@wesabe.com/logger;1"].getService(Ci.nsIWesabeLogger)
+
+    fileAppender = (text) ->
+      fileLogger.log text
+
+  catch ex
+    Logger.rootLogger.error '!! error registering file logger: ', ex
 
 
 module.exports = Logger

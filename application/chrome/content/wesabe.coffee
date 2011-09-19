@@ -322,10 +322,13 @@ Logger  = @require 'Logger'
 inspect = @require 'util/inspect'
 prefs   = @require 'util/prefs'
 
-# colorize the logging
+# colorize the logging if appropriate
 Logger.rootLogger.printer = (object) ->
   if typeof object is 'string'
     # top-level strings don't get quotes or color since they're probably just log messages
     object
   else
     inspect object, undefined, undefined, prefs.get('wesabe.logger.color') ? on
+
+# write logs to a file rather than stdout
+Logger.rootLogger.appender = Logger.getFileAppender()
