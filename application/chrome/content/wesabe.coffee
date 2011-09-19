@@ -318,8 +318,9 @@ wesabe =
 @wesabe = wesabe
 @require = wesabe.CommonJSRequire
 
-Logger = @require 'Logger'
+Logger  = @require 'Logger'
 inspect = @require 'util/inspect'
+prefs   = @require 'util/prefs'
 
 # colorize the logging
 Logger.rootLogger.printer = (object) ->
@@ -327,4 +328,4 @@ Logger.rootLogger.printer = (object) ->
     # top-level strings don't get quotes or color since they're probably just log messages
     object
   else
-    inspect object, undefined, undefined, on
+    inspect object, undefined, undefined, prefs.get('wesabe.logger.color') ? on
