@@ -44,24 +44,5 @@ class Rect
   @__defineGetter__ 'ZeroRect', ->
     @make 0, 0, 0, 0
 
-  inspect: (refs, color, tainted) ->
-    s = new Colorizer()
-    s.disabled = !color
-    s
-      .yellow('#<')
-      .bold(@constructor?.__module__?.name or 'Object')
-      .print(' ')
-      .yellow('{')
-      .print(@left)
-      .print(', ')
-      .print(@top)
-      .print(', ')
-      .print(@width)
-      .print(', ')
-      .print(@height)
-      .print('}')
-      .yellow('>')
-      .toString()
-
 
 module.exports = Rect
