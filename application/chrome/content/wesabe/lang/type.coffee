@@ -37,7 +37,7 @@ type =
     typeof object is 'number'
 
   isArray: (object) ->
-    object and
+    typeof object is 'object' and
     (type.isNumber object.length) and
     (type.isFunction object.splice)
 
