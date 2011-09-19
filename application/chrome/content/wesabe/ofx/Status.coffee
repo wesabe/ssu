@@ -1,6 +1,6 @@
 # Helper class to contain status messages from the OFX response.
 
-type = require 'util/type'
+type = require 'lang/type'
 
 class Status
   constructor: (@code, @status, @message) ->

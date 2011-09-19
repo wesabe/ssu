@@ -1,6 +1,6 @@
-type = require 'util/type'
 
 wesabe.require 'util.privacy'
+type    = require 'lang/type'
 
 # Account - simple data container for account information
 class Account
