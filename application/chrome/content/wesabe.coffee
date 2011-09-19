@@ -14,6 +14,7 @@ window.onerror = (error) ->
   catch cantLogException
     dump "uncaught exception: #{error}"
 
+
 wesabe =
   #
   # Creates nested modules as given by the module.
@@ -32,19 +33,20 @@ wesabe =
   #
   # @private
   #
-  provide: (module, value) ->
+  provide: (module, value={}) ->
     parts = module.split('.')
-    base = wesabe
 
-    for part, i in parts
-      base = (base[part] ||= (i is parts.length-1) and value or {})
+    walk module, (part, mod, level, levels) =>
+      if level is levels.length - 1
+        mod[part] = value
+      else
+        mod[part] ||= {}
 
-    if value
-      value.__module__ =
-        name: parts[parts.length-1]
-        fullName: module
+    value.__module__ =
+      name: parts[parts.length-1]
+      fullName: module
 
-    return base
+    return value
 
   CommonJSRequire: (path) ->
     wesabe.require path.replace(/\//g, '.')
@@ -85,7 +87,7 @@ wesabe =
 
     for uri in uris
       if wesabe._loadUri uri, module
-        wesabe.walk module.name, (part, mod, level, levels) =>
+        walk module.name, (part, mod, level, levels) =>
           if level is levels.length - 1
             module.exports = (mod[part] ||= module.exports)
           else
@@ -114,7 +116,7 @@ wesabe =
       parts: parts
 
     if parts[parts.length-1] isnt '*'
-      result.exports = wesabe.walk(module)
+      result.exports = walk(module)
 
     return result
 
@@ -167,16 +169,6 @@ wesabe =
 
     # start over with A/B
     uris.concat(wesabe._getUrisForParts(parts[0...parts.length-1], scheme, true, false))
-
-  walk: (module, callback) ->
-    base = wesabe
-
-    parts = module.split('.')
-    for part, i in parts
-      callback?(part, base, i, parts)
-      base &&= base[part]
-
-    return base
 
   #
   # All the Uris loaded by _loadUri.
@@ -314,6 +306,16 @@ wesabe =
         return null
 
     @_evalTextByURI[uri] = text
+
+walk = (module, callback) ->
+  base = wesabe
+
+  parts = module.split('.')
+  for part, i in parts
+    callback?(part, base, i, parts)
+    base &&= base[part]
+
+  return base
 
 @wesabe = wesabe
 @require = wesabe.CommonJSRequire
