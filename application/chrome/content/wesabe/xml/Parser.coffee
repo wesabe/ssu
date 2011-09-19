@@ -7,6 +7,8 @@ CloseTag  = require 'xml/CloseTag'
 Attribute = require 'xml/Attribute'
 Text      = require 'xml/Text'
 
+{tryThrow, tryCatch} = require 'util/try'
+
 class XmlParser
   parse: (xml, verboten) ->
     parser = @parser = new Parser()
@@ -198,7 +200,7 @@ class XmlParser
       '<': el.start
       '\\s': noop
 
-    wesabe.tryThrow 'xml.Parser', (log) =>
+    tryThrow 'xml.Parser', (log) =>
       parser.parse(xml)
       delete @parser
       delete @work

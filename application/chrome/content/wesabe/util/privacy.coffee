@@ -23,14 +23,12 @@ privacy =
   #
   clearCookies: ->
     tryCatch 'privacy.clearCookies', =>
-      cookieManager = Components.classes["@mozilla.org/cookiemanager;1"]
-                        .getService(Components.interfaces.nsICookieManager)
+      cookieManager = Cc["@mozilla.org/cookiemanager;1"].getService(Ci.nsICookieManager)
       cookieManager.removeAll()
 
   clearHistory: ->
     tryCatch 'privacy.clearHistory', =>
-      globalHistory = Components.classes["@mozilla.org/browser/global-history;2"]
-                        .getService(Components.interfaces.nsIBrowserHistory)
+      globalHistory = Cc["@mozilla.org/browser/global-history;2"].getService(Ci.nsIBrowserHistory)
       globalHistory.removeAllPages()
 
   #
@@ -70,23 +68,23 @@ privacy =
   # Convenience method for tainting objects.
   #
   taint: (o) ->
-    return o if type.isTainted(o)
+    return o if type.isTainted o
 
     for wrapper in wrappers
       if wrapper.canHandle(o)
         return wrapper.wrap(o)
 
-    wesabe.warn("not tainting value: ", o)
+    logger.warn "not tainting value: ", o
     return o
 
   #
   # Convenience method for untainting objects.
   #
   untaint: (o) ->
-    if wesabe.isTainted(o)
+    if type.isTainted o
       o.untaint()
-    else if wesabe.isArray(o)
-      wesabe.untaint(item) for item in o
+    else if type.isArray o
+      privacy.untaint item for item in o
     else
       o
 
@@ -180,12 +178,12 @@ privacy.registerTaintWrapper
 
 # wrapper for null/undefined
 privacy.registerTaintWrapper
-  detector: (o) -> wesabe.isNull(o) || wesabe.isUndefined(o)
+  detector: (o) -> type.isNull(o) or type.isUndefined(o)
   generator: (o) -> o
 
 # wrapper for Number
 privacy.registerTaintWrapper
-  detector: wesabe.isNumber
+  detector: type.isNumber
   generator: (o) -> o
 
 

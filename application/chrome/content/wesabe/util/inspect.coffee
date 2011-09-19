@@ -16,6 +16,8 @@ COLOR_SCHEME =
   undefined: ['black']
   boolean:   ['yellow']
   regexp:    ['red']
+  error:     ['red']
+  punct:     ['yellow']
 
 #
 # Inspect takes any JavaScript value and returns a string representing
@@ -26,27 +28,31 @@ COLOR_SCHEME =
 #
 
 inspect = (object, showHidden=off, depth=2, color=off) ->
+  classForInspect = object?.classForInspect?()
+
   if typeof object is 'undefined'
     style 'undefined', 'undefined', color
   else if object is null
     style 'null', 'null', color
-  else if object is true or object is false
+  else if classForInspect is Boolean or object is true or object is false
     style 'boolean', object.toString(), color
-  else if type.isArray(object) or type.is(object, HTMLCollection)
+  else if classForInspect is Array or type.isArray(object) or type.is(object, HTMLCollection)
     inspectArray object, showHidden, depth, color
-  else if type.isRegExp object
+  else if classForInspect is RegExp or type.isRegExp object
     inspectRegExp object, color
-  else if type.is object, Element
+  else if classForInspect in [Element, HTMLElement, XULElement] or type.is object, Element
     inspectElement object, color
-  else if typeof object is 'number'
+  else if classForInspect is Number or typeof object is 'number'
     inspectNumber object, color
-  else if typeof object is 'string'
+  else if classForInspect is String or typeof object is 'string'
     inspectString object, color
-  else if type.isFunction object
+  else if classForInspect is Function or type.isFunction object
     inspectFunction object, color
   else if type.isFunction object.inspect
     object.inspect showHidden, depth, color
-  else if typeof object is 'object'
+  # else if object instanceof Error
+  #   inspectError object, color
+  else if classForInspect is Object or typeof object is 'object'
     inspectObject object, showHidden, depth, color
   else
     "#{object}"
@@ -65,24 +71,36 @@ style = (type, text, color) ->
 inspectObject = (object, showHidden, depth, color) ->
   return style 'shell', object.toString(), color if depth < 0
 
-  properties = for own k of object
-    getter = object.__lookupGetter__ k
-    setter = object.__lookupSetter__ k
-    if getter or setter
-      string = "["
-      string += "Getter" if getter
-      string += "/" if getter and setter
-      string += "Setter" if setter
-      string += "]"
-      "#{k}: #{style 'shell', string, color}"
-    else
-      "#{k}: #{inspect object[k], showHidden, depth-1, color}"
+  # allow the object to override the thing we display as its content
+  content = object.contentForInspect?()
+
+  # if it's a simple object then just enumerate the properties
+  if not content or content?.constructor is Object
+    content ||= object
+
+    properties = for own k of content
+      getter = content.__lookupGetter__ k
+      setter = content.__lookupSetter__ k
+      if getter or setter
+        string = "["
+        string += "Getter" if getter
+        string += "/" if getter and setter
+        string += "Setter" if setter
+        string += "]"
+        "#{k}: #{style 'shell', string, color}"
+      else
+        "#{k}: #{inspect content[k], showHidden, depth-1, color}"
+
+    contentString = properties.join ', '
+  else
+    # otherwise do a full inspect call on it
+    contentString = inspect content, showHidden, depth-1, color
 
   string = "{"
   if object.constructor isnt Object and object.constructor.name
     string += style 'class', object.constructor.name, color
-    string += " " if properties.length
-  string += properties.join(', ')
+    string += " " if contentString.length
+  string += contentString
   string += "}"
 
 inspectArray = (object, showHidden, depth, color) ->
@@ -115,9 +133,95 @@ inspectRegExp = (regexp, color) ->
   style 'regexp', regexp.toSource(), color
 
 inspectElement = (element, color) ->
-  attrs = (" #{nodeName}=#{inspect nodeValue, undefined, undefined, color}" for {nodeName, nodeValue} in element.attributes).join('')
-  "<#{element.tagName}#{attrs}>"
+  attrs = (" #{nodeName}#{style 'punct', '=', color}#{inspect nodeValue, undefined, undefined, color}" for {nodeName, nodeValue} in element.attributes).join('')
+  "#{style 'punct', '<', color}#{element.tagName}#{attrs}#{style 'punct', '>', color}"
 
+inspectError = (error, color) ->
+  result = "An exception has occurred:\n    #{style 'error', error.message, color}" +
+    " (#{error.name})\n"
+
+  trace = []
+  files = {}
+
+  if error.stack
+    error.stack.replace /([^\r\n]+)\@([^\@\r\n]+?):(\d+)([\r\n]|$)/g, (everything, call, file, lineno) ->
+      trace.push
+        name: call
+        filename: file
+        lineNumber: lineno
+  else if error.location
+    frame = error.location
+    while frame
+      trace.push
+        name: frame.name
+        filename: frame.filename
+        lineNumber: frame.lineNumber
+      frame = frame.caller
+
+  for frame in trace
+    frame.name ||= 'unknown'
+    frame.filename ||= 'unknown'
+    frame.lineNumber ||= '??'
+
+    m = frame.filename.match(/^(.*\/)wesabe\.js$/)
+    if m
+      info = wesabe.fileAndLineFromEvalLine(Number(frame.lineNumber))
+      if info?.file isnt 'wesabe.coffee'
+        frame.filename = m[1] + info.file
+        frame.lineNumber = "#{info.lineno} (eval line #{frame.lineNumber})"
+
+    m = frame.filename.match(/^chrome:\/\/[^\/]+\/content\/(.*)$/)
+    if m
+      frame.filename = m[1]
+
+    contents = wesabe._getEvalText(frame.filename)?.split(/\n/)
+    if contents and frame.lineNumber isnt '??'
+      frame.lineNumber = Number(frame.lineNumber)
+      frame.lineText = contents[frame.lineNumber-1]
+      if frame.lineNumber < contents.length
+        for i in [frame.lineNumber..0]
+          if name = functionNameForLine(contents[i])
+            frame.name = name
+            break
+
+  if lineText = trace[0]?.lineText
+    lineText = trim(lineText)
+    lineText = lineText[0...38]+'...'+lineText[lineText.length-35...lineText.length] if lineText.length > 76
+
+    result += "On:\n    #{style 'error', lineText, color}\n"
+
+  result += "Backtrace:\n"
+
+  for {name, filename, lineNumber} in trace
+    if name.length < 40
+      result += ' ' for i in [0...(40 - name.length)]
+    else
+      name = "#{name[0...37]}..."
+
+    result += "#{name} at #{filename}:#{lineNumber}\n"
+
+  return result
+
+functionNameForLine = (line) ->
+  # foo: function(...)
+  if match = line.match(/([_a-zA-Z]\w*)\s*:\s*function\s*\(/)
+    match[1]
+
+  # function foo(...)
+  else if match = line.match(/function\s*([_a-zA-Z]\w*)\s*\([\)]*/)
+    match[1]
+
+  # get foo() / set foo(value)
+  else if match = line.match(/((?:get|set)\s+[_a-zA-Z]\w*)\(\)/)
+    match[1]
+
+  # Bar.prototype.foo = function(...)
+  else if match = line.match(/\.prototype\.([_a-zA-Z]\w*)\s*=\s*function/)
+    match[1]
+
+  # __defineGetter__('foo', function() / __defineSetter__('foo', function(...)
+  else if match = line.match(/__define([GS]et)ter__\(['"]([_a-zA-Z]\w*)['"],\s*function/)
+    "#{match[1].toLowerCase()} #{match[2]}"
 
 
 module.exports = inspect

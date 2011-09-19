@@ -14,6 +14,6 @@ wesabe.provide 'fi-scripts.com.schwab.bank',
     this::__defineSetter__ 'creds', (creds) ->
       # as reported by Charles Schwab customer support
       # search for "schwab password 8 characters quicken"
-      wesabe.info("Truncating password to 8 characters")
+      logger.info "Truncating password to 8 characters"
       creds.password = creds.password.substring(0, 8)
       @_creds = creds

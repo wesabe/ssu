@@ -24,7 +24,7 @@ module.exports =
     prefs.set "general.useragent.vendor", ua.vendor if ua.vendor
     prefs.set "general.useragent.vendorSub", ua.vendorSub if ua.vendorSub
 
-    wesabe.info "User Agent changed to ", @toString()
+    logger.info "User Agent changed to ", @toString()
 
   #
   # Set the User Agent string by an alias.
@@ -39,12 +39,10 @@ module.exports =
     if userAgent
       @set userAgent
     else
-      wesabe.warn "Unrecognized User Agent alias: ", alias
+      logger.warn "Unrecognized User Agent alias: ", alias
 
   #
   # Get the User Agent data by an alias.
-  #
-  # @see wesabe.xul.UserAgent.setByNamedAlias
   #
   getByNamedAlias: (alias) ->
     if /^((ms)?ie|internet explorer)\s*(7[\.\d]*)?$/i.test(alias)
@@ -79,4 +77,4 @@ module.exports =
     prefs.clear "general.useragent.override"
     prefs.clear "general.useragent.vendor"
     prefs.clear "general.useragent.vendorSub"
-    wesabe.info "Reverted User Agent to the default value: ", navigator.userAgent
+    logger.info "Reverted User Agent to the default value: ", navigator.userAgent

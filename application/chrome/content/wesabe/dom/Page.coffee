@@ -536,6 +536,9 @@ class Page
 
     @dump
 
+  contentForInspect: ->
+    url: @url, title: @title, name: @name
+
   #
   # Wraps documents for scripts to have easy helper access.
   #
@@ -544,16 +547,6 @@ class Page
       document
     else
       new @ document
-
-  inspect: (refs, color, tainted) ->
-    s = new Colorizer()
-    s.disabled = !color
-    s
-      .yellow('#<')
-      .bold(@constructor?.__module__?.name || 'Object')
-      .yellow('>')
-      .toString()
-
 
 
 module.exports = Page

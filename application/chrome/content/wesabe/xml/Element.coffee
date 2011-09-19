@@ -127,49 +127,52 @@ class Element
   # debugging methods
   #
 
-  inspect: (refs, color, tainted) ->
-    # handle NodeJS-style inspect
-    if typeof refs is 'number'
-      refs = null
+  classForInspect: ->
+    HTMLElement
 
-    s = new Colorizer()
-    s.disabled = !color
-    s.reset()
-     .bold("{#{if @selfclosing then 'empty' else ''}elem ")
-     .yellow('<')
-     .white()
-     .bold()
-     .print(@name)
+  #inspect: (refs, color, tainted) ->
+  #  # handle NodeJS-style inspect
+  #  if typeof refs is 'number'
+  #    refs = null
 
-    # print out the attributes
-    for attr in @attributes
-      value = attr.nodeValue.toString()
-      value = sanitize(value) if tainted
+  #  s = new Colorizer()
+  #  s.disabled = !color
+  #  s.reset()
+  #   .bold("{#{if @selfclosing then 'empty' else ''}elem ")
+  #   .yellow('<')
+  #   .white()
+  #   .bold()
+  #   .print(@name)
 
-      s.print(' ')
-       .reset()
-       .underlined(attr.nodeName)
-       .yellow('="')
-       .green(value)
-       .yellow('"')
+  #  # print out the attributes
+  #  for attr in @attributes
+  #    value = attr.nodeValue.toString()
+  #    value = sanitize(value) if tainted
 
-    s.yellow('>')
+  #    s.print(' ')
+  #     .reset()
+  #     .underlined(attr.nodeName)
+  #     .yellow('="')
+  #     .green(value)
+  #     .yellow('"')
 
-    # print the children
-    hasElementChildren = false
-    for child in @__children__
-      hasElementChildren = hasElementChildren or type.is(child, Element)
-      s.print(' ', inspect(child, refs, color, tainted))
+  #  s.yellow('>')
 
-    # only show the closing tag if there are child elements (not text)
-    if hasElementChildren
-      s.print(' ')
-       .yellow('</')
-       .white()
-       .bold()
-       .print(@name)
-       .yellow('>')
+  #  # print the children
+  #  hasElementChildren = false
+  #  for child in @__children__
+  #    hasElementChildren = hasElementChildren or type.is(child, Element)
+  #    s.print(' ', inspect(child, refs, color, tainted))
 
-    return s.bold('}').toString()
+  #  # only show the closing tag if there are child elements (not text)
+  #  if hasElementChildren
+  #    s.print(' ')
+  #     .yellow('</')
+  #     .white()
+  #     .bold()
+  #     .print(@name)
+  #     .yellow('>')
+
+  #  return s.bold('}').toString()
 
 module.exports = Element

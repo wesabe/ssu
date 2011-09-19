@@ -1,11 +1,11 @@
-Document = wesabe.require 'xml.Document'
-Text     = wesabe.require 'xml.Text'
+Document = require 'xml/Document'
+Text     = require 'xml/Text'
 
 describe 'wesabe.xml.Document', ->
   it 'throws an exception on a blank XML string', ->
     try
-      new Document('')
-      throw new Error("constructor failed to throw an exception")
+      new Document ''
+      throw new Error "constructor failed to throw an exception"
     catch err
       expect(err.message).toMatch(/Unexpected EOF/)
 

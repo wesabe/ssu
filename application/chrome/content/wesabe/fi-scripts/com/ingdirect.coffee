@@ -1,9 +1,13 @@
-wesabe.download.CompoundPlayer.register
+CompoundPlayer = require 'download/CompoundPlayer'
+OFXPlayer      = require 'download/OFXPlayer'
+Player         = require 'download/Player'
+
+CompoundPlayer.register
   fid: 'com.ingdirect'
   org: 'ING Direct'
 
   players: [
-    wesabe.download.OFXPlayer.create
+    OFXPlayer.create
       fid: 'com.ingdirect'
       org: 'ING Direct'
 
@@ -12,11 +16,11 @@ wesabe.download.CompoundPlayer.register
         ofxOrg: 'ING DIRECT'
         ofxUrl: 'https://ofx.ingdirect.com/OFX/ofx.html'
 
-    wesabe.download.Player.create
+    Player.create
       fid: 'com.ingdirect'
       org: 'ING Direct'
 
-      dispatchFrames: false
+      dispatchFrames: off
       afterDownload: 'nextGoal'
       afterLastGoal: 'logoff'
 
