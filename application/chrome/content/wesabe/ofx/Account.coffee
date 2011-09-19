@@ -1,6 +1,5 @@
-
-wesabe.require 'util.privacy'
 type    = require 'lang/type'
+privacy = require 'util/privacy'
 
 # Account - simple data container for account information
 class Account
@@ -21,7 +20,7 @@ class Account
 
     ('X' for i in [0...@acctid.length-4]).join('') + @acctid[-4..-1]
 
-wesabe.util.privacy.registerTaintWrapper
+privacy.registerTaintWrapper
   detector: (o) -> type.is(o, Account)
   getters: ["accttype", "acctid", "bankid", "desc", "masked_acctid"]
 
