@@ -9,9 +9,9 @@
 
 window.onerror = (error) ->
   # dump "oh no! #{error}\n"
-  if Logger?.rootLogger
+  try
     Logger.rootLogger.error "uncaught exception: ", error
-  else
+  catch cantLogException
     dump "uncaught exception: #{error}"
 
 wesabe =
