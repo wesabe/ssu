@@ -15,13 +15,14 @@
   <script type="text/coffeescript" src="main.coffee"/>
 
   <script type="text/javascript">
+    <![CDATA[
     (function() {
       var coffees, execute, index, length, s, scripts;
       scripts = document.getElementsByTagName('script');
       coffees = (function() {
         var _i, _len, _results;
         _results = [];
-        for (_i = 0, _len = scripts.length; _i &lt; _len; _i++) {
+        for (_i = 0, _len = scripts.length; _i < _len; _i++) {
           s = scripts[_i];
           if (s.getAttribute('type') === 'text/coffeescript') {
             _results.push({src: s.getAttribute('src'), type: s.getAttribute('type')});
@@ -45,6 +46,7 @@
       })();
       return null;
     })();
+    ]]>
   </script>
 
   <keyset>
