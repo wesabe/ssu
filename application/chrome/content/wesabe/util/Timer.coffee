@@ -87,3 +87,6 @@ class Timer
       summary[label] = total
 
     return summary
+
+
+module.exports = Timer
