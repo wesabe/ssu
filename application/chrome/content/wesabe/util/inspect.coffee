@@ -12,8 +12,49 @@ COLOR_SCHEME =
   number:    ['blue']
   string:    ['green']
   shell:     ['cyan']
+  class:     ['cyan']
   undefined: ['black']
   boolean:   ['yellow']
+  regexp:    ['red']
+
+#
+# Inspect takes any JavaScript value and returns a string representing
+# that value, optionally showing hidden properties of that value if
+# applicable, recursing to a specific depth if applicable, and optionally
+# returning a string using ANSI color escapes suitable for printing to
+# a terminal.
+#
+
+inspect = (object, showHidden=off, depth=2, color=off) ->
+  if typeof object is 'undefined'
+    style 'undefined', 'undefined', color
+  else if object is null
+    style 'null', 'null', color
+  else if object is true or object is false
+    style 'boolean', object.toString(), color
+  else if type.isArray(object) or type.is(object, HTMLCollection)
+    inspectArray object, showHidden, depth, color
+  else if type.isRegExp object
+    inspectRegExp object, color
+  else if type.is object, Element
+    inspectElement object, color
+  else if typeof object is 'number'
+    inspectNumber object, color
+  else if typeof object is 'string'
+    inspectString object, color
+  else if type.isFunction object
+    inspectFunction object, color
+  else if type.isFunction object.inspect
+    object.inspect showHidden, depth, color
+  else if typeof object is 'object'
+    inspectObject object, showHidden, depth, color
+  else
+    "#{object}"
+
+
+#
+# Helper functions for +inspect+.
+#
 
 style = (type, text, color) ->
   if color and colors = COLOR_SCHEME[type]
@@ -24,7 +65,25 @@ style = (type, text, color) ->
 inspectObject = (object, showHidden, depth, color) ->
   return style 'shell', object.toString(), color if depth < 0
 
-  "{#{("#{k}: #{inspect v, showHidden, depth-1, color}" for own k, v of object).join(', ')}}"
+  properties = for own k of object
+    getter = object.__lookupGetter__ k
+    setter = object.__lookupSetter__ k
+    if getter or setter
+      string = "["
+      string += "Getter" if getter
+      string += "/" if getter and setter
+      string += "Setter" if setter
+      string += "]"
+      "#{k}: #{style 'shell', string, color}"
+    else
+      "#{k}: #{inspect object[k], showHidden, depth-1, color}"
+
+  string = "{"
+  if object.constructor isnt Object and object.constructor.name
+    string += style 'class', object.constructor.name, color
+    string += " " if properties.length
+  string += properties.join(', ')
+  string += "}"
 
 inspectArray = (object, showHidden, depth, color) ->
   if object.length is 0
@@ -52,27 +111,13 @@ inspectFunction = (fn, color) ->
   string += "]"
   style 'shell', string, color
 
-inspect = (object, showHidden=off, depth=2, color=off) ->
-  if typeof object is 'undefined'
-    style 'undefined', 'undefined', color
-  else if object is null
-    style 'null', 'null', color
-  else if object is true or object is false
-    style 'boolean', object.toString(), color
-  else if type.isArray object
-    inspectArray object, showHidden, depth, color
-  else if typeof object is 'object'
-    inspectObject object, showHidden, depth, color
-  else if typeof object is 'number'
-    inspectNumber object, color
-  else if typeof object is 'string'
-    inspectString object, color
-  else if type.isFunction object
-    inspectFunction object, color
-  else if type.isFunction object.inspect
-    object.inspect showHidden, depth, color
-  else
-    "#{object}"
+inspectRegExp = (regexp, color) ->
+  style 'regexp', regexp.toSource(), color
+
+inspectElement = (element, color) ->
+  attrs = (" #{nodeName}=#{inspect nodeValue, undefined, undefined, color}" for {nodeName, nodeValue} in element.attributes).join('')
+  "<#{element.tagName}#{attrs}>"
+
 
 
 module.exports = inspect
