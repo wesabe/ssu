@@ -51,6 +51,7 @@ type =
     object?.isTainted?()
 
   is: (object, type) ->
+    object instanceof type or
     object?.constructor is type
 
 # make all these available as shortcuts on the wesabe object
