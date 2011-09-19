@@ -39,10 +39,10 @@ class Colorizer
         else
           "\x1b[#{code}m"
 
-      @::[name] = ->
-        @print("\x1b[#{code}m") unless @disabled
-        @print.apply(this, arguments) if arguments.length
-        @print("\x1b[#{STYLES.reset}m") unless @disabled
+      @::[name] = (args...) ->
+        @print "\x1b[#{code}m"  unless @disabled
+        @print args... if args.length
+        @print "\x1b[#{STYLES.reset}m" unless @disabled
         return this
 
   constructor: ->
