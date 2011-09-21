@@ -1,4 +1,3 @@
-dump 'main.coffee\n'
 #
 # This is the main entry point into the XulRunner SSU application.
 # It is loaded and eval'ed by main.xul in conjunction with CoffeeScript.

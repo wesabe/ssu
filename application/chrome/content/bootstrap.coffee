@@ -33,7 +33,6 @@ bootstrap =
 
     @loadedScripts.push {uri, content, offset, lines}
     @currentOffset += lines
-    dump "uri=#{uri}, offset=#{offset}, currentOffset=#{@currentOffset}\n"
 
     (-> `with (scope) { eval(padding+content) }`; null ).call(window) # JS version won't have "CoffeeScript" on the same line
 
@@ -67,7 +66,6 @@ do ->
     offset: 0
     lines: lines.length
 
-  dump "currentOffset=#{bootstrap.currentOffset}, evalOffset=#{bootstrap.evalOffset}\n"
 
 do ->
   scripts = document.getElementsByTagName 'script'

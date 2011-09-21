@@ -43,7 +43,6 @@
         lines: lines
       });
       this.currentOffset += lines;
-      dump("uri=" + uri + ", offset=" + offset + ", currentOffset=" + this.currentOffset + "\n");
       return (function() {
         with (scope) { eval(padding+content) };        return null;
       }).call(window);
@@ -86,7 +85,6 @@
       offset: 0,
       lines: lines.length
     };
-    return dump("currentOffset=" + bootstrap.currentOffset + ", evalOffset=" + bootstrap.evalOffset + "\n");
   })();
   (function() {
     var s, scripts, src, _i, _len, _results;
