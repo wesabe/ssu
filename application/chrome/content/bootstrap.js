@@ -1,22 +1,12 @@
 (function() {
-  var bootstrap, functionNameForLine, getContent, indentCount;
+  var $dir, $file, Cc, Ci, bootstrap, functionNameForLine, getContent, indentCount;
   this.onerror = function(error) {
     return dump("unhandled error: " + error + "\n");
   };
+  Cc = Components.classes;
+  Ci = Components.interfaces;
   getContent = function(uri) {
-    var xhr, _ref;
-    xhr = new XMLHttpRequest();
-    xhr.open('GET', uri, false);
-    try {
-      xhr.send(null);
-    } catch (e) {
-      return null;
-    }
-    if ((_ref = xhr.status) === 0 || _ref === 200) {
-      return xhr.responseText;
-    } else {
-      return null;
-    }
+    return $file.read($dir.chrome.path + ("/content/" + uri));
   };
   indentCount = function(line) {
     var i, indent;
@@ -49,6 +39,70 @@
       return "" + (match[1].toLowerCase()) + " " + match[2];
     }
   };
+  $file = {
+    open: function(path) {
+      var file;
+      file = Cc['@mozilla.org/file/local;1'].createInstance(Ci.nsILocalFile);
+      file.initWithPath(path);
+      return file;
+    },
+    read: function(file) {
+      var data, fiStream, path, siStream;
+      if (typeof file === 'string') {
+        path = file;
+        file = $file.open(path);
+      } else if (file) {
+        path = file.path;
+      }
+      fiStream = Cc['@mozilla.org/network/file-input-stream;1'].createInstance(Ci.nsIFileInputStream);
+      siStream = Cc['@mozilla.org/scriptableinputstream;1'].createInstance(Ci.nsIScriptableInputStream);
+      fiStream.init(file, 1, 0, false);
+      siStream.init(fiStream);
+      data = siStream.read(-1);
+      siStream.close();
+      fiStream.close();
+      return data;
+    }
+  };
+  $dir = {
+    create: function(dir) {
+      if (typeof dir === 'string') {
+        dir = $file.open(dir);
+      }
+      return dir.create(0x01, 0774);
+    },
+    mkpath: function(root, path) {
+      var part, _i, _len, _ref;
+      _ref = path.split(/[\/\\]/);
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        part = _ref[_i];
+        root = root.append(part);
+        root.normalize();
+        if (!root.exists()) {
+          $dir.create(root);
+        }
+      }
+      return root;
+    }
+  };
+  $dir.__defineGetter__('chrome', function() {
+    return Cc['@mozilla.org/file/directory_service;1'].createInstance(Ci.nsIProperties).get('AChrom', Ci.nsIFile);
+  });
+  $dir.__defineGetter__('root', function() {
+    var root;
+    root = $file.open($dir.chrome.path + '/../../');
+    root.normalize();
+    return root;
+  });
+  $dir.__defineGetter__('tmp', function() {
+    var root, tmp;
+    root = $dir.root;
+    tmp = root.append('tmp');
+    if (!$dir.exists()) {
+      $dir.create(tmp);
+    }
+    return tmp;
+  });
   bootstrap = {
     loadedScripts: [],
     info: null,

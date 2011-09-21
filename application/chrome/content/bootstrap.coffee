@@ -1,20 +1,11 @@
 @onerror = (error) ->
   dump "unhandled error: #{error}\n"
 
+Cc = Components.classes
+Ci = Components.interfaces
+
 getContent = (uri) ->
-  xhr = new XMLHttpRequest()
-
-  xhr.open 'GET', uri, false
-  try
-    xhr.send null
-  catch e
-    # uh oh, 404?
-    return null
-
-  if xhr.status in [0, 200]
-    xhr.responseText
-  else
-    null
+  $file.read $dir.chrome.path + "/content/#{uri}"
 
 indentCount = (line) ->
   indent = 0
@@ -45,6 +36,60 @@ functionNameForLine = (line) ->
   # __defineGetter__('foo', function() / __defineSetter__('foo', function(...)
   else if match = line.match(/__define([GS]et)ter__\(['"]([_a-zA-Z]\w*)['"],\s*function/)
     "#{match[1].toLowerCase()} #{match[2]}"
+
+$file =
+  open: (path) ->
+    file = Cc['@mozilla.org/file/local;1'].createInstance(Ci.nsILocalFile)
+    file.initWithPath(path)
+    return file
+
+  read: (file) ->
+    if typeof file is 'string'
+      path = file
+      file = $file.open path
+    else if file
+      path = file.path
+
+    fiStream = Cc['@mozilla.org/network/file-input-stream;1'].createInstance(Ci.nsIFileInputStream)
+    siStream = Cc['@mozilla.org/scriptableinputstream;1'].createInstance(Ci.nsIScriptableInputStream)
+    fiStream.init(file, 1, 0, false)
+    siStream.init(fiStream)
+
+    data = siStream.read(-1)
+    siStream.close()
+    fiStream.close()
+
+    return data
+
+$dir =
+  create: (dir) ->
+    dir = $file.open dir if typeof dir is 'string'
+    dir.create 0x01, 0774
+
+  mkpath: (root, path) ->
+    for part in path.split /[\/\\]/
+      root = root.append part
+      root.normalize()
+      $dir.create root unless root.exists()
+
+    return root
+
+$dir.__defineGetter__ 'chrome', ->
+  Cc['@mozilla.org/file/directory_service;1']
+    .createInstance(Ci.nsIProperties)
+    .get('AChrom', Ci.nsIFile)
+
+$dir.__defineGetter__ 'root', ->
+  root = $file.open $dir.chrome.path + '/../../'
+  root.normalize()
+  return root
+
+$dir.__defineGetter__ 'tmp', ->
+  {root} = $dir
+  tmp = root.append 'tmp'
+  $dir.create tmp unless $dir.exists()
+  return tmp
+
 
 bootstrap =
   loadedScripts: []
