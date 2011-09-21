@@ -322,12 +322,36 @@ walk = (module, callback) ->
 Logger  = @require 'Logger'
 inspect = @require 'util/inspect'
 prefs   = @require 'util/prefs'
+{trim}  = @require 'lang/string'
+
 
 # colorize the logging if appropriate
 Logger.rootLogger.printer = (object) ->
   if typeof object is 'string'
     # top-level strings don't get quotes or color since they're probably just log messages
     object
+  else if object instanceof Error
+    trace = (require 'util/error').stackTrace(object)
+    result = "#{object.message}\n\n"
+
+    if lineText = trace.frames[0]?.line
+      lineText = trim lineText
+      lineText = lineText[0...38]+'...'+lineText[lineText.length-35...lineText.length] if lineText.length > 76
+
+      result += "On:\n    #{lineText}\n"
+
+    result += "Backtrace:\n"
+
+    for {name, filename, lineNumber} in trace.frames
+      if name.length < 40
+        result += ' ' for i in [0...(40 - name.length)]
+      else
+        name = "#{name[0...37]}..."
+
+      result += "#{name} at #{filename}:#{lineNumber}\n"
+
+    return result
+
   else
     inspect object, undefined, undefined, prefs.get('wesabe.logger.color') ? on
 
