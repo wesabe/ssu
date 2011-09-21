@@ -179,3 +179,6 @@ class Response
                     message  = trim message.text if message
 
                     new Status code, severity, message
+
+
+module.exports = Response
