@@ -1,4 +1,3 @@
-{_inspectString} = require 'util'
 Colorizer        = require 'util/Colorizer'
 
 class Text
@@ -26,5 +25,6 @@ class Text
      .print(inspect @text)
      .reset()
      .toString()
+
 
 module.exports = Text
