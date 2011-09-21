@@ -58,12 +58,11 @@ class Job
 
   finish: (status, result, successful) ->
     @version++
-    event = if successful then 'succeed' else 'fail'
     @done = true
     @player.finish() if type.isFunction @player.finish
     @status = status or (if successful then 200 else 400)
     @result = result or (if successful then 'ok' else 'fail')
-    event.trigger this, "update #{event} complete"
+    event.trigger this, "update #{successful and 'succeed' or 'fail'} complete"
     @timer.end 'Total'
 
     org = @player.org
