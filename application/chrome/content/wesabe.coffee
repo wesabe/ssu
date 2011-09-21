@@ -15,6 +15,69 @@ window.onerror = (error) ->
     dump "uncaught exception: #{error}"
 
 
+loadedContent = []
+evalContentCache = {}
+contentInfoCache = {}
+evalFile = 'coffee-script.js'
+evalLine = null
+
+
+getEvalLine = ->
+  return evalLine if evalLine
+
+  for line, i in (getEvalContent evalFile).split '\n'
+    if line.match /\beval\(/
+      evalLine = i
+      break
+
+  if evalLine is null
+    throw new Error "unable to determine eval line for file #{evalFile}"
+
+  return evalLine
+
+getContent = (uri) ->
+  xhr = new XMLHttpRequest()
+
+  xhr.open 'GET', uri, false
+  try
+    xhr.send null
+  catch e
+    # uh oh, 404?
+    return null
+
+  if xhr.status in [0, 200]
+    xhr.responseText
+  else
+    null
+
+getEvalContent = (uri) ->
+  return evalContentCache[uri] if evalContentCache[uri]
+
+  content = getContent uri
+  return unless content
+
+  if /\.coffee$/.test uri
+    try
+      content = CoffeeScript.compile content
+    catch e
+      dump "!! Unable to compile CoffeeScript file: #{uri}: #{e}\n"
+      return null
+
+  evalContentCache[uri] = content
+
+getContentInfo = (uri) ->
+  return contentInfoCache[uri] if contentInfoCache[uri]
+
+  content = getEvalContent uri
+  return unless content
+
+  offset = getEvalLine()
+  lines  = content.split('\n').length
+  evalLine += lines
+
+  {content, offset, lines}
+
+
 wesabe =
   #
   # Creates nested modules as given by the module.
@@ -115,9 +178,6 @@ wesabe =
       name: module
       parts: parts
 
-    if parts[parts.length-1] isnt '*'
-      result.exports = walk(module)
-
     return result
 
   baseUrlForScheme: (scheme) ->
@@ -171,73 +231,25 @@ wesabe =
     uris.concat(wesabe._getUrisForParts(parts[0...parts.length-1], scheme, true, false))
 
   #
-  # All the Uris loaded by _loadUri.
-  # @private
-  #
-  _loadedUris: []
-
-  #
-  # File offset in number of lines.
-  #
-  _locOffset: null
-
-  #
-  # The line number of the eval statement in this file.
-  #
-  _evalOffset: null
-
-  #
-  # Returns the file and line number that the evaled code at a given line is from.
-  #
-  fileAndLineFromEvalLine: (lineno) ->
-    for uri in wesabe._loadedUris
-      if lineno > uri.offset and lineno <= uri.offset+uri.loc
-        return file: uri.file, lineno: lineno-uri.offset
-
-  #
   # Loads (and evals) the JS file at +uri+. Returns true on success.
   # @method _loadUri
   # @param uri {String} The uri to the JS file to load and eval.
   # @private
   #
   _loadUri: (uri, module) ->
-    if wesabe._loadedUris[uri]
+    if loadedContent[uri]
       return true
 
-    contents = wesabe._getEvalText(uri)
+    contents = getEvalContent uri
     return false unless contents
 
-    # figure out LOC offset and EVAL offset
-    if wesabe._locOffset is null
-      lines = wesabe._getEvalText(wesabe.getMyURI()).split(/\n/)
-      for line, i in lines
-        # can't actually use the same value we're looking for, or this'll be found first
-        if /_{2}EVAL_{2}/.test(lines[i])
-          wesabe._evalOffset = i
-          break
+    loadedContent[uri] = true
+    loadedContent.push loadedContent[uri]
 
-      wesabe._locOffset = lines.length
-      wesabe._loadedUris[wesabe.getMyURI()] =
-        offset: 0
-        loc: lines.length
-        file: wesabe.getMyURI()
-
-      wesabe._loadedUris.push wesabe._loadedUris[wesabe.getMyURI()]
-
-    loc = contents.split(/\n/).length
-
-    wesabe._loadedUris[uri] =
-      offset: wesabe._locOffset
-      loc: loc
-      file: uri
-
-    wesabe._loadedUris.push wesabe._loadedUris[uri]
-
-    __FILE__ = uri
-    padding = new Array(wesabe._locOffset-wesabe._evalOffset+1).join('\n')
-    wesabe._locOffset += loc
+    #padding = new Array(wesabe._locOffset-wesabe._evalOffset+1).join('\n')
 
     try
+      __FILE__ = uri
       _exportsOriginal = module.exports
       exports = module.exports
       require = wesabe.CommonJSRequire
@@ -247,7 +259,7 @@ wesabe =
 
       # run the file code inside a closure with exports as the context
       (->
-        eval("#{padding}#{contents}\r\n//@ sourceUri=#{uri}") # __EVAL__
+        eval(contents) # __EVAL__
 
         # if the file changed exports, re-save it
         if _exportsOriginal isnt exports
@@ -267,45 +279,6 @@ wesabe =
     for script in document.getElementsByTagName('script')
       if script.getAttribute('src').match(/wesabe.coffee/)
         return wesabe._myURI = script.getAttribute('src')
-
-  #
-  # Gets the text at the given uri.
-  # @method _getText
-  # @param uri {String} The uri to the file to get the text of.
-  # @private
-  #
-  _getText: (uri) ->
-    xhr = new XMLHttpRequest()
-
-    xhr.open 'GET', uri, false
-    try
-      xhr.send null
-    catch e
-      # uh oh, 404?
-      return null
-
-    if xhr.status in [0, 200]
-      xhr.responseText
-    else
-      null
-
-  _evalTextByURI: {}
-
-  _getEvalText: (uri) ->
-    return @_evalTextByURI[uri] if @_evalTextByURI[uri]
-
-    text = @_getText uri
-
-    return unless text
-
-    if /\.coffee$/.test uri
-      try
-        text = CoffeeScript.compile(text)
-      catch e
-        dump "!! Unable to compile CoffeeScript file #{uri}: #{e}\n"
-        return null
-
-    @_evalTextByURI[uri] = text
 
 walk = (module, callback) ->
   base = wesabe
