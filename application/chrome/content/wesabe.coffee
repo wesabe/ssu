@@ -20,12 +20,16 @@ evalContentCache = {}
 contentInfoCache = {}
 evalFile = 'coffee-script.js'
 evalLine = null
+evaled = ''
 
 
 getEvalLine = ->
   return evalLine if evalLine
 
-  for line, i in (getEvalContent evalFile).split '\n'
+  evalFileContent = getEvalContent evalFile
+  evaled += evalFileContent
+
+  for line, i in evalFileContent.split '\n'
     if line.match /\beval\(/
       evalLine = i
       break
@@ -75,10 +79,39 @@ getContentInfo = (uri) ->
   lines  = content.split('\n').length
   evalLine += lines
 
-  {content, offset, lines}
+  contentInfoCache[uri] = {content, offset, lines}
+  dump "#{uri}, offset=#{offset}, lines=#{lines}\n"
+  contentInfoCache[uri]
+
+getOriginalLineInfo = (evaledOffset) ->
+  evaledLines = evaled.split('\n')
+  for uri, {content, offset, lines} of contentInfoCache
+    if offset <= evaledOffset < offset + lines
+      originalLineNumber = evaledOffset - offset + 1
+      originalLineContent = content.split('\n')[originalLineNumber-1]
+      ll = (evaledLines[evaledOffset+i] for i in [-2..2])
+      Logger.rootLogger.debug "\noriginalLineContent=#{originalLineContent}\nevaled[#{evaledOffset}]:\n#{ll.join('\n')}\n"
+      return {line: originalLineContent, lineNumber: originalLineNumber, uri}
 
 
 wesabe =
+  caller: ->
+    (require 'util/error').stackTrace new Error()
+
+  getLineForStackFrame: (frame) ->
+    (getEvalContent frame.filename).split('\n')[frame.lineNumber]
+
+  correctStackFrameInfo: (frame) ->
+    evalFile = window.bootstrap.uri
+    Logger.rootLogger.debug "correcting #{frame.filename}:#{frame.lineNumber} | #{frame.filename[frame.filename.length-evalFile.length..]}"
+    if frame.filename[frame.filename.length-evalFile.length..] is evalFile
+      if info = bootstrap.infoForEvaledLineNumber frame.lineNumber
+        Logger.rootLogger.debug "--> #{info.toSource()}"
+        frame.filename = info.filename
+        frame.lineNumber = info.lineNumber
+        frame.line = info.line
+
+
   #
   # Creates nested modules as given by the module.
   #
@@ -240,32 +273,29 @@ wesabe =
     if loadedContent[uri]
       return true
 
-    contents = getEvalContent uri
-    return false unless contents
+    info = getContentInfo uri
+    return false unless info
 
     loadedContent[uri] = true
     loadedContent.push loadedContent[uri]
 
-    #padding = new Array(wesabe._locOffset-wesabe._evalOffset+1).join('\n')
+    #padding = new Array(info.offset+1).join('\n')
 
     try
-      __FILE__ = uri
-      _exportsOriginal = module.exports
-      exports = module.exports
-      require = wesabe.CommonJSRequire
-      logger  = Logger?.loggerForFile __FILE__
-      Cc      = Components.classes
-      Ci      = Components.interfaces
+      exports = _exportsOriginal = module.exports
 
-      # run the file code inside a closure with exports as the context
-      (->
-        eval(contents) # __EVAL__
+      bootstrap.load uri,
+        __FILE__: uri
+        module:   module
+        exports:  exports
+        require:  wesabe.CommonJSRequire
+        logger:   Logger?.loggerForFile uri
+        Cc:       Components.classes
+        Ci:       Components.interfaces
 
-        # if the file changed exports, re-save it
-        if _exportsOriginal isnt exports
-          module.exports = exports
-
-      ).call(exports)
+      # if the file changed exports, re-save it
+      if _exportsOriginal isnt exports
+        module.exports = exports
 
     catch e
       dump "!! Error while evaluating code from #{uri}: #{e}\n"
@@ -307,3 +337,7 @@ Logger.rootLogger.printer = (object) ->
 
 # write logs to a file rather than stdout
 Logger.rootLogger.appender = Logger.getFileAppender()
+
+setTimeout ->
+  Logger.rootLogger.debug new Error(), (require 'util/error').stackTrace(new Error())
+, 0

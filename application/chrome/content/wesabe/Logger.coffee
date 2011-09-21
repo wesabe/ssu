@@ -137,6 +137,9 @@ class Logger
 rootLogger = new Logger()
 fileAppender = null
 
+setTimeout ->
+  require 'util/error'
+, 0
 
 Logger.getFileAppender = ->
   return fileAppender if fileAppender

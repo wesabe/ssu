@@ -14,40 +14,7 @@
   <script type="text/coffeescript" src="wesabe.coffee"/>
   <script type="text/coffeescript" src="main.coffee"/>
 
-  <script type="text/javascript">
-    <![CDATA[
-    (function() {
-      var coffees, execute, index, length, s, scripts;
-      scripts = document.getElementsByTagName('script');
-      coffees = (function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = scripts.length; _i < _len; _i++) {
-          s = scripts[_i];
-          if (s.getAttribute('type') === 'text/coffeescript') {
-            _results.push({src: s.getAttribute('src'), type: s.getAttribute('type')});
-          }
-        }
-        return _results;
-      })();
-      index = 0;
-      length = coffees.length;
-      (execute = function() {
-        var script;
-        script = coffees[index++];
-        if ((script != null ? script.type : void 0) === 'text/coffeescript') {
-          if (script.src) {
-            return CoffeeScript.load(script.src, execute);
-          } else {
-            CoffeeScript.run(script.innerHTML);
-            return execute();
-          }
-        }
-      })();
-      return null;
-    })();
-    ]]>
-  </script>
+  <script type="application/x-javascript" src="bootstrap.js"></script>
 
   <keyset>
     <key modifiers="accel" key="W" oncommand="window.close()"/>

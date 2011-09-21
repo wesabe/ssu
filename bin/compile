@@ -7,7 +7,7 @@ which -s coffee 2>/dev/null ||
   die "CoffeeScript is not installed. Please make sure 'coffee' is in your PATH."
 
 if [[ "$1" == "-w" || "$1" == "--watch" ]]; then
-  exec coffee --compile --watch application/chrome/content/wesabe
+  exec coffee --compile --watch application/chrome/content
 else
-  exec coffee --compile application/chrome/content/wesabe/**/*.coffee
+  exec coffee --compile application/chrome/content/**/*.coffee
 fi
