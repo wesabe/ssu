@@ -20,7 +20,7 @@ getContent = (uri) ->
       return $file.read cache
     else
       # out of date, rebuild cached file
-      dump "building cache at #{cache.path} from #{liveFile.path}\n"
+      dump "\x1b[36m[compile]\x1b[0m #{uri}\n"
       content = CoffeeScript.compile $file.read(liveFile)
       $file.write cache, content
       return content
