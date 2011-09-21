@@ -45,15 +45,12 @@
 {open} = require 'io/file'
 
 
-sep        = if navigator.platform.toLowerCase().indexOf('win') > -1 then '\\' else '/'
-dirservCID = '@mozilla.org/file/directory_service;1'
-propsIID   = Components.interfaces.nsIProperties
-fileIID    = Components.interfaces.nsIFile
+sep = if navigator.platform.toLowerCase().indexOf('win') > -1 then '\\' else '/'
 
 _read = (dirEntry, recursive) ->
   list = []
   while dirEntry.hasMoreElements()
-    list.push(dirEntry.getNext().QueryInterface(Components.interfaces.nsILocalFile))
+    list.push(dirEntry.getNext().QueryInterface(Ci.nsILocalFile))
 
   if recursive
     list2 = []
@@ -70,7 +67,9 @@ _read = (dirEntry, recursive) ->
 $dir =
   get: (type) ->
     try
-      Components.classes[dirservCID].createInstance(propsIID).get(type, fileIID)
+      Cc['@mozilla.org/file/directory_service;1']
+        .createInstance(Ci.nsIProperties)
+        .get(type, Ci.nsIFile)
     catch e
       return false
 

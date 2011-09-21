@@ -29,27 +29,12 @@
 type = require 'lang/type'
 {tryThrow, tryCatch} = require 'util/try'
 
-localfileCID  = '@mozilla.org/file/local;1'
-localfileIID  = Components.interfaces.nsILocalFile
-
-finstreamCID  = '@mozilla.org/network/file-input-stream;1'
-finstreamIID  = Components.interfaces.nsIFileInputStream
-
-foutstreamCID = '@mozilla.org/network/file-output-stream;1'
-foutstreamIID = Components.interfaces.nsIFileOutputStream
-
-sinstreamCID  = '@mozilla.org/scriptableinputstream;1'
-sinstreamIID  = Components.interfaces.nsIScriptableInputStream
-
-suniconvCID   = '@mozilla.org/intl/scriptableunicodeconverter'
-suniconvIID   = Components.interfaces.nsIScriptableUnicodeConverter
-
 exists = (path) ->
   open(path)?.exists()
 
 open = (path) ->
   try
-    file = Components.classes[localfileCID].createInstance(localfileIID)
+    file = Cc['@mozilla.org/file/local;1'].createInstance(Ci.nsILocalFile)
     file.initWithPath(path)
     return file
   catch e
@@ -63,8 +48,10 @@ read = (file, charset) ->
     path = file.path
 
   tryThrow "file.read(#{path})", =>
-    fiStream = Components.classes[finstreamCID].createInstance(finstreamIID)
-    siStream = Components.classes[sinstreamCID].createInstance(sinstreamIID)
+    fiStream = Cc['@mozilla.org/network/file-input-stream;1']
+      .createInstance(Ci.nsIFileInputStream)
+    siStream = Cc['@mozilla.org/scriptableinputstream;1']
+      .createInstance(Ci.nsIScriptableInputStream)
     fiStream.init(file, 1, 0, false)
     siStream.init(fiStream)
 
@@ -88,7 +75,8 @@ write = (file, data, mode, charset) ->
     path = file.path
 
   try
-    foStream = Components.classes[foutstreamCID].createInstance(foutstreamIID)
+    foStream = Cc['@mozilla.org/network/file-output-stream;1']
+      .createInstance(Ci.nsIFileOutputStream)
     data = fromUnicode charset, data if charset
     flags = if mode == 'a'
               0x02 | 0x10        # wronly | append
@@ -127,7 +115,8 @@ path = (file) ->
 
 toUnicode = (charset, data) ->
   try
-    uniConv = Components.classes[suniconvCID].createInstance(suniconvIID)
+    uniConv = Cc['@mozilla.org/intl/scriptableunicodeconverter']
+      .createInstance(Ci.nsIScriptableUnicodeConverter)
     uniConv.charset = charset
     data = uniConv.ConvertToUnicode(data)
   catch e
@@ -137,7 +126,8 @@ toUnicode = (charset, data) ->
 
 fromUnicode = (charset, data) ->
   try
-    uniConv = Components.classes[suniconvCID].createInstance(suniconvIID)
+    uniConv = Cc['@mozilla.org/intl/scriptableunicodeconverter']
+      .createInstance(Ci.nsIScriptableUnicodeConverter)
     uniConv.charset = charset
     data = uniConv.ConvertFromUnicode(data)
     # data += uniConv.Finish()
