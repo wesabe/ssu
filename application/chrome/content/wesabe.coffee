@@ -80,8 +80,6 @@ getContentInfo = (uri) ->
   evalLine += lines
 
   contentInfoCache[uri] = {content, offset, lines}
-  dump "#{uri}, offset=#{offset}, lines=#{lines}\n"
-  contentInfoCache[uri]
 
 getOriginalLineInfo = (evaledOffset) ->
   evaledLines = evaled.split('\n')
@@ -90,7 +88,6 @@ getOriginalLineInfo = (evaledOffset) ->
       originalLineNumber = evaledOffset - offset + 1
       originalLineContent = content.split('\n')[originalLineNumber-1]
       ll = (evaledLines[evaledOffset+i] for i in [-2..2])
-      Logger.rootLogger.debug "\noriginalLineContent=#{originalLineContent}\nevaled[#{evaledOffset}]:\n#{ll.join('\n')}\n"
       return {line: originalLineContent, lineNumber: originalLineNumber, uri}
 
 
@@ -103,10 +100,8 @@ wesabe =
 
   correctStackFrameInfo: (frame) ->
     evalFile = window.bootstrap.uri
-    Logger.rootLogger.debug "correcting #{frame.filename}:#{frame.lineNumber} | #{frame.filename[frame.filename.length-evalFile.length..]}"
     if frame.filename[frame.filename.length-evalFile.length..] is evalFile
       if info = bootstrap.infoForEvaledLineNumber frame.lineNumber
-        Logger.rootLogger.debug "--> #{info.toSource()}"
         frame.filename = info.filename
         frame.lineNumber = info.lineNumber
         frame.line = info.line
@@ -337,7 +332,3 @@ Logger.rootLogger.printer = (object) ->
 
 # write logs to a file rather than stdout
 Logger.rootLogger.appender = Logger.getFileAppender()
-
-setTimeout ->
-  Logger.rootLogger.debug new Error(), (require 'util/error').stackTrace(new Error())
-, 0
