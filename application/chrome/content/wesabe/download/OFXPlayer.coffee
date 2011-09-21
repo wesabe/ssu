@@ -1,6 +1,7 @@
 date    = require 'lang/date'
 type    = require 'lang/type'
 extend  = require 'lang/extend'
+event   = require 'util/event'
 privacy = require 'util/privacy'
 {tryCatch, tryThrow} = require 'util/try'
 
