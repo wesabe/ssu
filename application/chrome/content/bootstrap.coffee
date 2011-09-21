@@ -5,7 +5,27 @@ Cc = Components.classes
 Ci = Components.interfaces
 
 getContent = (uri) ->
-  $file.read $dir.chrome.path + "/content/#{uri}"
+  liveFile = $file.open $dir.chrome.path + "/content/#{uri}"
+
+  if m = uri.match /^(?:(.+)\/)?([^\/]+)\.coffee$/
+    name = m[2]
+    dir = m[1]
+
+    {root} = $dir
+    cache = $dir.mkpath root, "tmp/script-build-cache/#{dir or ''}"
+    cache.append "#{name}.js"
+
+    if cache.exists() and cache.lastModifiedTime >= liveFile.lastModifiedTime
+      # up to date, read the cached file
+      return $file.read cache
+    else
+      # out of date, rebuild cached file
+      dump "building cache at #{cache.path} from #{liveFile.path}\n"
+      content = CoffeeScript.compile $file.read(liveFile)
+      $file.write cache, content
+      return content
+
+  $file.read liveFile
 
 indentCount = (line) ->
   indent = 0
@@ -61,6 +81,25 @@ $file =
 
     return data
 
+  write: (file, data, mode) ->
+    if typeof file is 'string'
+      path = file
+      file = $file.open path
+    else if file
+      path = file.path
+
+    foStream = Cc['@mozilla.org/network/file-output-stream;1'].createInstance(Ci.nsIFileOutputStream)
+    flags = if mode is 'a'
+              0x02 | 0x10        # wronly | append
+            else
+              0x02 | 0x08 | 0x20 # wronly | create | truncate
+
+    foStream.init(file, flags, 0664, 0)
+    foStream.write(data, data.length)
+    foStream.close()
+
+    return true
+
 $dir =
   create: (dir) ->
     dir = $file.open dir if typeof dir is 'string'
@@ -68,8 +107,7 @@ $dir =
 
   mkpath: (root, path) ->
     for part in path.split /[\/\\]/
-      root = root.append part
-      root.normalize()
+      root.append part
       $dir.create root unless root.exists()
 
     return root
@@ -84,12 +122,6 @@ $dir.__defineGetter__ 'root', ->
   root.normalize()
   return root
 
-$dir.__defineGetter__ 'tmp', ->
-  {root} = $dir
-  tmp = root.append 'tmp'
-  $dir.create tmp unless $dir.exists()
-  return tmp
-
 
 bootstrap =
   loadedScripts: []
@@ -101,7 +133,6 @@ bootstrap =
 
   load: (uri, scope={}) ->
     content = getContent uri
-    content = CoffeeScript.compile(content) if uri.match /\.coffee$/
     lines = content.split('\n').length
     offset = @currentOffset
     padding = new Array(offset-@evalOffset+1).join('\n')

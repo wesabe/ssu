@@ -6,7 +6,24 @@
   Cc = Components.classes;
   Ci = Components.interfaces;
   getContent = function(uri) {
-    return $file.read($dir.chrome.path + ("/content/" + uri));
+    var cache, content, dir, liveFile, m, name, root;
+    liveFile = $file.open($dir.chrome.path + ("/content/" + uri));
+    if (m = uri.match(/^(?:(.+)\/)?([^\/]+)\.coffee$/)) {
+      name = m[2];
+      dir = m[1];
+      root = $dir.root;
+      cache = $dir.mkpath(root, "tmp/script-build-cache/" + (dir || ''));
+      cache.append("" + name + ".js");
+      if (cache.exists() && cache.lastModifiedTime >= liveFile.lastModifiedTime) {
+        return $file.read(cache);
+      } else {
+        dump("building cache at " + cache.path + " from " + liveFile.path + "\n");
+        content = CoffeeScript.compile($file.read(liveFile));
+        $file.write(cache, content);
+        return content;
+      }
+    }
+    return $file.read(liveFile);
   };
   indentCount = function(line) {
     var i, indent;
@@ -62,6 +79,21 @@
       siStream.close();
       fiStream.close();
       return data;
+    },
+    write: function(file, data, mode) {
+      var flags, foStream, path;
+      if (typeof file === 'string') {
+        path = file;
+        file = $file.open(path);
+      } else if (file) {
+        path = file.path;
+      }
+      foStream = Cc['@mozilla.org/network/file-output-stream;1'].createInstance(Ci.nsIFileOutputStream);
+      flags = mode === 'a' ? 0x02 | 0x10 : 0x02 | 0x08 | 0x20;
+      foStream.init(file, flags, 0664, 0);
+      foStream.write(data, data.length);
+      foStream.close();
+      return true;
     }
   };
   $dir = {
@@ -76,8 +108,7 @@
       _ref = path.split(/[\/\\]/);
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         part = _ref[_i];
-        root = root.append(part);
-        root.normalize();
+        root.append(part);
         if (!root.exists()) {
           $dir.create(root);
         }
@@ -94,15 +125,6 @@
     root.normalize();
     return root;
   });
-  $dir.__defineGetter__('tmp', function() {
-    var root, tmp;
-    root = $dir.root;
-    tmp = root.append('tmp');
-    if (!$dir.exists()) {
-      $dir.create(tmp);
-    }
-    return tmp;
-  });
   bootstrap = {
     loadedScripts: [],
     info: null,
@@ -115,9 +137,6 @@
         scope = {};
       }
       content = getContent(uri);
-      if (uri.match(/\.coffee$/)) {
-        content = CoffeeScript.compile(content);
-      }
       lines = content.split('\n').length;
       offset = this.currentOffset;
       padding = new Array(offset - this.evalOffset + 1).join('\n');
