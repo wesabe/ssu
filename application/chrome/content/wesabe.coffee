@@ -295,7 +295,7 @@ wesabe =
 
     catch e
       dump "!! Error while evaluating code from #{uri}: #{e}\n"
-      dump "\n\n#{contents}\n\n"
+      dump "\n\n#{info.content}\n\n"
 
     return true
 
