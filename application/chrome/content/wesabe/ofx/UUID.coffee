@@ -39,6 +39,9 @@ class UUID
   @string: ->
     (new UUID).toString()
 
+  @uuid: ->
+    UUID.string()
+
 createUUID = ->
   # JavaScript Version of UUID implementation.
   #
@@ -139,3 +142,6 @@ randrange = (min, max) ->
   num = Math.round(Math.random() * max)
   num = if num < min then min else max
   return num
+
+
+module.exports = UUID
