@@ -15,88 +15,12 @@ window.onerror = (error) ->
     dump "uncaught exception: #{error}"
 
 
-loadedContent = []
-evalContentCache = {}
-contentInfoCache = {}
-evalFile = 'coffee-script.js'
-evalLine = null
-evaled = ''
-
-
-getEvalLine = ->
-  return evalLine if evalLine
-
-  evalFileContent = getEvalContent evalFile
-  evaled += evalFileContent
-
-  for line, i in evalFileContent.split '\n'
-    if line.match /\beval\(/
-      evalLine = i
-      break
-
-  if evalLine is null
-    throw new Error "unable to determine eval line for file #{evalFile}"
-
-  return evalLine
-
-getContent = (uri) ->
-  xhr = new XMLHttpRequest()
-
-  xhr.open 'GET', uri, false
-  try
-    xhr.send null
-  catch e
-    # uh oh, 404?
-    return null
-
-  if xhr.status in [0, 200]
-    xhr.responseText
-  else
-    null
-
-getEvalContent = (uri) ->
-  return evalContentCache[uri] if evalContentCache[uri]
-
-  content = getContent uri
-  return unless content
-
-  if /\.coffee$/.test uri
-    try
-      content = CoffeeScript.compile content
-    catch e
-      dump "!! Unable to compile CoffeeScript file: #{uri}: #{e}\n"
-      return null
-
-  evalContentCache[uri] = content
-
-getContentInfo = (uri) ->
-  return contentInfoCache[uri] if contentInfoCache[uri]
-
-  content = getEvalContent uri
-  return unless content
-
-  offset = getEvalLine()
-  lines  = content.split('\n').length
-  evalLine += lines
-
-  contentInfoCache[uri] = {content, offset, lines}
-
-getOriginalLineInfo = (evaledOffset) ->
-  evaledLines = evaled.split('\n')
-  for uri, {content, offset, lines} of contentInfoCache
-    if offset <= evaledOffset < offset + lines
-      originalLineNumber = evaledOffset - offset + 1
-      originalLineContent = content.split('\n')[originalLineNumber-1]
-      ll = (evaledLines[evaledOffset+i] for i in [-2..2])
-      return {line: originalLineContent, lineNumber: originalLineNumber, uri}
-
-
 wesabe =
   caller: ->
     (require 'util/error').stackTrace new Error()
 
   getLineForStackFrame: (frame) ->
-    (getEvalContent frame.filename).split('\n')[frame.lineNumber]
+    (bootstrap.getContent frame.filename).split('\n')[frame.lineNumber]
 
   correctStackFrameInfo: (frame) ->
     evalFile = window.bootstrap.uri
@@ -266,16 +190,8 @@ wesabe =
   # @private
   #
   _loadUri: (uri, module) ->
-    if loadedContent[uri]
-      return true
-
-    info = getContentInfo uri
-    return false unless info
-
-    loadedContent[uri] = true
-    loadedContent.push loadedContent[uri]
-
-    #padding = new Array(info.offset+1).join('\n')
+    content = bootstrap.getContent uri
+    return false unless content
 
     try
       exports = _exportsOriginal = module.exports
@@ -295,7 +211,7 @@ wesabe =
 
     catch e
       dump "!! Error while evaluating code from #{uri}: #{e}\n"
-      dump "\n\n#{info.content}\n\n"
+      dump "\n\n#{content}\n\n"
 
     return true
 

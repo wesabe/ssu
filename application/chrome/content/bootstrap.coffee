@@ -6,6 +6,7 @@ Ci = Components.interfaces
 
 getContent = (uri) ->
   liveFile = $file.open $dir.chrome.path + "/content/#{uri}"
+  return null unless liveFile.exists()
 
   if m = uri.match /^(?:(.+)\/)?([^\/]+)\.coffee$/
     name = m[2]
@@ -130,6 +131,8 @@ bootstrap =
   uri: 'bootstrap.js'
   evalOffset: null
   currentOffset: null
+
+  getContent: getContent
 
   load: (uri, scope={}) ->
     content = getContent uri

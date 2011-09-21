@@ -8,6 +8,9 @@
   getContent = function(uri) {
     var cache, content, dir, liveFile, m, name, root;
     liveFile = $file.open($dir.chrome.path + ("/content/" + uri));
+    if (!liveFile.exists()) {
+      return null;
+    }
     if (m = uri.match(/^(?:(.+)\/)?([^\/]+)\.coffee$/)) {
       name = m[2];
       dir = m[1];
@@ -131,6 +134,7 @@
     uri: 'bootstrap.js',
     evalOffset: null,
     currentOffset: null,
+    getContent: getContent,
     load: function(uri, scope) {
       var content, lines, offset, padding;
       if (scope == null) {
