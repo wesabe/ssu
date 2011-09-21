@@ -1,5 +1,6 @@
 date    = require 'lang/date'
 func    = require 'lang/func'
+type    = require 'lang/type'
 xhr     = require 'io/xhr'
 privacy = require 'util/privacy'
 {uuid}  = require 'ofx/UUID'
@@ -272,3 +273,6 @@ class Request
     "</INVSTMTRQ>\r\n" +
     "</INVSTMTTRNRQ>\r\n" +
     "</INVSTMTMSGSRQV1>\r\n"
+
+
+module.exports = Request
