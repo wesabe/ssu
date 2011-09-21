@@ -1,5 +1,5 @@
 (function() {
-  var bootstrap, getContent;
+  var bootstrap, functionNameForLine, getContent, indentCount;
   this.onerror = function(error) {
     return dump("unhandled error: " + error + "\n");
   };
@@ -16,6 +16,37 @@
       return xhr.responseText;
     } else {
       return null;
+    }
+  };
+  indentCount = function(line) {
+    var i, indent;
+    indent = 0;
+    while (line.indexOf(((function() {
+        var _results;
+        _results = [];
+        for (i = 0; 0 <= indent ? i <= indent : i >= indent; 0 <= indent ? i++ : i--) {
+          _results.push('  ');
+        }
+        return _results;
+      })()).join('')) === 0) {
+      indent++;
+    }
+    return indent;
+  };
+  functionNameForLine = function(line) {
+    var match;
+    if (match = line.match(/([_a-zA-Z]\w*)\s*:\s*(?:__bind\()?function\s*\(/)) {
+      return match[1];
+    } else if (match = line.match(/function\s*([_a-zA-Z]\w*)\s*\([\)]*/)) {
+      return match[1];
+    } else if (match = line.match(/(\w+)\s*=\s*(?:__bind\()?function\b/)) {
+      return match[1];
+    } else if (match = line.match(/\w+\.([_a-zA-Z]\w*)\s*=\s*(?:__bind\()?function/)) {
+      return match[1];
+    } else if (match = line.match(/((?:get|set)\s+[_a-zA-Z]\w*)\(\)/)) {
+      return match[1];
+    } else if (match = line.match(/__define([GS]et)ter__\(['"]([_a-zA-Z]\w*)['"],\s*function/)) {
+      return "" + (match[1].toLowerCase()) + " " + match[2];
     }
   };
   bootstrap = {
@@ -48,7 +79,7 @@
       }).call(window);
     },
     infoForEvaledLineNumber: function(lineNumber) {
-      var filename, line, s, script, _i, _len, _ref, _ref2;
+      var filename, indentOfLine, indentOfLineToCheck, line, lineNumberToCheck, lineToCheck, lines, minimumIndent, name, s, script, _i, _len, _ref, _ref2;
       script = this.info;
       _ref = this.loadedScripts;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -60,11 +91,31 @@
       }
       filename = script.uri;
       lineNumber = lineNumber - script.offset;
-      line = script.content.split('\n')[lineNumber - 1];
+      lines = script.content.split('\n');
+      line = lines[lineNumber - 1];
+      name = functionNameForLine(line);
+      if (!name && line) {
+        indentOfLine = indentCount(line);
+        minimumIndent = indentOfLine;
+        lineNumberToCheck = lineNumber - 2;
+        while (lineNumberToCheck >= 0) {
+          lineToCheck = lines[lineNumberToCheck];
+          indentOfLineToCheck = indentCount(lineToCheck);
+          if (indentOfLineToCheck < minimumIndent) {
+            minimumIndent = indentOfLineToCheck;
+            if (name = functionNameForLine(lineToCheck)) {
+              break;
+            }
+          }
+          lineNumberToCheck--;
+        }
+        name || (name = indentOfLine === 1 ? '(top)' : '(anonymous)');
+      }
       return {
         filename: filename,
         lineNumber: lineNumber,
-        line: line
+        line: line,
+        name: name
       };
     }
   };
@@ -79,7 +130,7 @@
       }
     }
     bootstrap.currentOffset = lines.length;
-    bootstrap.info = {
+    return bootstrap.info = {
       uri: bootstrap.uri,
       content: lines.join('\n'),
       offset: 0,
