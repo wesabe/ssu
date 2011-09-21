@@ -105,6 +105,7 @@ wesabe =
         frame.filename = info.filename
         frame.lineNumber = info.lineNumber
         frame.line = info.line
+        frame.name = info.name if info.name
 
 
   #
