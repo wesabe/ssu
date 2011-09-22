@@ -44,6 +44,7 @@
 
 {open} = require 'io/file'
 
+{tryThrow, tryCatch} = require 'util/try'
 
 sep = if navigator.platform.toLowerCase().indexOf('win') > -1 then '\\' else '/'
 

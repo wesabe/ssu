@@ -8,6 +8,7 @@ type           = require 'lang/type'
 event          = require 'util/event'
 dateForElement = (require 'dom/date').forElement
 dir            = require 'io/dir'
+file           = require 'io/file'
 {download}     = require 'io/Downloader'
 uuid           = (require 'ofx/UUID').string
 privacy        = require 'util/privacy'

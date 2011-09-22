@@ -1,6 +1,7 @@
 StreamListener = require 'io/StreamListener'
 
 {trigger} = require 'util/event'
+{tryThrow, tryCatch} = require 'util/try'
 
 sharedContentListener = null
 

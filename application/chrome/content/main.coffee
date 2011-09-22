@@ -88,7 +88,7 @@ class Application
   listenForDownloads: ->
     contentListener = ContentListener.sharedInstance
     contentListener.init window, "application/x-ssu-intercept"
-    event.add contentListener, 'after-receive', (event, data, filename) ->
+    event.add contentListener, 'after-receive', (_, data, filename) ->
       event.trigger 'downloadSuccess', [data, filename]
 
 
