@@ -63,7 +63,7 @@ class Response
   # Public methods
 
   # Response OFX presented as a DOM tree.
-  this::__defineGetter__ 'responseXML', ->
+  @::__defineGetter__ 'responseXML', ->
     @__responseXML__ ||= new Document @response, /BANKTRANLIST/i
 
   # Response OFX presented as a complete DOM tree, including BANKTRANLIST nodes.
@@ -71,7 +71,7 @@ class Response
     @__fullResponseXML__ ||= new Document @response
 
   # List of all deposit accounts.
-  this::__defineGetter__ 'bankAccounts', ->
+  @::__defineGetter__ 'bankAccounts', ->
     @_find_accounts() unless @__bankAccounts__
     return @__bankAccounts__
 
