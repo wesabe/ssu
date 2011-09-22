@@ -215,13 +215,6 @@ wesabe =
 
     return true
 
-  getMyURI: ->
-    return wesabe._myURI if wesabe._myURI
-
-    for script in document.getElementsByTagName('script')
-      if script.getAttribute('src').match(/wesabe.coffee/)
-        return wesabe._myURI = script.getAttribute('src')
-
 walk = (module, callback) ->
   base = wesabe
 
