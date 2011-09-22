@@ -19,10 +19,11 @@ MINUTE = MINUTES = 60 * SECONDS
 HOUR   = HOURS   = 60 * MINUTES
 DAY    = DAYS    = 24 * HOURS
 
-{trim} = wesabe.require 'lang.string'
+{trim}  = require 'lang/string'
+privacy = require 'util/privacy'
 
 parse = (string) ->
-  string = wesabe.untaint string
+  string = privacy.untaint string
 
   idate = Date.parse string
   if isNaN(idate)
@@ -34,7 +35,7 @@ parse = (string) ->
       return new Date m[1], Number(m[2])-1, m[3]
 
     # still couldn't do it
-    wesabe.warn 'unable to parse date: ', string
+    logger.warn 'unable to parse date: ', string
     return null
 
   return new Date idate

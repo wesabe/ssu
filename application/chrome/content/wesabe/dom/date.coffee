@@ -58,7 +58,7 @@ class SelectGroup
     xpath = Pathway.bind('.//select[.//option[contains(string(.), ":year")]]', year: thisYear)
     @yearSelect = wesabe.untaint Page.wrap(@container.ownerDocument).find(xpath, @container)
 
-    wesabe.warn "Unable to find a <select> element containing years" unless @yearSelect
+    logger.warn "Unable to find a <select> element containing years" unless @yearSelect
 
   locateMonthSelect: ->
     for month in MONTH_NAMES
@@ -67,13 +67,13 @@ class SelectGroup
 
       return if @monthSelect
 
-    wesabe.warn "Unable to find a <select> element containing months"
+    logger.warn "Unable to find a <select> element containing months"
 
   locateDaySelect: ->
     for select in wesabe.untaint Page.wrap(@container.ownerDocument).select('.//select', @container)
       return @daySelect = select if select.options.length >= 30
 
-    wesabe.warn "Unable to find a <select> element containing days"
+    logger.warn "Unable to find a <select> element containing days"
 
 
 module.exports = {forElement}

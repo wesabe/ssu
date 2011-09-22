@@ -55,7 +55,7 @@ class ContentListener
       logger.debug "suggestedFilenameForRequest error: #{err}"
 
       httpChannel.visitResponseHeaders
-        visitHeader: (key, value) -> wesabe.debug "HEADER: #{key}=#{value}"
+        visitHeader: (key, value) -> logger.debug "HEADER: #{key}=#{value}"
 
       match = httpChannel.URI?.spec?.match(/.+\/([^\/\?]+)/)
       return match?[1]

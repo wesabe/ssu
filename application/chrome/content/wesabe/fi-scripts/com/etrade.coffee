@@ -52,12 +52,12 @@ wesabe.download.Player.register
           action.beginDownloads()
 
         if tmp.account
-          wesabe.debug "DOWNLOADING: ", tmp.account
+          logger.debug "DOWNLOADING: ", tmp.account
           action.download()
         else if not tmp.accounts.length
           job.nextGoal()
         else
-          wesabe.debug "GETTING NEXT ACCOUNT"
+          logger.debug "GETTING NEXT ACCOUNT"
           tmp.account = tmp.accounts.shift()
           action.chooseAccount()
       else
