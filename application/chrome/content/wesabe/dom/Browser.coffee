@@ -17,7 +17,7 @@ class Browser
   #
   go: (uri) ->
     uri = @joinURI uri
-    wesabe.debug 'Loading uri=', uri
+    logger.debug 'Loading uri=', uri
     @browser.loadURI wesabe.untaint(uri), null, null
 
   #
