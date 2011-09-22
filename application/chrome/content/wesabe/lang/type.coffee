@@ -1,4 +1,4 @@
-extend = wesabe.require 'lang.extend'
+extend = require 'lang/extend'
 
 type =
   isString: (object) ->
