@@ -4,6 +4,7 @@ extend         = require 'lang/extend'
 date           = require 'lang/date'
 {trim}         = require 'lang/string'
 func           = require 'lang/func'
+type           = require 'lang/type'
 event          = require 'util/event'
 dateForElement = (require 'dom/date').forElement
 dir            = require 'io/dir'
