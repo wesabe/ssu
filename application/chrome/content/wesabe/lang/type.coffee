@@ -18,7 +18,7 @@ type =
     re instanceof RegExp or # easy case
     # duck-type for context-switching evalcx case
     re and
-    re.constructor.name is 'RegExp' and
+    re.constructor?.name is 'RegExp' and
     re.compile and
     re.test and
     re.exec and

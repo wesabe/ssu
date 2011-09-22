@@ -79,8 +79,8 @@ inspectObject = (object, showHidden, depth, color) ->
     content ||= object
 
     properties = for own k of content
-      getter = content.__lookupGetter__ k
-      setter = content.__lookupSetter__ k
+      getter = content.__lookupGetter__? k
+      setter = content.__lookupSetter__? k
       if getter or setter
         string = "["
         string += "Getter" if getter
@@ -97,7 +97,7 @@ inspectObject = (object, showHidden, depth, color) ->
     contentString = inspect content, showHidden, depth-1, color
 
   string = "{"
-  if object.constructor isnt Object and object.constructor.name
+  if object.constructor isnt Object and object.constructor?.name
     string += style 'class', object.constructor.name, color
     string += " " if contentString.length
   string += contentString
