@@ -54,7 +54,7 @@ class Page
   # Returns the URL of this page.
   #
   @::__defineGetter__ 'url', ->
-    privacy.taint @defaultView.location.href
+    privacy.taint @document.URL
 
   #
   # Returns true if this page is in a frame, false otherwise.
