@@ -292,6 +292,11 @@ class Player
   #
   answerSecurityQuestions: ->
 
+    # these are here because this function is called with magic scope
+    # and therefore won't see the variables we defined above
+    {trim} = require 'lang/string'
+    privacy = require 'util/privacy'
+
     questions = page.select e.security.questions
     qanswers  = page.select e.security.answers
 
@@ -466,7 +471,7 @@ class Player
           callbacks = @["#{type}ReceivedCallbacks"]
           if callbacks
             for callback in callbacks
-              @callWithMagicScope callback, browser, page, extend({message, log: (require 'Logger')}), message
+              @callWithMagicScope callback, browser, page, extend({message, logger: (require 'Logger').rootLogger}), message
 
     unless @shouldDispatch browser, page
       logger.info 'skipping document load'
@@ -521,6 +526,7 @@ class Player
     return true
 
   callWithMagicScope: (fn, browser, page, scope, args...) ->
+    log = scope.logger or scope.log or logger
     func.callWithScope fn, this, extend({
       browser
       page
@@ -534,6 +540,8 @@ class Player
       reload: => @triggerDispatch browser, page
       download: (args...) => @download args...
       bind: (args...) => Pathway.bind(args...)
+      logger: log
+      log: log
     }, scope or {}), args...
 
 
