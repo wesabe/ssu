@@ -11,6 +11,7 @@ dir       = require 'io/dir'
 file      = require 'io/file'
 snapshot  = require 'canvas/snapshot'
 english   = require 'util/words'
+privacy   = require 'util/privacy'
 {tryCatch, tryThrow} = require 'util/try'
 
 # ==== Types (shortcuts for use in this file)
@@ -38,22 +39,22 @@ class Page
   # Returns the title of this page.
   #
   @::__defineGetter__ 'title', ->
-    wesabe.taint @document.title
+    privacy.taint @document.title
 
   @::__defineGetter__ 'name', ->
-    wesabe.taint @defaultView.name
+    privacy.taint @defaultView.name
 
   #
   # Returns the +Window+ associated with this page.
   #
   @::__defineGetter__ 'defaultView', ->
-    wesabe.taint @document.defaultView
+    privacy.taint @document.defaultView
 
   #
   # Returns the URL of this page.
   #
   @::__defineGetter__ 'url', ->
-    wesabe.taint @defaultView.location.href
+    privacy.taint @defaultView.location.href
 
   #
   # Returns true if this page is in a frame, false otherwise.
@@ -95,7 +96,7 @@ class Page
   # Shorthand for finding an element by id, returns null if not found.
   #
   byId: (id) ->
-    wesabe.taint @document.getElementById(id)
+    privacy.taint @document.getElementById(id)
 
   #
   # Finds all nodes matching +xpathOrNode+ with optional
@@ -157,15 +158,15 @@ class Page
   #
   fill: (xpathOrNode, valueOrXpathOrNode) ->
     tryThrow 'Page.fill', (log) =>
-      element = wesabe.untaint @findStrict(xpathOrNode)
-      log.info 'element=', wesabe.taint(element)
+      element = privacy.untaint @findStrict(xpathOrNode)
+      log.info 'element=', privacy.taint(element)
 
-      value = wesabe.untaint(valueOrXpathOrNode)
+      value = privacy.untaint(valueOrXpathOrNode)
       value = value.toString() if type.isNumber(value)
 
       if value and not type.isString(value)
-        valueNode = wesabe.untaint @findStrict(value, element)
-        log.debug 'valueNode=', wesabe.taint(valueNode)
+        valueNode = privacy.untaint @findStrict(value, element)
+        log.debug 'valueNode=', privacy.taint(valueNode)
         value = valueNode.value
 
       log.radioactive 'value=', value
@@ -243,7 +244,7 @@ class Page
     tryThrow 'Page.check', (log) =>
       element = @findStrict xpathOrNode
       log.info 'element=', element
-      wesabe.untaint(element).checked = true
+      privacy.untaint(element).checked = true
 
   #
   # Unchecks the element given by +xpathOrNode+.
@@ -260,7 +261,7 @@ class Page
     tryThrow 'Page.uncheck', (log) =>
       element = @findStrict xpathOrNode
       log.info('element=', element)
-      wesabe.untaint(element).checked = false
+      privacy.untaint(element).checked = false
 
   #
   # Simulates submitting a form.
@@ -299,7 +300,7 @@ class Page
   #
   fireEvent: (xpathOrNode, eventType, args...) ->
     options = if args.length is 1 and typeof args[args.length-1] is 'object' then args.pop() else {}
-    element = wesabe.untaint(@findStrict xpathOrNode)
+    element = privacy.untaint(@findStrict xpathOrNode)
     event = element.ownerDocument.createEvent EVENT_TYPE_MAP[eventType]
 
     if eventType in ['keydown', 'keypress', 'keyup']
@@ -332,7 +333,7 @@ class Page
   # @public
   #
   visible: (xpathOrNode) ->
-    element = wesabe.untaint @find(xpathOrNode)
+    element = privacy.untaint @find(xpathOrNode)
 
     # no element? not visible
     return false unless element
@@ -396,7 +397,7 @@ class Page
   # @public
   #
   cells: (xpathOrNode) ->
-    node = wesabe.untaint @findStrict(xpathOrNode)
+    node = privacy.untaint @findStrict(xpathOrNode)
     name = node.tagName.toLowerCase()
 
     switch name
@@ -436,7 +437,7 @@ class Page
       textNodes = [node]
     else
       textNodes = @select './/text()', node
-    wesabe.taint (wesabe.untaint(node.nodeValue) for node in textNodes).join('')
+    privacy.taint (privacy.untaint(node.nodeValue) for node in textNodes).join('')
 
   #
   # Returns +true+ if +xpathOrNode+ has class +className+, +false+ otherwise.
@@ -489,7 +490,7 @@ class Page
       html.append "#{basename}.html"
       png.append "#{basename}.png"
 
-      wesabe.debug 'Dumping contents of current page to ', html.path, ' and ', png.path
+      logger.debug 'Dumping contents of current page to ', html.path, ' and ', png.path
       file.write html, "<html>#{@document.documentElement.innerHTML}</html>"
       snapshot.writeToFile @document.defaultView, png.path
 
@@ -501,10 +502,10 @@ class Page
     indent += '  ' for i in [0...level]
 
     for node in @select '*', scope or @document
-      selector = wesabe.untaint node.tagName.toLowerCase()
+      selector = privacy.untaint node.tagName.toLowerCase()
       selector += "##{node.id}" if node.id
       selector += ".#{node.className.replace /\s+/g, '.'}" if node.className
-      wesabe.debug indent, selector
+      logger.debug indent, selector
       @dumpStructure node, level + 1
 
     return null
@@ -514,7 +515,7 @@ class Page
   # then dumps the page as usual.
   dumpPrivately: ->
     for text in @select '//body//text()'
-      text = wesabe.untaint text
+      text = privacy.untaint text
       value = text.nodeValue
       sanitized = []
 
