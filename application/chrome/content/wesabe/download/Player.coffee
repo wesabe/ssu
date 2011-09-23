@@ -140,10 +140,10 @@ class Player
       UserAgent.revertToDefault()
 
     # set up the callbacks for page load and download done
-    event.add browser, 'DOMContentLoaded', (event) =>
-      @onDocumentLoaded Browser.wrap(browser), Page.wrap(event.target)
+    event.add browser, 'DOMContentLoaded', (evt) =>
+      @onDocumentLoaded Browser.wrap(browser), Page.wrap(evt.target)
 
-    event.add 'downloadSuccess', (event, data, filename) =>
+    event.add 'downloadSuccess', (evt, data, filename) =>
       @job.update 'account.download.success'
       @setErrorTimeout 'global'
 
@@ -162,7 +162,7 @@ class Player
         delete @job.nextDownloadMetadata
         @onDownloadSuccessful @browser, @page
 
-    event.add 'downloadFail', (event) =>
+    event.add 'downloadFail', (evt) =>
       logger.warn 'Failed to download a statement! This is bad, but a failed job is worse, so we press on'
       @job.update 'account.download.failure'
       @setErrorTimeout 'global'
