@@ -17,6 +17,12 @@ class Browser
     wesabe.taint @browser.currentURI?.resolve(null)
 
   #
+  # Proxy addEventListener through so that event.add will work.
+  #
+  addEventListener: (args...) ->
+    @browser.addEventListener args...
+
+  #
   # Remove this browser from the container DOM.
   #
   remove: ->
