@@ -60,7 +60,10 @@ class Page
   # Returns true if this page is in a frame, false otherwise.
   #
   @::__defineGetter__ 'framed', ->
-    !!@defaultView.frameElement
+    if frameElement = @defaultView.frameElement
+      return frameElement.tagName?.toLowerCase() isnt 'browser'
+    else
+      return false
 
   #
   # Returns the top-most +Page+, the one at the root of the frame hierarchy.
