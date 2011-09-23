@@ -31,6 +31,4 @@
     </menubar>
   </toolbox>
 
-  <browser id="playback-browser" flex="1" type="content-primary" />
-
 </window>

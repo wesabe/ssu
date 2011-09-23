@@ -78,7 +78,7 @@ class Job
     @nextGoal()
 
     logger.info "Starting job for #{@player.org} (#{@fid})"
-    @player.start @creds, document.getElementById('playback-browser')
+    @player.start @creds, new Browser()
 
     event.trigger this, 'begin'
     @timer.start 'Total'

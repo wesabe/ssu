@@ -5,6 +5,8 @@ class Browser
   constructor: (@browser) ->
     unless @browser
       @browser = document.createElement 'browser'
+      @browser.setAttribute 'type', 'content-targetable'
+      @browser.setAttribute 'flex', '1'
       document.documentElement.appendChild @browser
 
   @::__defineGetter__ 'mainPage', ->
