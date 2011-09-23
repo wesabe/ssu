@@ -3,9 +3,19 @@ Page = require 'dom/Page'
 
 class Browser
   constructor: (@browser) ->
+    unless @browser
+      @browser = document.createElement 'browser'
+      document.documentElement.appendChild @browser
 
   @::__defineGetter__ 'mainPage', ->
     Page.wrap @browser.contentDocument
+
+  #
+  #
+  # Remove this browser from the container DOM.
+  #
+  remove: ->
+    @browser.parentNode.removeChild @browser
 
   #
   # Navigate to the given uri.
