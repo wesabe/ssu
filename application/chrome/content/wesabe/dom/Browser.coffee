@@ -11,6 +11,11 @@ class Browser
     Page.wrap @browser.contentDocument
 
   #
+  # Get the current uri of browser as a string.
+  #
+  @::__defineGetter__ 'url', ->
+    wesabe.taint @browser.currentURI?.resolve(null)
+
   #
   # Remove this browser from the container DOM.
   #
@@ -41,12 +46,6 @@ class Browser
     wesabe.taint uri
 
   #
-  # Get the current uri of browser as a string.
-  #
-  getURI: ->
-    wesabe.taint @browser.currentURI?.resolve(null)
-
-  #
   # Determines whether browser is currently at +uri+,
   # which may be relative or absolute.
   #
@@ -54,7 +53,7 @@ class Browser
     currentURI = @browser.currentURI
     return true if currentURI is null and uri is null
 
-    wesabe.untaint(@getURI()) is wesabe.untaint(@joinURI uri)
+    wesabe.untaint(@url) is wesabe.untaint(@joinURI uri)
 
   @wrap: (browser) ->
     if type.is browser, @

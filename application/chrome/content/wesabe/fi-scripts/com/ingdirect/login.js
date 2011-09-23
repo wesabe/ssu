@@ -4,8 +4,8 @@ wesabe.provide('fi-scripts.com.ingdirect.login', {
     if (tmp.authenticated)
       return;
 
-    var uri = browser.getURI();
-    if (uri && (uri.indexOf('pin_change_newpin') != -1)) {
+    var url = browser.url;
+    if (url && (url.indexOf('pin_change_newpin') != -1)) {
       // user is being asked to change their PIN
       job.fail(403, 'auth.pass.expired');
       return;
