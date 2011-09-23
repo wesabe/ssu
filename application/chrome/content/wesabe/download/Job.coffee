@@ -100,17 +100,9 @@ class Job
     @data.downloads ||= []
     @data.downloads.push extend({path: file.path, suggestedFilename: suggestedFilename, status: 'ok'}, metadata or {})
 
-    if reload
-      browser = Browser.wrap(@player.browser)
-      @player.onDownloadSuccessful browser, browser.mainPage
-
   recordFailedDownload: (metadata, reload=true) ->
     logger.error 'failed to download file'
     @data.downloads ||= []
     @data.downloads.push(extend({status: 'error'}, metadata or {}))
-
-    if reload
-      browser = Browser.wrap(@player.browser)
-      @player.onDownloadSuccessful browser, browser.mainPage
 
 module.exports = Job

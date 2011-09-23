@@ -160,13 +160,13 @@ class Player
 
         @job.recordSuccessfulDownload statement, filename, @job.nextDownloadMetadata
         delete @job.nextDownloadMetadata
+        @onDownloadSuccessful @browser, @page
 
     event.add 'downloadFail', (event) =>
       logger.warn 'Failed to download a statement! This is bad, but a failed job is worse, so we press on'
       @job.update 'account.download.failure'
       @setErrorTimeout 'global'
-      browser = Browser.wrap(browser)
-      @onDownloadSuccessful browser, browser.mainPage
+      @onDownloadSuccessful @browser, @page
 
     @setErrorTimeout 'global'
     # start the security question timeout when the job is suspended
@@ -240,6 +240,10 @@ class Player
     @job
 
   download: (url, metadata) ->
+    # hang on to the current browser and page so we can reload with the right context
+    browser = @browser
+    page = @page
+
     newStatementFile = =>
       folder = dir.profile
       folder.append 'statements'
@@ -270,7 +274,9 @@ class Player
 
       statement = newStatementFile()
       file.write statement, metadata.data
+      delete metadata.data
       @job.recordSuccessfulDownload statement, metadata.suggestedFilename, metadata
+      @onDownloadSuccessful browser, page
 
       return
 
@@ -280,9 +286,11 @@ class Player
       download url, newStatementFile(),
         success: (path, suggestedFilename) =>
           @job.recordSuccessfulDownload path, suggestedFilename, metadata
+          @onDownloadSuccessful browser, page
 
         failure: =>
           @job.recordFailedDownload metadata
+          @onDownloadSuccessful browser, page
 
 
   #
