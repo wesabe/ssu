@@ -127,7 +127,11 @@ class Logger
   #
   format: (objects, level) ->
     strings = for object in objects
-                (@printer object).replace /\r/g, ''
+                try
+                  (@printer object).replace /\r/g, ''
+                catch ex
+                  dump "ERROR: while printing object (#{object}) for log: #{ex}\n"
+                  "#{object}"
 
     level = levelNameForCode(level).toUpperCase()
     lines = strings.join('').split(/\r?\n/)
