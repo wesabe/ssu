@@ -102,6 +102,30 @@ class Page
     privacy.taint @document.getElementById(id)
 
   #
+  # Find a link either by id, href, content, or using a matcher function.
+  #
+  #   # matches <a id="formSubmitButton">
+  #   page.link 'formSubmitButton'
+  #
+  #   # both match <a href="/logoff">Log Off</a>
+  #   page.link '/logoff'
+  #   page.link 'Log Off'
+  #
+  #   # matches the first link whose content text is longer than 1000 characters
+  #   page.link (a) -> page.text(a).length > 1000
+  #
+  link: (matcher, scope) ->
+    if type.isString matcher
+      escaped = matcher.replace /"/, '\\"'
+      @find """//a[@id="#{escaped}" or @href="#{escaped}" or contains(string(.), "#{escaped}")]""", scope
+
+    else if type.isFunction matcher
+      for link in @select '//a', scope
+        return link if matcher link
+
+      return null
+
+  #
   # Finds all nodes matching +xpathOrNode+ with optional
   # +scope+ when it is an xpath, returns it when it's a node.
   #
