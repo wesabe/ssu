@@ -110,10 +110,8 @@ class wesabe.download.Job
     wesabe.info 'successfully downloaded file to ', file.path
     @data.downloads ||= []
     @data.downloads.push(wesabe.lang.extend({path: file.path, suggestedFilename: suggestedFilename, status: 'ok'}, metadata || {}))
-    @player.onDownloadSuccessful @player.browser, wesabe.dom.page.wrap(@player.browser.contentDocument) if reload
 
   recordFailedDownload: (metadata, reload=true) ->
     wesabe.error 'failed to download file'
     @data.downloads ||= []
     @data.downloads.push(wesabe.lang.extend({status: 'error'}, metadata || {}))
-    @player.onDownloadSuccessful @player.browser, wesabe.dom.page.wrap(@player.browser.contentDocument) if reload

@@ -143,12 +143,13 @@ wesabe.provide 'download.Player', class Player
 
         @job.recordSuccessfulDownload statement, filename, @job.nextDownloadMetadata
         delete @job.nextDownloadMetadata
+        @onDownloadSuccessful @browser, @page
 
     wesabe.bind 'downloadFail', (event) =>
       wesabe.warn 'Failed to download a statement! This is bad, but a failed job is worse, so we press on'
       @job.update 'account.download.failure'
       @setErrorTimeout 'global'
-      @onDownloadSuccessful browser, wesabe.dom.page.wrap(browser.contentDocument)
+      @onDownloadSuccessful @browser, @page
 
     @setErrorTimeout 'global'
     # start the security question timeout when the job is suspended
@@ -237,6 +238,10 @@ wesabe.provide 'download.Player', class Player
     @job
 
   download: (url, metadata) ->
+    # hang on to the current browser and page so we can reload with the right context
+    browser = @browser
+    page = @page
+
     newStatementFile = =>
       folder = wesabe.io.dir.profile
       folder.append 'statements'
@@ -267,7 +272,9 @@ wesabe.provide 'download.Player', class Player
 
       file = newStatementFile()
       wesabe.io.file.write file, metadata.data
+      delete metadata.data
       @job.recordSuccessfulDownload file, metadata.suggestedFilename, metadata
+      @onDownloadSuccessful browser, page
 
       return
 
@@ -277,9 +284,11 @@ wesabe.provide 'download.Player', class Player
       wesabe.io.download url, newStatementFile(),
         success: (file, suggestedFilename) =>
           @job.recordSuccessfulDownload file, suggestedFilename, metadata
+          @onDownloadSuccessful browser, page
 
         failure: =>
           @job.recordFailedDownload metadata
+          @onDownloadSuccessful browser, page
 
 
   #
