@@ -1,4 +1,15 @@
 prefs = require 'util/prefs'
+#
+# NOTE: instead of using `require' for all these we lazy-load them,
+# otherwise `logger' will not be available for them since, duh, we're
+# the logger and haven't loaded yet.
+#
+isTainted = (args...) ->
+  {isTainted} = require 'lang/type'
+  isTainted args...
+untaint = (args...) ->
+  {untaint} = require 'util/privacy'
+  untaint args...
 
 loggersByName = {}
 
@@ -128,6 +139,9 @@ class Logger
   format: (objects, level) ->
     strings = for object in objects
                 try
+                  if level is LEVELS.radioactive
+                    object = untaint object if isTainted object
+
                   (@printer object).replace /\r/g, ''
                 catch ex
                   dump "ERROR: while printing object (#{object}) for log: #{ex}\n"

@@ -14,6 +14,10 @@ window.onerror = (error) ->
   catch cantLogException
     dump "uncaught exception: #{error}"
 
+# lazy-load privacy.untaint
+untaint = (args...) ->
+  {untaint} = require 'util/privacy'
+  untaint args...
 
 wesabe =
   caller: ->
@@ -228,17 +232,28 @@ walk = (module, callback) ->
 @wesabe = wesabe
 @require = wesabe.CommonJSRequire
 
+# NOTE: We load Logger before everything else, otherwise nobody loaded before
+# Logger will have their `logger' object in scope.
 Logger  = @require 'Logger'
+
 inspect = @require 'util/inspect'
 prefs   = @require 'util/prefs'
+type    = @require 'lang/type'
 {trim}  = @require 'lang/string'
 
 
 # colorize the logging if appropriate
 Logger.rootLogger.printer = (object) ->
-  if typeof object is 'string'
+  opts = color: prefs.get('wesabe.logger.color') ? on
+
+  if type.isTainted object
+    opts.sanitize = on
+    "{sanitized #{inspect untaint(object), undefined, undefined, opts}}"
+
+  else if typeof object is 'string'
     # top-level strings don't get quotes or color since they're probably just log messages
     object
+
   else if object instanceof Error
     trace = (require 'util/error').stackTrace(object)
     result = "#{object.message}\n\n"
@@ -262,7 +277,7 @@ Logger.rootLogger.printer = (object) ->
     return result
 
   else
-    inspect object, undefined, undefined, prefs.get('wesabe.logger.color') ? on
+    inspect object, undefined, undefined, opts
 
 # write logs to a file rather than stdout
 Logger.rootLogger.appender = Logger.getFileAppender()
