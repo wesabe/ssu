@@ -27,6 +27,8 @@ levelNameForCode = (level) ->
   for own key, value of LEVELS
     return key if value is level
 
+  return null
+
 levelCodeForName = (name) ->
   return name if typeof name is 'number'
   LEVELS[name]
@@ -39,10 +41,10 @@ class Logger
   # The higher the level, the more attention you should pay.
   #
   @::__defineGetter__ 'level', ->
-    @_level or @_parent?._level or levelCodeForName prefs.get('wesabe.logger.level')
+    @_level ? @_parent?._level ? levelCodeForName prefs.get('wesabe.logger.level')
 
   @::__defineSetter__ 'level', (level) ->
-    @_level = if level? then levelNameForCode level else level
+    @_level = (levelCodeForName level) ? level
 
   @::__defineGetter__ 'levelName', ->
     levelNameForCode @level
