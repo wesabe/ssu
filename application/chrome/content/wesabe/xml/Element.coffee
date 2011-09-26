@@ -66,7 +66,7 @@ class Element
         node.parentNode = this
         return node
 
-    throw new Error("Element#insertBefore: Could not find adjacentNode #{inspect(adjacentNode)}")
+    throw new Error("Element#insertBefore: Could not find adjacentNode #{inspect adjacentNode}")
 
   insertAfter: (node, adjacentNode) ->
     for child, i in @__children__
@@ -75,7 +75,7 @@ class Element
         node.parentNode = this
         return node
 
-    throw new Error("Element#insertAfter: Could not find adjacentNode #{inspect(adjacentNode)}")
+    throw new Error("Element#insertAfter: Could not find adjacentNode #{inspect adjacentNode}")
 
   # finders
 
@@ -130,49 +130,5 @@ class Element
   classForInspect: ->
     HTMLElement
 
-  #inspect: (refs, color, tainted) ->
-  #  # handle NodeJS-style inspect
-  #  if typeof refs is 'number'
-  #    refs = null
-
-  #  s = new Colorizer()
-  #  s.disabled = !color
-  #  s.reset()
-  #   .bold("{#{if @selfclosing then 'empty' else ''}elem ")
-  #   .yellow('<')
-  #   .white()
-  #   .bold()
-  #   .print(@name)
-
-  #  # print out the attributes
-  #  for attr in @attributes
-  #    value = attr.nodeValue.toString()
-  #    value = sanitize(value) if tainted
-
-  #    s.print(' ')
-  #     .reset()
-  #     .underlined(attr.nodeName)
-  #     .yellow('="')
-  #     .green(value)
-  #     .yellow('"')
-
-  #  s.yellow('>')
-
-  #  # print the children
-  #  hasElementChildren = false
-  #  for child in @__children__
-  #    hasElementChildren = hasElementChildren or type.is(child, Element)
-  #    s.print(' ', inspect(child, refs, color, tainted))
-
-  #  # only show the closing tag if there are child elements (not text)
-  #  if hasElementChildren
-  #    s.print(' ')
-  #     .yellow('</')
-  #     .white()
-  #     .bold()
-  #     .print(@name)
-  #     .yellow('>')
-
-  #  return s.bold('}').toString()
 
 module.exports = Element
