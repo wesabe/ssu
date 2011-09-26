@@ -3,7 +3,7 @@ file = require 'io/file'
 TYPE = 'image/png'
 
 writeToFile = (window, path) ->
-  write path, serializeCanvas(canvasWithContentsOfWindow(window))
+  file.write path, serializeCanvas(canvasWithContentsOfWindow(window))
 
   return true
 
