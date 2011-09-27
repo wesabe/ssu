@@ -248,7 +248,7 @@ class Controller
 
       response:
         status: 'ok'
-        eval: inspect(result, undefined, undefined, data.color)
+        eval: inspect(result, undefined, undefined, color: data.color)
 
     catch e
       logger.error 'eval: error: ', e
