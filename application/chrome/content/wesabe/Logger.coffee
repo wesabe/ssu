@@ -139,6 +139,17 @@ class Logger
     @log args, LEVELS.fatal
 
   #
+  # Logs info about a deprecated method call.
+  #
+  deprecated: (name) ->
+    @warn new Error "DEPRECATION WARNING: A deprecated method was called: #{name}"
+
+  wrapDeprecated: (name, fn, context) ->
+    (args...) =>
+      @deprecated name
+      fn.call context, args...
+
+  #
   # Formats the message for display in a log message.
   #
   format: (objects, level) ->
