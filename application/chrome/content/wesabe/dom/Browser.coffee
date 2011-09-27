@@ -1,5 +1,6 @@
-type = require 'lang/type'
-Page = require 'dom/Page'
+type    = require 'lang/type'
+Page    = require 'dom/Page'
+privacy = require 'util/privacy'
 
 class Browser
   constructor: (@browser) ->
@@ -16,7 +17,7 @@ class Browser
   # Get the current uri of browser as a string.
   #
   @::__defineGetter__ 'url', ->
-    wesabe.taint @browser.currentURI?.resolve(null)
+    privacy.taint @browser.currentURI?.resolve(null)
 
   #
   # Proxy addEventListener through so that event.add will work.
@@ -41,17 +42,17 @@ class Browser
   go: (uri) ->
     uri = @joinURI uri
     logger.debug 'Loading uri=', uri
-    @browser.loadURI wesabe.untaint(uri), null, null
+    @browser.loadURI privacy.untaint(uri), null, null
 
   #
   # Get the absolute uri by joining +uri+ to the current uri of +browser+.
   # +uri+ may be either relative or absolute.
   #
   joinURI: (uri) ->
-    uri = wesabe.untaint uri
+    uri = privacy.untaint uri
     uri = @browser.currentURI?.resolve uri
 
-    wesabe.taint uri
+    privacy.taint uri
 
   #
   # Determines whether browser is currently at +uri+,
@@ -61,7 +62,7 @@ class Browser
     currentURI = @browser.currentURI
     return true if currentURI is null and uri is null
 
-    wesabe.untaint(@url) is wesabe.untaint(@joinURI uri)
+    privacy.untaint(@url) is privacy.untaint(@joinURI uri)
 
   @wrap: (browser) ->
     if type.is browser, @
