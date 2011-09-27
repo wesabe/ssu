@@ -21,7 +21,9 @@ untaint = (args...) ->
 
 wesabe =
   caller: ->
-    (require 'util/error').stackTrace new Error()
+    caller = (require 'util/error').stackTrace new Error()
+    caller.frames.shift() # remove this call
+    return caller
 
   getLineForStackFrame: (frame) ->
     (bootstrap.getContent frame.filename).split('\n')[frame.lineNumber]
