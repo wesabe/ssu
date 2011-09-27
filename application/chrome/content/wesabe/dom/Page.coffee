@@ -41,6 +41,12 @@ class Page
   @::__defineGetter__ 'title', ->
     privacy.taint @document.title
 
+  @::__defineSetter__ 'title', (title) ->
+    @document.title = privacy.untaint title
+
+  #
+  # Returns the window name for this page.
+  #
   @::__defineGetter__ 'name', ->
     privacy.taint @defaultView.name
 
