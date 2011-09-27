@@ -141,12 +141,12 @@ class Logger
   #
   # Logs info about a deprecated method call.
   #
-  deprecated: (name) ->
-    @warn new Error "DEPRECATION WARNING: A deprecated method was called: #{name}"
+  deprecated: (name, alternate=null) ->
+    @warn new Error "DEPRECATION WARNING: A deprecated method was called: #{name}#{alternate and ", use #{alternate} instead" or ""}."
 
-  wrapDeprecated: (name, fn, context) ->
+  wrapDeprecated: (name, alternate, fn, context) ->
     (args...) =>
-      @deprecated name
+      @deprecated name, alternate
       fn.call context, args...
 
   #

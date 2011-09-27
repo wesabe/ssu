@@ -1,5 +1,3 @@
-extend = require 'lang/extend'
-
 type =
   isString: (object) ->
     typeof object is 'string'
@@ -56,7 +54,8 @@ type =
     object?.constructor is type
 
 # make all these available as shortcuts on the wesabe object
-extend wesabe, type
+for own name, fn of type
+  wesabe[name] = logger.wrapDeprecated "wesabe.#{name}", "type.#{name}", fn, type
 
 # hand it off to whoever required us
 module.exports = type

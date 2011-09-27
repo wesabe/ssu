@@ -133,12 +133,12 @@ privacy.registerSanitizer 'Account Number', (string) ->
 
 # wrapper for String
 privacy.registerTaintWrapper
-  detector: wesabe.isString
+  detector: type.isString
   getters: ['length']
 
 # wrapper for Array
 privacy.registerTaintWrapper
-  detector: (o) -> o && wesabe.isFunction(o.map)
+  detector: (o) -> o && type.isFunction(o.map)
   generator: (o) ->
     tarray = (privacy.taint(item) for item in o)
     tarray.isTainted = -> true
@@ -187,8 +187,8 @@ privacy.registerTaintWrapper
   generator: (o) -> o
 
 
-wesabe.untaint = logger.wrapDeprecated 'wesabe.untaint', privacy.untaint
-wesabe.taint = logger.wrapDeprecated 'wesabe.taint', privacy.taint
+wesabe.untaint = logger.wrapDeprecated 'wesabe.untaint', 'privacy.untaint', privacy.untaint
+wesabe.taint = logger.wrapDeprecated 'wesabe.taint', 'privacy.taint', privacy.taint
 
 
 module.exports = privacy
