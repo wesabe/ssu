@@ -40,6 +40,10 @@ class Browser
   #   browser.go('/groups')
   #
   go: (uri) ->
+    # if the browser is newly-attached to its parent (and doesn't have a currentURI property),
+    # then we let this cycle of the run loop complete before we try again
+    return (setTimeout => @go uri, 0) if @browser.currentURI is null
+
     uri = @joinURI uri
     logger.debug 'Loading uri=', uri
     @browser.loadURI privacy.untaint(uri), null, null
