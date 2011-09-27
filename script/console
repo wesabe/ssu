@@ -29,6 +29,7 @@ class ConsoleCLI
     ENV['PORT'] = port.to_s
     require 'irb'
     require File.expand_path('../console.rb', __FILE__)
+    ARGV.unshift '--simple-prompt'
     IRB.start(__FILE__)
   end
 
