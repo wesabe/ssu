@@ -1,4 +1,4 @@
-prefs = require 'util/prefs'
+#prefs = require 'util/prefs'
 #
 # NOTE: instead of using `require' for all these we lazy-load them,
 # otherwise `logger' will not be available for them since, duh, we're
@@ -10,6 +10,9 @@ isTainted = (args...) ->
 untaint = (args...) ->
   {untaint} = require 'util/privacy'
   untaint args...
+getPref = (args...) ->
+  getPref = (require 'util/prefs').get
+  getPref args...
 
 loggersByName = {}
 
@@ -41,7 +44,7 @@ class Logger
   # The higher the level, the more attention you should pay.
   #
   @::__defineGetter__ 'level', ->
-    @_level ? @_parent?._level ? levelCodeForName prefs.get('wesabe.logger.level')
+    @_level ? @_parent?._level ? levelCodeForName getPref('wesabe.logger.level')
 
   @::__defineSetter__ 'level', (level) ->
     @_level = (levelCodeForName level) ? level
