@@ -44,6 +44,8 @@ load = (path) ->
 #
 #   prefs.get('browser.dom.window.dump.enabled'); // => false
 #
+# NOTE: because this is used in logging, this function may not use `logger'.
+#
 get = (key, defaultValue) ->
   root = getPreferencesRoot()
 
