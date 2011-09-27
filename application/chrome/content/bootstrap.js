@@ -6,7 +6,7 @@
   Cc = Components.classes;
   Ci = Components.interfaces;
   getContent = function(uri) {
-    var cache, content, dir, liveFile, m, name, root;
+    var cache, content, dir, i, line, liveFile, m, name, root;
     liveFile = $file.open($dir.chrome.path + ("/content/" + uri));
     if (!liveFile.exists()) {
       return null;
@@ -21,7 +21,18 @@
         return $file.read(cache);
       } else {
         dump("\x1b[36m[compile]\x1b[0m " + uri + "\n");
-        content = CoffeeScript.compile($file.read(liveFile));
+        content = $file.read(liveFile);
+        content = ((function() {
+          var _len, _ref, _results;
+          _ref = content.split(/\n/);
+          _results = [];
+          for (i = 0, _len = _ref.length; i < _len; i++) {
+            line = _ref[i];
+            _results.push(line.replace(/__LINE__/, i + 1));
+          }
+          return _results;
+        })()).join("\n");
+        content = CoffeeScript.compile(content);
         $file.write(cache, content);
         return content;
       }

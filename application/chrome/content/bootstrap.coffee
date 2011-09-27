@@ -22,11 +22,16 @@ getContent = (uri) ->
     else
       # out of date, rebuild cached file
       dump "\x1b[36m[compile]\x1b[0m #{uri}\n"
-      content = CoffeeScript.compile $file.read(liveFile)
+
+      # replace __LINE__ with the actual line number
+      content = $file.read liveFile
+      content = (line.replace /__LINE__/, i+1 for line, i in content.split(/\n/)).join("\n")
+      content = CoffeeScript.compile content
       $file.write cache, content
       return content
 
   $file.read liveFile
+
 
 indentCount = (line) ->
   indent = 0
