@@ -1,5 +1,19 @@
 #!/usr/bin/env ruby
+
+begin
+  require 'bundler'
+rescue LoadError
+  begin
+    require 'rubygems'
+    require 'bundler'
+  rescue LoadError => e
+    $stderr.puts "ERROR: Unable to generate because an error occurred while loading: #{e}"
+  end
+end
+
+Bundler.setup
 require 'optparse'
+require 'json'
 
 class ConsoleCLI
   attr_reader :port
@@ -13,7 +27,9 @@ class ConsoleCLI
 
   def run
     ENV['PORT'] = port.to_s
-    exec "irb --simple-prompt -r #{File.dirname(__FILE__)}/console.rb"
+    require 'irb'
+    require File.expand_path('../console.rb', __FILE__)
+    IRB.start(__FILE__)
   end
 
   protected

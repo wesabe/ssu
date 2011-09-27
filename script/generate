@@ -1,13 +1,24 @@
 #!/usr/bin/env ruby
 
-require 'rubygems'
-gem 'templater', '>= 0.3.2'
+begin
+  require 'bundler'
+rescue LoadError
+  begin
+    require 'rubygems'
+    require 'bundler'
+  rescue LoadError => e
+    $stderr.puts "ERROR: Unable to generate because an error occurred while loading: #{e}"
+  end
+end
+
+Bundler.setup
 require 'templater'
 
-path = File.join(File.dirname(__FILE__), 'generators')
+generators = File.expand_path('../generators', __FILE__)
+$:.unshift generators unless $:.include? generators
 
-require File.join(path, 'player')
-require File.join(path, 'credential')
+require 'player'
+require 'credential'
 
 module SSU::Generators
   extend Templater::Manifold

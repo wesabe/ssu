@@ -1,4 +1,3 @@
-require 'rubygems'
 require 'readline'
 require 'socket'
 require 'json'
@@ -15,7 +14,9 @@ require File.dirname(__FILE__)/'api'
 
 self.instance_eval do
   def fis
-    Dir.glob(credpath/'*').map {|fi| File.basename(fi)}
+    Dir.glob(credpath/'*').map do |fi|
+      File.basename(fi)
+    end
   end
 
   def js
@@ -95,7 +96,7 @@ self.instance_eval do
 end
 
 class ApiMethodChainer
-  instance_methods.each { |m| undef_method m unless m =~ /^__/ }
+  instance_methods.each { |m| undef_method m unless m =~ /^(__|object_id)/ }
 
   def initialize(first=nil)
     parts << first if first
