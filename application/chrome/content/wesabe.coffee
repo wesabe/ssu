@@ -19,6 +19,9 @@ untaint = (args...) ->
   {untaint} = require 'util/privacy'
   untaint args...
 
+# hold the already-required required modules
+required = {}
+
 wesabe =
   caller: ->
     caller = (require 'util/error').stackTrace new Error()
@@ -99,6 +102,8 @@ wesabe =
   #   # wesabe/math/__package__.js
   #
   require: (module) ->
+    return required[module].exports if required[module]
+
     # split "A.B" into ["A", "B"]
     module = wesabe._parseModuleUri(module)
 
@@ -120,6 +125,7 @@ wesabe =
           fullName: module.name
           uri: uri
 
+        required[module.name] = module
         return module.exports
 
     throw new Error "Failed to load #{module.name}. Are you sure the files are in the right place?"
