@@ -81,7 +81,7 @@ class Logger
     @_enabled = enabled
 
 
-  constructor: (@name='', @_parent=Logger.rootLogger) ->
+  constructor: (@name='', @_parent=rootLogger) ->
     @_enabled = null
 
   @__defineGetter__ 'rootLogger', ->
@@ -178,7 +178,7 @@ setTimeout ->
 Logger.getFileAppender = ->
   return fileAppender if fileAppender
 
-  Logger.rootLogger.debug 'Registering file logger'
+  rootLogger.debug 'Registering file logger'
 
   try
     # Wesabe Logger registration - if not already registered.
@@ -196,7 +196,7 @@ Logger.getFileAppender = ->
           shouldRegister = false if catEntryName is "Wesabe Logger"
 
     if shouldRegister
-      Logger.rootLogger.debug 'registering Wesabe Logger with category manager'
+      rootLogger.debug 'registering Wesabe Logger with category manager'
       catMgr.addCategoryEntry "loggers", "Wesabe Logger", "@wesabe.com/logger;1", false, true
 
     fileLogger = Cc["@wesabe.com/logger;1"].getService(Ci.nsIWesabeLogger)
@@ -205,7 +205,7 @@ Logger.getFileAppender = ->
       fileLogger.log text
 
   catch ex
-    Logger.rootLogger.error '!! error registering file logger: ', ex
+    rootLogger.error '!! error registering file logger: ', ex
 
 
 module.exports = Logger
