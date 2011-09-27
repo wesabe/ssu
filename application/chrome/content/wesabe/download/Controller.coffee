@@ -236,6 +236,7 @@ class Controller
   eval: (data) ->
     try
       script = data.script
+      @scope ||= {@job, logger}
 
       if data.type is 'text/coffeescript'
         script = CoffeeScript.compile "return (-> #{script})()"
@@ -244,7 +245,9 @@ class Controller
 
       script = "return #{script}"
       logger = Logger.loggerForFile 'repl'
-      result = func.callWithScope script, wesabe, {@job, logger}
+      result = func.callWithScope script, wesabe, scope
+
+      scope._ = result
 
       response:
         status: 'ok'
