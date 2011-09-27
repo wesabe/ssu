@@ -1,3 +1,11 @@
+# lazy-load some functions
+untaint = (args...) ->
+  {untaint} = require 'util/privacy'
+  untaint args...
+isFunction = (args...) ->
+  {isFunction} = require 'lang/type'
+  isFunction args...
+
 ORDINAL_PARSERS = [
   [/\b(\w+)\s+from\s+(last|the\s+end)\b/i,  (m) -> -parseOrdinalPhrase(m[1]) if m[1]]
   [/([\d,]+)(st|rd|th|nd)/i,                (m) -> Number(m[1].replace(',', ''))]
@@ -19,12 +27,12 @@ ORDINAL_PARSERS = [
 parseOrdinalPhrase = (string) ->
   for [pattern, value] in ORDINAL_PARSERS
     if m = string.match(pattern)
-      value = value(m) if wesabe.isFunction(value)
+      value = value(m) if isFunction value
       return value
 
 parse = (string) ->
   return NaN if string is ''
-  Number wesabe.untaint(string)
+  Number untaint(string)
 
 
 module.exports = {parse, parseOrdinalPhrase}

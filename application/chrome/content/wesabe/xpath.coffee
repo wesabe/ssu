@@ -1,6 +1,7 @@
 type    = require 'lang/type'
 array   = require 'lang/array'
 inspect = require 'util/inspect'
+privacy = require 'util/privacy'
 
 #
 # Provides methods for generating, manipulating, and searching by XPaths.
@@ -26,8 +27,8 @@ class Pathway
   first: (document, scope) ->
     try
       result = document.evaluate(
-                 wesabe.untaint(@value),
-                 wesabe.untaint(scope or document),
+                 privacy.untaint(@value),
+                 privacy.untaint(scope or document),
                  null,
                  XPathResult.ANY_TYPE,
                  null,
@@ -38,7 +39,7 @@ class Pathway
 
       throw err
 
-    wesabe.taint result?.iterateNext()
+    privacy.taint result?.iterateNext()
 
   #
   # Returns all matching DOM elements in the given document.
@@ -54,8 +55,8 @@ class Pathway
   #
   select: (document, scope) ->
     result = document.evaluate(
-               wesabe.untaint(@value),
-               wesabe.untaint(scope or document),
+               privacy.untaint(@value),
+               privacy.untaint(scope or document),
                null,
                XPathResult.ANY_TYPE,
                null,
@@ -63,7 +64,7 @@ class Pathway
 
     nodes = []
     nodes.push(node) while node = result.iterateNext()
-    return wesabe.taint @constructor.inDocumentOrder(nodes)
+    return privacy.taint @constructor.inDocumentOrder(nodes)
 
   #
   # Applies a binding to a copy of this +Pathway+.
@@ -84,8 +85,8 @@ class Pathway
     boundValue = @value
 
     for own key, value of binding
-      boundValue = boundValue.replace(new RegExp(":#{key}", 'g'), wesabe.untaint(value))
-      boundValue = wesabe.taint(boundValue) if wesabe.isTainted(value)
+      boundValue = boundValue.replace(new RegExp(":#{key}", 'g'), privacy.untaint(value))
+      boundValue = privacy.taint(boundValue) if type.isTainted(value)
 
     return new Pathway boundValue
 
@@ -97,7 +98,7 @@ class Pathway
   #   Something that can be used as a +Pathway+.
   #
   # ==== Returns
-  # wesabe.xpath.Pathway,wesabe.xpath.Pathset::
+  # Pathway,Pathset::
   #   A +Pathway+ or +Pathset+ converted from the argument.
   #
   # @public
@@ -110,7 +111,7 @@ class Pathway
     else if type.is(xpath, Pathway) or type.is(xpath, Pathset)
       xpath
     else
-      throw new Error "Could not convert #{inspect xpath} to a wesabe.xpath.Pathway."
+      throw new Error "Could not convert #{inspect xpath} to a Pathway."
 
   #
   # Returns the given array with elements sorted by document order.
@@ -125,8 +126,8 @@ class Pathway
   #
   @inDocumentOrder: (elements) ->
     elements.sort (a, b) ->
-      a = wesabe.untaint(a)
-      b = wesabe.untaint(b)
+      a = privacy.untaint(a)
+      b = privacy.untaint(b)
 
       switch a.compareDocumentPosition(b)
         when Node.DOCUMENT_POSITION_PRECEDING, Node.DOCUMENT_POSITION_CONTAINS

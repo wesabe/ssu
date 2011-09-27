@@ -1,8 +1,9 @@
 {parse, format, MONTH_NAMES} = require 'lang/date'
-number = require 'lang/number'
+number  = require 'lang/number'
+privacy = require 'util/privacy'
 
 forElement = (element, format) ->
-  if wesabe.untaint(element).tagName.toLowerCase() is 'input'
+  if privacy.untaint(element).tagName.toLowerCase() is 'input'
     new TextInput element, format
   else
     new SelectGroup element
@@ -10,7 +11,7 @@ forElement = (element, format) ->
 
 class TextInput
   constructor: (element, @format) ->
-    @element = wesabe.untaint element
+    @element = privacy.untaint element
 
   @::__defineGetter__ 'date', ->
     parse @element.value
@@ -21,7 +22,7 @@ class TextInput
 
 class SelectGroup
   constructor: (container) ->
-    @container = wesabe.untaint container
+    @container = privacy.untaint container
     @locateYearSelect()
     @locateMonthSelect()
     @locateDaySelect()
@@ -56,21 +57,21 @@ class SelectGroup
     # assume that one of the values is the current year
     thisYear = new Date().getFullYear()
     xpath = Pathway.bind('.//select[.//option[contains(string(.), ":year")]]', year: thisYear)
-    @yearSelect = wesabe.untaint Page.wrap(@container.ownerDocument).find(xpath, @container)
+    @yearSelect = privacy.untaint Page.wrap(@container.ownerDocument).find(xpath, @container)
 
     logger.warn "Unable to find a <select> element containing years" unless @yearSelect
 
   locateMonthSelect: ->
     for month in MONTH_NAMES
       xpath = Pathway.bind('.//select[.//option[contains(string(.), ":month")]]', month: month)
-      @monthSelect = wesabe.untaint Page.wrap(@container.ownerDocument).find(xpath, @container)
+      @monthSelect = privacy.untaint Page.wrap(@container.ownerDocument).find(xpath, @container)
 
       return if @monthSelect
 
     logger.warn "Unable to find a <select> element containing months"
 
   locateDaySelect: ->
-    for select in wesabe.untaint Page.wrap(@container.ownerDocument).select('.//select', @container)
+    for select in privacy.untaint Page.wrap(@container.ownerDocument).select('.//select', @container)
       return @daySelect = select if select.options.length >= 30
 
     logger.warn "Unable to find a <select> element containing days"
