@@ -227,3 +227,20 @@ class Pathset
 
 
 module.exports = {Pathset, Pathway}
+
+# DEPRECATIONS
+#
+# We previously allowed:
+#
+#   wesabe.xpath.bind(xpath, binding)
+#
+# to be shorthand for:
+#
+#   wesabe.xpath.Pathway.from(xpath).bind(binding)
+#
+# but now the preferred shorthand is:
+#
+#   wesabe.xpath.Pathway.bind(xpath, binding)
+#
+# We re-add the original here with a deprecation notice.
+wesabe.provide 'xpath.bind', logger.wrapDeprecated('wesabe.xpath.bind', 'wesabe.xpath.Pathway.bind', (args...) -> Pathway.bind args...)
