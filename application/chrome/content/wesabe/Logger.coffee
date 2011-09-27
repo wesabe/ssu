@@ -209,3 +209,22 @@ Logger.getFileAppender = ->
 
 
 module.exports = Logger
+
+
+# DEPRECATIONS
+#
+# Anyone used to be able to access the "root" logger by simply
+# calling logging methods on the wesabe object:
+#
+#   wesabe.debug "I'm a lumberjack and I'm okay."
+#
+# That has since been replaced with a distinct logger per file
+# with the "root" logger residing at Logger.rootLogger.
+#
+# This will still allow calls to wesabe.debug etc. but with
+# a nice fat deprecation warning.
+for own level of LEVELS
+  do (level) ->
+    wesabe[level] = (args...) ->
+      rootLogger.deprecated "wesabe.#{level}(...)", "logger.#{level}(...)"
+      rootLogger[level](args...)
