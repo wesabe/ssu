@@ -244,13 +244,7 @@ type    = @require 'lang/type'
 
 # colorize the logging if appropriate
 Logger.rootLogger.printer = (object) ->
-  opts = color: prefs.get('wesabe.logger.color') ? on
-
-  if type.isTainted object
-    opts.sanitize = on
-    "{sanitized #{inspect untaint(object), undefined, undefined, opts}}"
-
-  else if typeof object is 'string'
+  if typeof object is 'string'
     # top-level strings don't get quotes or color since they're probably just log messages
     object
 
@@ -277,7 +271,7 @@ Logger.rootLogger.printer = (object) ->
     return result
 
   else
-    inspect object, undefined, undefined, opts
+    inspect object, undefined, undefined, color: prefs.get('wesabe.logger.color') ? on
 
 # write logs to a file rather than stdout
 Logger.rootLogger.appender = Logger.getFileAppender()

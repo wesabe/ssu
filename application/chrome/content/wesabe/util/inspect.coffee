@@ -3,10 +3,13 @@ array      = require 'lang/array'
 {trim}     = require 'lang/string'
 Colorizer  = require 'util/Colorizer'
 
-# lazy-load the sanitize method
+# lazy-load the sanitize/untaint methods
 sanitize = (args...) ->
   {sanitize} = require 'util/privacy'
   sanitize args...
+untaint = (args...) ->
+  {untaint} = require 'util/privacy'
+  untaint args...
 
 COLOR_SCHEME =
   number:    ['blue']
@@ -29,10 +32,19 @@ COLOR_SCHEME =
 
 inspect = (object, showHidden=off, depth=2, opts={}) ->
   opts.color    ?= off
-  opts.sanitize ?= off
+  opts.sanitize ?= type.isTainted object
 
+  object = untaint object if type.isTainted object
   classForInspect = object?.classForInspect?()
 
+  if opts.sanitize
+    prefix = "{sanitized "
+    suffix = "}"
+  else
+    prefix = ""
+    suffix = ""
+
+  "#{prefix}#{
   if typeof object is 'undefined'
     style 'undefined', 'undefined', opts
   else if object is null
@@ -59,6 +71,7 @@ inspect = (object, showHidden=off, depth=2, opts={}) ->
     inspectObject object, showHidden, depth, opts
   else
     "#{object}"
+  }#{suffix}"
 
 
 #
