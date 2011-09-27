@@ -76,3 +76,23 @@ class Browser
 
 
 module.exports = Browser
+
+# DEPRECATIONS
+#
+# This class used to be a set of functions that were passed a XULBrowser
+# as the first argument, like so:
+#
+#   wesabe.dom.browser.go(browser, "http://www.google.com/"
+#
+# Now it's an actual class that keeps the XULBrowser as an ivar. To help
+# with the transition, this section adds back wesabe.dom.browser.go and
+# friends but yells at you that you're using a deprecated method.
+#
+deprecated = {}
+for name in ['go', 'joinURI', 'atURI']
+  do (name) ->
+    deprecated[name] = (browser, args...) ->
+      logger.deprecated "wesabe.dom.browser.#{name}(browser, ...)", "browser.#{name}(...)"
+      browser[name](args...)
+
+wesabe.provide 'dom.browser', deprecated
