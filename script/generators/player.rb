@@ -20,18 +20,18 @@ module SSU
       end
 
       template :main do |t|
-        t.source = "main.js.erb"
-        t.destination = "application/chrome/content/wesabe/fi-scripts/#{script_path}.js"
+        t.source = "main.coffee.erb"
+        t.destination = "application/chrome/content/wesabe/fi-scripts/#{script_path}.coffee"
       end
 
       template :login do |t|
-        t.source = "login.js.erb"
-        t.destination = "application/chrome/content/wesabe/fi-scripts/#{script_path}/login.js"
+        t.source = "login.coffee.erb"
+        t.destination = "application/chrome/content/wesabe/fi-scripts/#{script_path}/login.coffee"
       end
 
       template :accounts do |t|
-        t.source = "accounts.js.erb"
-        t.destination = "application/chrome/content/wesabe/fi-scripts/#{script_path}/accounts.js"
+        t.source = "accounts.coffee.erb"
+        t.destination = "application/chrome/content/wesabe/fi-scripts/#{script_path}/accounts.coffee"
       end
     end
   end
