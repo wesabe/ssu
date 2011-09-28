@@ -243,4 +243,4 @@ module.exports = {Pathset, Pathway}
 #   wesabe.xpath.Pathway.bind(xpath, binding)
 #
 # We re-add the original here with a deprecation notice.
-wesabe.provide 'xpath.bind', logger.wrapDeprecated('wesabe.xpath.bind', 'wesabe.xpath.Pathway.bind', (args...) -> Pathway.bind args...)
+module.exports.bind = logger.wrapDeprecated('wesabe.xpath.bind', 'wesabe.xpath.Pathway.bind', (args...) -> Pathway.bind args...)
