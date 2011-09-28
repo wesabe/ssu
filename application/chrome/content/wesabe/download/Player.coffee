@@ -141,8 +141,18 @@ wesabe.provide 'download.Player', class Player
 
         wesabe.io.file.write statement, data
 
-        @job.recordSuccessfulDownload statement, filename, @job.nextDownloadMetadata
+        metadata = @job.nextDownloadMetadata
         delete @job.nextDownloadMetadata
+
+        # restore the browser and page the download was triggered from, if any
+        if metadata.browser
+          @browser = metadata.browser
+          delete metadata.browser
+        if metadata.page
+          @page = metadata.page
+          delete metadata.page
+
+        @job.recordSuccessfulDownload statement, filename, metadata
         @onDownloadSuccessful @browser, @page
 
     wesabe.bind 'downloadFail', (event) =>
@@ -258,6 +268,9 @@ wesabe.provide 'download.Player', class Player
       callback = metadata
       metadata = url
       url = null
+
+      metadata.browser = browser
+      metadata.page = page
 
       @job.nextDownloadMetadata = metadata
       callback()
