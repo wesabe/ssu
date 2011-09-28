@@ -6,6 +6,7 @@ date           = require 'lang/date'
 func           = require 'lang/func'
 type           = require 'lang/type'
 event          = require 'util/event'
+prefs          = require 'util/prefs'
 dateForElement = (require 'dom/date').forElement
 dir            = require 'io/dir'
 file           = require 'io/file'
@@ -19,6 +20,11 @@ Bridge         = require 'dom/Bridge'
 {Pathway}      = require 'xpath'
 
 {tryThrow, tryCatch} = require 'util/try'
+
+DEFAULT_TIMEOUTS =
+  action:    60 # 1m
+  global:   300 # 5m
+  security: 180 # 3m
 
 class Player
   @register: (params) ->
@@ -426,27 +432,23 @@ class Player
     logger.warn args... if args.length
     delete @tmp.account
 
-  actionTimeoutDuration: 60000 # 1m
-  globalTimeoutDuration: 300000 # 5m
-  securityTimeoutDuration: 180000 # 3m
-
   setErrorTimeout: (timeoutType) ->
-    duration = @["#{timeoutType}TimeoutDuration"]
+    duration = (prefs.get "wesabe.download.player.timeout.#{timeoutType}") or DEFAULT_TIMEOUTS[timeoutType]
     tt = @_timeouts
     tt ||= @_timeouts = {}
 
     @clearErrorTimeout timeoutType
 
-    logger.debug "Timeout ", timeoutType, " set (", duration, ")"
+    logger.debug "Timeout ", timeoutType, " set (", duration, " seconds)"
 
     tt[timeoutType] = setTimeout =>
       event.trigger this, 'timeout', [timeoutType]
       return if @job.done
-      logger.error "Timeout ", timeoutType, " (", duration, ") reached, abandoning job"
+      logger.error "Timeout ", timeoutType, " (", duration, " seconds) reached, abandoning job"
       tryCatch "Player#setErrorTimeout(page dump)", =>
         @page?.dumpPrivately()
       @job.fail 504, "timeout.#{timeoutType}"
-    , duration
+    , duration * 1000
 
   clearErrorTimeout: (timeoutType) ->
     if @_timeouts?[timeoutType]
