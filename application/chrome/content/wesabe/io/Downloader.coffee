@@ -39,7 +39,12 @@ class Downloader
        match = @url.match(/.+\/([^\/\?]+)/)
        suggestedFilename = match?[1]
 
-     wesabe.callback @callback, req.status is 0, [file, suggestedFilename]
+      try
+        contentType = @_httpChannel.getResponseHeader('Content-Type')
+      catch err
+        contentType = undefined
+
+     wesabe.callback @callback, req.status is 0, [file, suggestedFilename, contentType]
 
      delete @_httpChannel
      delete @_downloader

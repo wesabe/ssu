@@ -95,10 +95,10 @@ class Job
 
     @player.onLastGoalFinished()
 
-  recordSuccessfulDownload: (file, suggestedFilename, metadata, reload=true) ->
+  recordSuccessfulDownload: (file, metadata, reload=true) ->
     logger.info 'successfully downloaded file to ', file.path
     @data.downloads ||= []
-    @data.downloads.push extend({path: file.path, suggestedFilename: suggestedFilename, status: 'ok'}, metadata or {})
+    @data.downloads.push extend({path: file.path, status: 'ok'}, metadata or {})
 
   recordFailedDownload: (metadata, reload=true) ->
     logger.error 'failed to download file'

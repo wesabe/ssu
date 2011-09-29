@@ -149,7 +149,7 @@ class Player
     event.add browser, 'DOMContentLoaded', (evt) =>
       @onDocumentLoaded Browser.wrap(browser), Page.wrap(evt.target)
 
-    event.add 'downloadSuccess', (evt, data, filename) =>
+    event.add 'downloadSuccess', (evt, data, suggestedFilename, contentType) =>
       @job.update 'account.download.success'
       @setErrorTimeout 'global'
 
@@ -175,7 +175,7 @@ class Player
           @page = metadata.page
           delete metadata.page
 
-        @job.recordSuccessfulDownload statement, filename, metadata
+        @job.recordSuccessfulDownload statement, extend({suggestedFilename, contentType}, metadata)
         @onDownloadSuccessful @browser, @page
 
     event.add 'downloadFail', (evt) =>
@@ -294,17 +294,18 @@ class Player
       statement = newStatementFile()
       file.write statement, metadata.data
       delete metadata.data
-      @job.recordSuccessfulDownload statement, metadata.suggestedFilename, metadata
+      @job.recordSuccessfulDownload statement, metadata
       @onDownloadSuccessful browser, page
 
       return
 
-    metadata = extend url: url, (metadata or {})
+    url = privacy.untaint url
+    metadata = extend {url}, (metadata or {})
 
-    tryThrow "Player#download(#{url})", (log) =>
+    tryThrow "Player#download(#{url})", =>
       download url, newStatementFile(),
-        success: (path, suggestedFilename) =>
-          @job.recordSuccessfulDownload path, suggestedFilename, metadata
+        success: (path, suggestedFilename, contentType) =>
+          @job.recordSuccessfulDownload path, extend({suggestedFilename, contentType}, metadata)
           @onDownloadSuccessful browser, page
 
         failure: =>

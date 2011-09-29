@@ -88,8 +88,8 @@ class Application
   listenForDownloads: ->
     contentListener = ContentListener.sharedInstance
     contentListener.init window, "application/x-ssu-intercept"
-    event.add contentListener, 'after-receive', (_, data, filename) ->
-      event.trigger 'downloadSuccess', [data, filename]
+    event.add contentListener, 'after-receive', (_, data, filename, contentType) ->
+      event.trigger 'downloadSuccess', [data, filename, contentType]
 
 
 # Wesabe Sniffer registration - if not already registered.

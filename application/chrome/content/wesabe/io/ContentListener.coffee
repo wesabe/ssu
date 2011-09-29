@@ -37,9 +37,10 @@ class ContentListener
     tryCatch "ContentListener#doContent(contentType=#{contentType})", (log) =>
       contentHandler.value = new StreamListener((
         (data) =>
-          filename = @suggestedFilenameForRequest(request)
-          log.debug("got some data (filename=#{filename})")
-          trigger this, 'after-receive', [data, filename]
+          filename = @suggestedFilenameForRequest request
+          originalContentType = @originalContentTypeForRequest request
+          log.debug "got some data (filename=", filename, ", contentType=", originalContentType, ")"
+          trigger this, 'after-receive', [data, filename, originalContentType]
         ), contentType)
 
     return false
@@ -60,6 +61,17 @@ class ContentListener
 
       match = httpChannel.URI?.spec?.match(/.+\/([^\/\?]+)/)
       return match?[1]
+
+  originalContentTypeForRequest: (request) ->
+    httpChannel = request.QueryInterface(Components.interfaces.nsIHttpChannel)
+
+    try
+      header = httpChannel.getResponseHeader('X-SSU-Content-Type')
+      logger.debug 'X-SSU-Content-Type header = ', header
+      return header
+    catch err
+      logger.debug "originalContentTypeForRequest error: #{err}"
+      return null
 
   isPreferred: (contentType, desiredContentType) ->
     @contentType is contentType
