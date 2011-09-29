@@ -60,7 +60,7 @@ class Bridge
       @dispatch response
     ), true
 
-    fn?.call?(this)
+    fn?.call?(this, this)
 
   getBridgeElement: ->
     @document.byId("_xulBridge")
