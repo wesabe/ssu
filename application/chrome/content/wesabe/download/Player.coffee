@@ -8,6 +8,7 @@ type           = require 'lang/type'
 event          = require 'util/event'
 prefs          = require 'util/prefs'
 dateForElement = (require 'dom/date').forElement
+inspect        = require 'util/inspect'
 dir            = require 'io/dir'
 file           = require 'io/file'
 {download}     = require 'io/Downloader'
@@ -481,16 +482,17 @@ class Player
             return
 
           [type, message] = data
+          formattedMessage = inspect message, undefined, undefined, color: prefs.get('wesabe.logger.color') ? on
 
           switch type
             when 'alert'
-              logger.info type, ' called with message=', wesabe.util.inspectForLog(message)
+              logger.info type, ' called with message=', formattedMessage
 
             when 'confirm'
-              logger.info type, ' called with message=', wesabe.util.inspectForLog(message), ', automatically answered YES'
+              logger.info type, ' called with message=', formattedMessage, ', automatically answered YES'
 
             when 'open'
-              logger.info type, ' called with url=', wesabe.util.inspectForLog(message)
+              logger.info type, ' called with url=', formattedMessage
 
           callbacks = @["#{type}ReceivedCallbacks"]
           if callbacks
