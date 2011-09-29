@@ -36,7 +36,7 @@ class Downloader
        match = @_httpChannel.getResponseHeader('Content-Disposition').match(/filename="([^"]+)"/i)
        suggestedFilename = match?[1]
      catch err
-       match = url.match(/.+\/([^\/\?]+)/)
+       match = @url.match(/.+\/([^\/\?]+)/)
        suggestedFilename = match?[1]
 
      wesabe.callback @callback, req.status is 0, [file, suggestedFilename]
