@@ -105,4 +105,8 @@ class Job
     @data.downloads ||= []
     @data.downloads.push(extend({status: 'error'}, metadata or {}))
 
+
+  contentForInspect: ->
+    {@jobid, @status, @result, @done, @options, @player, @data}
+
 module.exports = Job
