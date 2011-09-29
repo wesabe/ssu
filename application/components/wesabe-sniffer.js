@@ -111,6 +111,15 @@ WesabeSniffer.prototype.getMIMETypeFromContent = function(request, data, length)
           dump("WesabeSniffer.getMTFC: can't unset content-disposition: " + ex.message + "\n");
         }
 
+        try {
+          var http = request.QueryInterface(Components.interfaces.nsIHttpChannel);
+
+          try { http.setResponseHeader("X-SSU-Content-Type", http.getResponseHeader("Content-Type"), false); }
+          catch (ex) { dump("WesabeSniffer.getMTFC: can't preserve Content-Type header: " + ex.message + "\n") }
+        }
+        catch (ex) {}
+
+
         dump("WesabeSniffer: getMTFC: marking request for intercept\n");
         return "application/x-ssu-intercept";
       }
