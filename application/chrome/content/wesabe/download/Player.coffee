@@ -486,20 +486,20 @@ class Player
             logger.debug "Bridge connected"
             return
 
-          [type, message] = data
+          [messageType, message] = data
           formattedMessage = inspect message, undefined, undefined, color: prefs.get('wesabe.logger.color') ? on
 
-          switch type
+          switch messageType
             when 'alert'
-              logger.info type, ' called with message=', formattedMessage
+              logger.info messageType, ' called with message=', formattedMessage
 
             when 'confirm'
-              logger.info type, ' called with message=', formattedMessage, ', automatically answered YES'
+              logger.info messageType, ' called with message=', formattedMessage, ', automatically answered YES'
 
             when 'open'
-              logger.info type, ' called with url=', formattedMessage
+              logger.info messageType, ' called with url=', formattedMessage
 
-          callbacks = @["#{type}ReceivedCallbacks"]
+          callbacks = @["#{messageType}ReceivedCallbacks"]
           if callbacks
             for callback in callbacks
               @callWithMagicScope callback, browser, page, extend({message, logger: (require 'Logger').rootLogger}), message
