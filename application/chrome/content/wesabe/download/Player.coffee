@@ -449,12 +449,10 @@ wesabe.provide 'download.Player', class Player
 
     module = @constructor.fid
 
-    bridgeCallback = (args...) =>
-      @onBridgeResponse browser, page, args...
 
     # log when alert and confirm are called
-    new wesabe.dom.Bridge page.proxyTarget, ->
-      @evaluate ->
+    new wesabe.dom.Bridge page.proxyTarget, (bridge) =>
+      bridge.evaluate ->
         # evaluated on the page
         window.alert = (message) ->
           callback 'alert', message
@@ -466,7 +464,8 @@ wesabe.provide 'download.Player', class Player
           callback 'open', url
           return false
 
-      , bridgeCallback
+      , (args...) =>
+        @onBridgeResponse browser, page, args...
 
     unless @shouldDispatch browser, page
       wesabe.info 'skipping document load'
