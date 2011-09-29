@@ -7,7 +7,6 @@ func           = require 'lang/func'
 type           = require 'lang/type'
 event          = require 'util/event'
 prefs          = require 'util/prefs'
-dateForElement = (require 'dom/date').forElement
 inspect        = require 'util/inspect'
 dir            = require 'io/dir'
 file           = require 'io/file'
@@ -377,6 +376,9 @@ class Player
   #
   # Fills in the date range for a download based on a lower bound.
   #
+  # NOTE: This is an action and may be called with action.fillDateRange().
+  # Be warned: because this is an action _it is called with magic scope_.
+  #
   # ==== Options (options)
   # :since<Number, null>::
   #   Time of the lower bound to use for the date range (in ms since epoch).
@@ -384,6 +386,9 @@ class Player
   # @public
   #
   fillDateRange: ->
+    date = require 'lang/date'
+    dateForElement = (require 'dom/date').forElement
+    type = require 'lang/type'
     formatString = e.download.date.format or 'MM/dd/yyyy'
 
     opts   = e.download.date
@@ -401,7 +406,7 @@ class Player
       # use default or today's date if we can't get a date from the field
       to.date ||= getDefault(opts.defaults && opts.defaults.to) or new Date()
 
-      log.info "Adjusting date upper bound: ", to.date
+      logger.info "Adjusting date upper bound: ", to.date
 
     if fromEl
       # if there's a lower bound, choose a week before it to ensure some overlap
@@ -421,7 +426,7 @@ class Player
         from.date = getDefault(opts.defaults and opts.defaults.from, to: to.date) or
           date.add(to.date, -89 * date.DAYS)
 
-      log.info "Adjusting date lower bound: ", from.date
+      logger.info "Adjusting date lower bound: ", from.date
 
 
   nextAccount: ->
