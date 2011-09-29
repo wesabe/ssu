@@ -461,8 +461,8 @@ class Player
     module = @constructor.fid
 
     # log when alert and confirm are called
-    new Bridge page, ->
-      @evaluate ->
+    new Bridge page, (bridge) =>
+      bridge.evaluate ->
         # evaluated on the page
         window.alert = (message) ->
           callback 'alert', message
@@ -474,7 +474,7 @@ class Player
           callback 'open', url
           return false
 
-      , (data) ->
+      , (data) =>
         # evaluated here
           unless data
             logger.debug "Bridge connected"
