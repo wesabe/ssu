@@ -21,7 +21,7 @@ class Downloader
   # Starts the download. This is the only public method for this class.
   #
   download: ->
-    @_httpChannel = ioService.newChannel @url, '', null
+    @_httpChannel = @_ioService.newChannel @url, '', null
     @_httpChannel.QueryInterface Ci.nsIHttpChannel
     @_httpChannel.asyncOpen @_downloader, null
 
