@@ -57,7 +57,7 @@ class wesabe.dom.Bridge
       response = eval(element.firstChild.nodeValue)
       @dispatch(response)), true
 
-    fn?.call?(this)
+    fn?.call?(this, this)
 
   getBridgeElement: ->
     @document.getElementById("_xulBridge")
