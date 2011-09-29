@@ -573,7 +573,7 @@ class Player
       bind: (args...) => Pathway.bind(args...)
       logger: log
       log: log
-    }, scope or {}), args...
+    }, scope or {}), args
 
 
   @::__defineGetter__ 'history', ->
