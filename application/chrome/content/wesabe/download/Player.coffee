@@ -449,6 +449,9 @@ wesabe.provide 'download.Player', class Player
 
     module = @constructor.fid
 
+    bridgeCallback = (args...) =>
+      @onBridgeResponse browser, page, args...
+
     # log when alert and confirm are called
     new wesabe.dom.Bridge page.proxyTarget, ->
       @evaluate ->
@@ -463,48 +466,49 @@ wesabe.provide 'download.Player', class Player
           callback 'open', url
           return false
 
-      , (data) ->
-        # evaluated here
-          unless data
-            wesabe.debug "Bridge connected"
-            return
-
-          [type, message] = data
-
-          switch type
-            when 'alert'
-              wesabe.info type, ' called with message=', wesabe.util.inspectForLog(message)
-
-            when 'confirm'
-              wesabe.info type, ' called with message=', wesabe.util.inspectForLog(message), ', automatically answered YES'
-
-            when 'open'
-              wesabe.info type, ' called with url=', wesabe.util.inspectForLog(message)
-
-          callbacks = @["#{type}ReceivedCallbacks"]
-          if callbacks
-            for callback in callbacks
-              wesabe.lang.func.callWithScope callback, this,
-                message: message
-                browser: browser
-                page: page
-                e: @constructor.elements
-                answers: @answers
-                options: @job.options
-                log: wesabe
-                tmp: @tmp
-                action: @getActionProxy browser, page
-                job: @getJobProxy()
-                reload: => @triggerDispatch browser, page
-                skipAccount: @skipAccount
-                download: (args...) => @download args...
-              , [message]
+      , bridgeCallback
 
     unless @shouldDispatch browser, page
       wesabe.info 'skipping document load'
       return
 
     @triggerDispatch browser, page
+
+  onBridgeResponse: (browser, page, data) ->
+    unless data
+      wesabe.debug "Bridge connected"
+      return
+
+    [type, message] = data
+
+    switch type
+      when 'alert'
+        wesabe.info type, ' called with message=', wesabe.util.inspectForLog(message)
+
+      when 'confirm'
+        wesabe.info type, ' called with message=', wesabe.util.inspectForLog(message), ', automatically answered YES'
+
+      when 'open'
+        wesabe.info type, ' called with url=', wesabe.util.inspectForLog(message)
+
+    callbacks = @["#{type}ReceivedCallbacks"]
+    if callbacks
+      for callback in callbacks
+        wesabe.lang.func.callWithScope callback, this,
+          message: message
+          browser: browser
+          page: page
+          e: @constructor.elements
+          answers: @answers
+          options: @job.options
+          log: wesabe
+          tmp: @tmp
+          action: @getActionProxy browser, page
+          job: @getJobProxy()
+          reload: => @triggerDispatch browser, page
+          skipAccount: @skipAccount
+          download: (args...) => @download args...
+        , [message]
 
   triggerDispatch: (browser, page) ->
     module = @constructor.fid
