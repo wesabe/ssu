@@ -13,6 +13,7 @@ untaint = (args...) ->
 getPref = (args...) ->
   getPref = (require 'util/prefs').get
   getPref args...
+Colorizer = null
 
 loggersByName = {}
 
@@ -23,6 +24,14 @@ LEVELS =
   warn:        3
   error:       4
   fatal:       5
+
+COLORS =
+  radioactive: ['cyan', 'bold']
+  debug:       ['black']
+  info:        ['bold']
+  warn:        ['yellow']
+  error:       ['red']
+  fatal:       ['red', 'bold']
 
 levelNameForCode = (level) ->
   return level if typeof level is 'string'
@@ -164,9 +173,15 @@ class Logger
                   "#{object}"
 
     level = levelNameForCode(level).toUpperCase()
+    prefix = "#{level}#{new Array(Math.max(0, 7-level.length)).join(' ')} "
+
+    if getPref('wesabe.logger.color') ? on
+      Colorizer ||= require 'util/Colorizer'
+      prefix = Colorizer.apply(prefix, COLORS[level.toLowerCase()]...)
+
     lines = strings.join('').split(/\r?\n/)
 
-    return ("#{level} -- #{@name and "#{@name}: "}#{line}" for line in lines).join('\n')
+    return ("#{prefix}#{@name and "#{@name}: "}#{line}" for line in lines).join('\n')
 
 rootLogger = new Logger()
 fileAppender = null

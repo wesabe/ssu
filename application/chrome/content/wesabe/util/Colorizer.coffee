@@ -21,15 +21,20 @@ STYLES =
 # Provides an easy way to generate ANSI color strings for the shell.
 # Example:
 #
-#   var s = new wesabe.util.Colorizer();
-#   s.red();
-#   s.print("this is red.");
-#   s.underlined();
-#   s.print("and this is red and underlined.");
-#   s.reset();
-#   dump(s.toString());
+#   var s = new Colorizer()
+#   s.red()
+#   s.print("this is red.")
+#   s.underlined()
+#   s.print("and this is red and underlined.")
+#   s.reset()
+#   dump(s.toString())
 #
 class Colorizer
+  @apply: (text, styles...) ->
+    for style in styles
+      text = @[style](text)
+    return text
+
   # add colors and styles as methods
   for name, code of extend(extend({}, COLORS), STYLES)
     do (name, code) =>
