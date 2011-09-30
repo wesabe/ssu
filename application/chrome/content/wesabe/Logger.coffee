@@ -97,7 +97,7 @@ class Logger
     rootLogger
 
   @loggerForFile: (file) ->
-    file = file.replace /\.\w+$/, ''
+    file = file.replace /\.(coffee|js)$/, ''
     loggersByName[file] ||= new Logger(file)
 
   #
