@@ -122,7 +122,7 @@ class Controller
             params =
               status: @job.status
               result: @job.result
-              data: json.render job.data
+              data: json.render @job.data
               completed: @job.done
               cookies: cookies.dump()
               timestamp: new Date().getTime()
@@ -210,7 +210,7 @@ class Controller
     logger.info 'Got request to stop job, shutting down'
 
     # job didn't finish, so it failed
-    job.fail 504, 'timeout.quit' unless @job.done
+    @job.fail 504, 'timeout.quit' unless @job.done
 
     response:
       status: 'ok'
