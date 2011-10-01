@@ -13,8 +13,7 @@ inspect = require 'util/inspect'
 
 class Controller
   createServerSocket: ->
-    Components.classes['@mozilla.org/network/server-socket;1']
-      .createInstance(Components.interfaces.nsIServerSocket)
+    Cc['@mozilla.org/network/server-socket;1'].createInstance(Ci.nsIServerSocket)
 
   start: (@port) ->
     bindSuccessful = false
@@ -56,8 +55,7 @@ class Controller
       instream.init stream
       log.debug 'Accepted connection'
 
-      pump = Components.classes['@mozilla.org/network/input-stream-pump;1']
-               .createInstance(Components.interfaces.nsIInputStreamPump)
+      pump = Cc['@mozilla.org/network/input-stream-pump;1'].createInstance(Ci.nsIInputStreamPump)
       pump.init(stream, -1, -1, 0, 0, false)
       pump.asyncRead({
         onStartRequest: (request, context) =>
