@@ -209,13 +209,14 @@ wesabe =
       exports = _exportsOriginal = module.exports
 
       bootstrap.load uri,
-        __FILE__: uri
-        module:   module
-        exports:  exports
-        require:  wesabe.CommonJSRequire
-        logger:   Logger?.loggerForFile uri
-        Cc:       Components.classes
-        Ci:       Components.interfaces
+        __filename: uri
+        __dirname:  uri.replace /\/[^\/]+$/, ''
+        module:     module
+        exports:    exports
+        require:    wesabe.CommonJSRequire
+        logger:     Logger?.loggerForFile uri
+        Cc:         Components.classes
+        Ci:         Components.interfaces
 
       # if the file changed exports, re-save it
       if _exportsOriginal isnt exports
