@@ -164,7 +164,7 @@ class Player
 
         file.write statement, data
 
-        metadata = @job.nextDownloadMetadata
+        metadata = @job.nextDownloadMetadata or {}
         delete @job.nextDownloadMetadata
 
         # restore the browser and page the download was triggered from, if any
