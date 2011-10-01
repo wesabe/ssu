@@ -1,15 +1,14 @@
-wesabe.provide('util.benchmark')
+type = require 'lang/type'
 
-wesabe.util.benchmark =
+benchmark =
   bm: (callbacks, count) ->
-    # wesabe.info('Benchmark')
-    wesabe.info('================================================')
+    logger.info '================================================'
     for key, callback of callbacks
-      wesabe.info(key,': ',@time(callback, count))
-    wesabe.info('================================================')
+      logger.info key,': ',@time(callback, count)
+    logger.info '================================================'
 
   time: (callback, count) ->
-    count = 1 if wesabe.isUndefined(count)
+    count = 1 if type.isUndefined count
     times = []
     total = 0
     sqtotal = 0
@@ -38,9 +37,7 @@ wesabe.util.benchmark =
     round: (f) ->
       parseFloat(parseInt(parseFloat(f) * 100))/100
     inspect: ->
-      "average: #{@round(@average,2)
-   }ms stddev: #{@round(@stddev)
-   }ms total: #{@round(@total)
-   }ms (#{@count} times)"
+      "average: #{@round @average, 2}ms stddev: #{@round @stddev}ms total: #{@round @total}ms (#{@count} times)"
 
-wesabe.bm = wesabe.util.benchmark.bm
+
+module.exports = benchmark

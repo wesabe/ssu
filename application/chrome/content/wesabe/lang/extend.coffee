@@ -1,4 +1,4 @@
-wesabe.provide 'lang.extend', (target, source, options={}) ->
+extend = (target, source, options={}) ->
   options.override ?= true
   options.merge ?= false
 
@@ -17,3 +17,5 @@ wesabe.provide 'lang.extend', (target, source, options={}) ->
         target[key] = source[key]
 
   return target
+
+module.exports = extend

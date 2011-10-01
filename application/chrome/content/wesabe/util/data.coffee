@@ -1,11 +1,9 @@
-wesabe.provide('util.data')
-
 uuid = 0
 cache = {}
 expando = "wesabe#{new Date().getTime()}"
 
 # shamelessly adapted from jQuery.data
-wesabe.util.data = (elem, name, data) ->
+data = (elem, name, data) ->
   id = elem[expando]
 
   # assign the id to elem
@@ -21,7 +19,7 @@ wesabe.util.data = (elem, name, data) ->
 
   return cache[id][name]
 
-wesabe.util.data.remove = (elem, name) ->
+remove = (elem, name) ->
   id = elem[expando]
 
   if not name
@@ -38,4 +36,8 @@ wesabe.util.data.remove = (elem, name) ->
       cacheEmpty = false
       break
 
-    @remove(elem) if cacheEmpty
+    remove elem if cacheEmpty
+
+data.remove = remove
+
+module.exports = data

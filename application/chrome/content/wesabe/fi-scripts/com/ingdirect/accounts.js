@@ -8,7 +8,7 @@ wesabe.provide('fi-scripts.com.ingdirect.accounts', {
       return;
 
     if (page.visible(e.errors.noTransactionsForPeriod)) {
-      wesabe.warn('No transactions available, skipping account');
+      logger.warn('No transactions available, skipping account');
       job.succeed();
       action.logoff();
     } else if (page.visible(e.downloadPeriod)) {
@@ -47,10 +47,10 @@ wesabe.provide('fi-scripts.com.ingdirect.accounts', {
       var form = page.findStrict(e.downloadForm),
           formid = form.getAttribute('id');
       if (formid) {
-        wesabe.warn("MainForm already has an id (", formid, ") -- doing nothing");
+        logger.warn("MainForm already has an id (", formid, ") -- doing nothing");
       } else {
         formid = form.getAttribute('name');
-        wesabe.warn("Setting MainForm's id to ", formid);
+        logger.warn("Setting MainForm's id to ", formid);
         form.setAttribute('id', wesabe.untaint(formid));
       }
       // </hack>

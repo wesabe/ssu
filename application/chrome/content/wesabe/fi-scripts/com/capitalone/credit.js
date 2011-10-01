@@ -7,7 +7,7 @@ wesabe.download.Player.register({
 
   actions: {
     main: function() {
-      wesabe.dom.browser.go(browser, "https://servicing.capitalone.com/c1/login.aspx");
+      browser.go("https://servicing.capitalone.com/c1/login.aspx");
     },
 
     login: function() {

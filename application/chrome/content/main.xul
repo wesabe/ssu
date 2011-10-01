@@ -11,8 +11,10 @@
   <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
   <script type="application/x-javascript" src="coffee-script.js"/>
   <script type="application/x-javascript" src="json2.js"/>
-  <script type="application/x-javascript" src="wesabe.js"/>
-  <script type="application/x-javascript" src="main.js"/>
+  <script type="text/coffeescript" src="wesabe.coffee"/>
+  <script type="text/coffeescript" src="main.coffee"/>
+
+  <script type="application/x-javascript" src="bootstrap.js"></script>
 
   <keyset>
     <key modifiers="accel" key="W" oncommand="window.close()"/>
@@ -21,7 +23,7 @@
 
   <toolbox>
     <menubar>
-      <menu id="menu_file" label="File">
+      <menu id="menu_file" label="File" hidden="true">
         <menupopup>
           <menuitem id="menu_FileQuitItem" key="quit" label="Quit DesktopUploader" oncommand="goQuitApplication();"/>
         </menupopup>
@@ -29,5 +31,4 @@
     </menubar>
   </toolbox>
 
-  <browser id="playback-browser" flex="1" type="content-primary" />
 </window>

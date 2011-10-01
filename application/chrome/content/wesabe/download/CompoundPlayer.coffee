@@ -1,11 +1,11 @@
-wesabe.provide('download.CompoundPlayer')
+extend = require 'lang/extend'
 
-class wesabe.download.CompoundPlayer
+class CompoundPlayer
   @register: (params) ->
-    klass = @create(params)
+    klass = @create params
 
     # make sure we put it where wesabe.require expects it
-    wesabe.provide("fi-scripts.#{klass.fid}", klass)
+    wesabe.provide "fi-scripts.#{klass.fid}", klass
 
     return klass
 
@@ -14,7 +14,7 @@ class wesabe.download.CompoundPlayer
       @fid: params.fid
       @org: params.org
 
-    wesabe.lang.extend(klass.prototype, params)
+    extend klass.prototype, params
 
     return klass
 
@@ -25,18 +25,18 @@ class wesabe.download.CompoundPlayer
     startNextPlayer = (failureCallback) =>
       nextPlayer()
       while @currentPlayer and not @currentPlayer.canHandleGoal(@job.goal)
-        wesabe.warn("Skipping player ", @currentPlayer, " since it can't handle goal: ", @job.goal)
+        logger.warn "Skipping player ", @currentPlayer, " since it can't handle goal: ", @job.goal
         nextPlayer()
 
       if @currentPlayer
-        wesabe.info("Starting player ", @currentPlayer)
+        logger.info "Starting player ", @currentPlayer
         @currentPlayer.job = @job
-        @currentPlayer.start(answers, browser)
+        @currentPlayer.start answers, browser
       else if failureCallback
         failureCallback()
       else
-        wesabe.info("No more players to handle goal: ", @job.goal)
-        @job.fail(400, "goal.unreachable")
+        logger.info "No more players to handle goal: ", @job.goal
+        @job.fail 400, "goal.unreachable"
 
     nextPlayer = =>
       @currentPlayer?.job = null
@@ -50,7 +50,7 @@ class wesabe.download.CompoundPlayer
     # customize fail to go to the next player
     job_fail_original = @job.fail
     @job.fail = (status, result) =>
-      wesabe.info "Could not complete job with ", @currentPlayer, " (", status, " ", result, ")"
+      logger.info "Could not complete job with ", @currentPlayer, " (", status, " ", result, ")"
 
       # if we can't, just report the last failure
       startNextPlayer(=> job_fail_original.call(@job, status, result))
@@ -71,3 +71,6 @@ class wesabe.download.CompoundPlayer
 
   @::__defineGetter__ 'browser', ->
     @currentPlayer?.browser
+
+
+module.exports = CompoundPlayer

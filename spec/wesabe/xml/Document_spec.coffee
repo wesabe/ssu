@@ -1,10 +1,11 @@
-Document = wesabe.require 'xml.Document'
+Document = require 'xml/Document'
+Text     = require 'xml/Text'
 
 describe 'wesabe.xml.Document', ->
   it 'throws an exception on a blank XML string', ->
     try
-      new Document('')
-      throw new Error("constructor failed to throw an exception")
+      new Document ''
+      throw new Error "constructor failed to throw an exception"
     catch err
       expect(err.message).toMatch(/Unexpected EOF/)
 
@@ -33,6 +34,6 @@ describe 'wesabe.xml.Document', ->
   it 'handles unclosed elements', ->
     root = new Document('<root>abc<child>def</root>').documentElement
     expect(root.childNodes.length).toBe(2)
-    expect(root.firstChild instanceof wesabe.xml.Text).toBe(true)
+    expect(root.firstChild instanceof Text).toBe(true)
     expect(root.lastChild.nodeName).toBe('child')
     expect(root.lastChild.text).toBe('def')

@@ -1,5 +1,3 @@
-wesabe.provide('ofx.UUID')
-
 #
 # uuid.js - Version 0.1
 # JavaScript Class to create a UUID like identifier
@@ -27,7 +25,7 @@ wesabe.provide('ofx.UUID')
 
 
 # on creation of a UUID object, set its initial value
-class wesabe.ofx.UUID
+class UUID
   constructor: ->
     @id = createUUID()
 
@@ -37,6 +35,12 @@ class wesabe.ofx.UUID
 
   toString: ->
     @id
+
+  @string: ->
+    (new UUID).toString()
+
+  @uuid: ->
+    UUID.string()
 
 createUUID = ->
   # JavaScript Version of UUID implementation.
@@ -138,3 +142,6 @@ randrange = (min, max) ->
   num = Math.round(Math.random() * max)
   num = if num < min then min else max
   return num
+
+
+module.exports = UUID

@@ -1,7 +1,10 @@
-wesabe.provide('ofx.Response')
-wesabe.require('ofx.Status')
-wesabe.require('util.privacy')
-wesabe.require('xml.*')
+{trim}   = require 'lang/string'
+Status   = require 'ofx/Status'
+Document = require 'ofx/Document'
+Account  = require 'ofx/Account'
+privacy  = require 'util/privacy'
+
+{tryThrow, tryCatch} = require 'util/try'
 
 # Response - parse an OFX response message for needed information
 
@@ -25,12 +28,12 @@ wesabe.require('xml.*')
 #
 # //....build OFX account info request....
 # var acctinfo_text = ofx_client.send_request(acctinfo_request);
-# var acctinfo = new wesabe.ofx.Response(acctinfo_text);
+# var acctinfo = new Response(acctinfo_text);
 # if (acctinfo.isSuccess()) {
 #     for (var i = 0; i < acctinfo.bankAccounts.length; i++) {
 #         // ....build OFX bank statement request....
 #         var statement_text = ofx_client.send_request(bankstmt_request);
-#         var statement = new wesabe.ofx.Response(statement_text);
+#         var statement = new Response(statement_text);
 #         if (statement.isSuccess()) {
 #             wesabe_client.upload_statement(statement.get_sanitized_statement());
 #         } else {
@@ -41,7 +44,7 @@ wesabe.require('xml.*')
 #     for (var i = 0; i < acctinfo.creditcardAccounts.length; i++) {
 #         // ....build OFX bank statement request....
 #         var statement_text = ofx_client.send_request(creditcardstmt_request);
-#         var statement = new wesabe.ofx.Response(statement_text);
+#         var statement = new Response(statement_text);
 #         if (statement.isSuccess()) {
 #             wesabe_client.upload_statement(statement.get_sanitized_statement());
 #         } else {
@@ -52,23 +55,23 @@ wesabe.require('xml.*')
 #     // report error
 # }
 
-class wesabe.ofx.Response
+class Response
   constructor: (@response, @job) ->
-    wesabe.radioactive('ofx.Response: response=', @response)
+    logger.radioactive 'ofx.Response: response=', @response
     @_find_statuses()
 
   # Public methods
 
   # Response OFX presented as a DOM tree.
-  this::__defineGetter__ 'responseXML', ->
-    @__responseXML__ ||= new wesabe.ofx.Document(@response, /BANKTRANLIST/i)
+  @::__defineGetter__ 'responseXML', ->
+    @__responseXML__ ||= new Document @response, /BANKTRANLIST/i
 
   # Response OFX presented as a complete DOM tree, including BANKTRANLIST nodes.
   parseFullResponseXML: ->
-    @__fullResponseXML__ ||= new wesabe.ofx.Document(@response)
+    @__fullResponseXML__ ||= new Document @response
 
   # List of all deposit accounts.
-  this::__defineGetter__ 'bankAccounts', ->
+  @::__defineGetter__ 'bankAccounts', ->
     @_find_accounts() unless @__bankAccounts__
     return @__bankAccounts__
 
@@ -83,7 +86,7 @@ class wesabe.ofx.Response
     return @__investmentAccounts__
 
   hasOFX: ->
-    return @responseXML.documentElement?.tagName.toLowerCase() == 'ofx'
+    @responseXML.documentElement?.tagName.toLowerCase() is 'ofx'
 
   # Check to see if the server returned any errors in the OFX response.
   isSuccess: ->
@@ -121,7 +124,7 @@ class wesabe.ofx.Response
 
     intu_pattern = /<INTU.[^>]*>[^<]*(?:<\/INTU.[^>]*>[^<]*)?/ig
     while result = intu_pattern.exec(@response) and intu_tag = result[0]
-      sanitized_text = sanitized_text.replace(intu_tag, "")
+      sanitized_text = sanitized_text.replace intu_tag, ""
 
     return sanitized_text
 
@@ -140,39 +143,42 @@ class wesabe.ofx.Response
     credit = @__creditcardAccounts__ = []
     investment = @__investmentAccounts__ = []
 
-    for acct in @responseXML.getElementsByTagName('ACCTINFO')
-      wesabe.radioactive(acct)
-      [acctid]   = acct.getElementsByTagName('ACCTID')
-      [bankid]   = acct.getElementsByTagName('BANKID')
-      [accttype] = acct.getElementsByTagName('ACCTTYPE')
-      [desc]     = acct.getElementsByTagName('DESC')
-      [account]  = acct.getElementsByTagName('CREDITCARD')
+    for acct in @responseXML.getElementsByTagName 'ACCTINFO'
+      logger.radioactive acct
+      [acctid]   = acct.getElementsByTagName 'ACCTID'
+      [bankid]   = acct.getElementsByTagName 'BANKID'
+      [accttype] = acct.getElementsByTagName 'ACCTTYPE'
+      [desc]     = acct.getElementsByTagName 'DESC'
+      [account]  = acct.getElementsByTagName 'CREDITCARD'
 
-      acctid   = wesabe.lang.string.trim(acctid.text) if acctid
-      accttype = wesabe.lang.string.trim(accttype.text) if accttype
-      bankid   = wesabe.lang.string.trim(bankid.text) if bankid
-      desc     = wesabe.lang.string.trim(desc.text) if desc
-      account  = wesabe.lang.string.trim(account.text) if account
+      acctid   = trim acctid.text if acctid
+      accttype = trim accttype.text if accttype
+      bankid   = trim bankid.text if bankid
+      desc     = trim desc.text if desc
+      account  = trim account.text if account
 
       if acct.getElementsByTagName('BANKACCTFROM').length
-        bank.push(new wesabe.ofx.Account(accttype, acctid, bankid, desc))
+        bank.push new Account(accttype, acctid, bankid, desc)
       else if acct.getElementsByTagName('CCACCTFROM').length
-        credit.push(new wesabe.ofx.Account("CREDITCARD", acctid, null, desc))
+        credit.push new Account("CREDITCARD", acctid, null, desc)
       else if acct.getElementsByTagName('INVACCTFROM').length
-        investment.push(new wesabe.ofx.Account("INVESTMENT", acctid, null, desc))
+        investment.push new Account("INVESTMENT", acctid, null, desc)
       else
-        wesabe.warn("Skipping unknown account type: ", acct)
+        logger.warn "Skipping unknown account type: ", acct
 
   _find_statuses: ->
-    wesabe.tryThrow 'Response#_find_statuses', =>
-      @statuses = for status in @responseXML.getElementsByTagName('STATUS')
-                    wesabe.radioactive(status)
-                    [code]      = status.getElementsByTagName('CODE')
-                    [severity]  = status.getElementsByTagName('SEVERITY')
-                    [message]   = status.getElementsByTagName('MESSAGE')
+    tryThrow 'Response#_find_statuses', =>
+      @statuses = for status in @responseXML.getElementsByTagName 'STATUS'
+                    logger.radioactive status
+                    [code]      = status.getElementsByTagName 'CODE'
+                    [severity]  = status.getElementsByTagName 'SEVERITY'
+                    [message]   = status.getElementsByTagName 'MESSAGE'
 
-                    code     = wesabe.lang.string.trim(code.text) if code
-                    severity = wesabe.lang.string.trim(severity.text) if severity
-                    message  = wesabe.lang.string.trim(message.text) if message
+                    code     = trim code.text if code
+                    severity = trim severity.text if severity
+                    message  = trim message.text if message
 
-                    new wesabe.ofx.Status(code, severity, message)
+                    new Status code, severity, message
+
+
+module.exports = Response

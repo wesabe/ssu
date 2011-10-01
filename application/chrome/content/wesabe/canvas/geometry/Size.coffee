@@ -1,21 +1,7 @@
-wesabe.provide('canvas.geometry.Size')
+Colorizer = require 'util/Colorizer'
 
-class wesabe.canvas.geometry.Size
-  constructor: (width, height) ->
-    @width = width
-    @height = height
+class Size
+  constructor: (@width, @height) ->
 
-  inspect: (refs, color, tainted) ->
-    s = new wesabe.util.Colorizer()
-    s.disabled = !color
-    return s
-      .yellow('#<')
-      .bold(@constructor?.__module__?.name || 'Object')
-      .print(' ')
-      .yellow('{')
-      .print(@width)
-      .print(', ')
-      .print(@height)
-      .yellow('}')
-      .yellow('>')
-      .toString()
+
+module.exports = Size

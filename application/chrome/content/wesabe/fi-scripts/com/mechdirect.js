@@ -59,7 +59,7 @@ wesabe.download.Player.register({
 
   actions: {
     main: function() {
-      wesabe.dom.browser.go(browser, "https://www.mechdirect.com/cas_login/");
+      browser.go("https://www.mechdirect.com/cas_login/");
     },
 
     login: function() {
@@ -86,7 +86,7 @@ wesabe.download.Player.register({
     },
 
     goToAccountPage: function() {
-      page.click(wesabe.xpath.bind(e.accounts.list.linkByAccountNumber, tmp.account));
+      page.click(bind(e.accounts.list.linkByAccountNumber, tmp.account));
     },
 
     goToDownloadPage: function() {

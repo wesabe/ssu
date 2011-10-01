@@ -1,17 +1,21 @@
-wesabe.provide 'xml.Document'
-wesabe.require 'xml.*'
-wesabe.require 'util.event'
-wesabe.require 'util.Colorizer'
-wesabe.require 'util.inspect'
+type      = require 'lang/type'
+event     = require 'util/event'
+inspect   = require 'util/inspect'
+Colorizer = require 'util/Colorizer'
 
-class wesabe.xml.Document
+Parser    = require 'xml/Parser'
+Element   = require 'xml/Element'
+Attribute = require 'xml/Attribute'
+Text      = require 'xml/Text'
+
+class Document
   constructor: (xml, verboten) ->
-    @parse(xml, verboten) if xml?
+    @parse xml, verboten if xml?
 
-  this::__defineGetter__ 'root', ->
-    this._root ||= new wesabe.xml.Element()
+  @::__defineGetter__ 'root', ->
+    @_root ||= new Element()
 
-  this::__defineGetter__ 'documentElement', ->
+  @::__defineGetter__ 'documentElement', ->
     @root.firstChild
 
   find: (selector) ->
@@ -28,30 +32,30 @@ class wesabe.xml.Document
     @documentElement.getElementsByTagName(name)
 
   parse: (xml, verboten) ->
-    parser = new wesabe.xml.Parser()
+    parser = new Parser()
 
     work =
       stack: []
 
       push: (node) ->
-        if wesabe.is(node, wesabe.xml.Text)
-          @stack.push(node)
-        else if wesabe.is(node, wesabe.xml.Attribute)
+        if type.is node, Text
+          @stack.push node
+        else if type.is node, Attribute
           @stack[@stack.length-1].setAttribute(node.name, node.value)
-        else if wesabe.is(node, wesabe.xml.Element)
+        else if type.is node, Element
           node.parsing = !node.selfclosing
-          @stack.push(node)
+          @stack.push node
         else
-          throw new Error('Unexpected node type: ', node)
+          throw new Error 'Unexpected node type: ', node
 
       setName: (name) ->
         for i in [@stack.length-1..0]
           node = @stack[i]
-          if wesabe.is(node, wesabe.xml.Element)
+          if type.is node, Element
             node.name = name
             return
 
-        throw new Error('Unable to find an element to set name to ', name)
+        throw new Error 'Unable to find an element to set name to ', name
 
       pop: (closeTag) ->
         # make sure tags are matched or just figure it out
@@ -59,53 +63,47 @@ class wesabe.xml.Document
 
         while @stack.length
           node = @stack.pop()
-          if wesabe.is(node, wesabe.xml.Element) && node.parsing
+          if node.parsing and type.is node, Element
             # found the matching opening tag, push all children into it
-            if node.name == closeTag.name
+            if node.name is closeTag.name
               for child in popped
-                node.appendChild(child)
+                node.appendChild child
 
               delete node.parsing
-              @stack.push(node)
+              @stack.push node
               return
           else if node.parsing
-            wesabe.error("NODE IS ", node)
+            logger.error "NODE IS ", node
 
           # push a dangling text node onto the adjacent element if that element is unclosed
-          if wesabe.is(popped[0], wesabe.xml.Text) && wesabe.is(node, wesabe.xml.Element) && node.parsing
+          if node.parsing and type.is(popped[0], Text) and type.is(node, Element)
             node.appendChild(popped.shift())
           popped.unshift(node)
 
-        throw new Error("Unexpected closing tag #{wesabe.util.inspect(closeTag)}")
+        throw new Error "Unexpected closing tag #{inspect closeTag}"
 
-    wesabe.bind parser, 'start-open-tag', (event, tag) =>
-      work.push(tag.toElement())
+    event.add parser, 'start-open-tag', (event, tag) =>
+      work.push tag.toElement()
 
-    wesabe.bind parser, 'end-open-tag', (event, tag) =>
-      work.setName(tag.name)
+    event.add parser, 'end-open-tag', (event, tag) =>
+      work.setName tag.name
 
-    wesabe.bind parser, 'close-tag', (event, tag) =>
-      work.pop(tag)
+    event.add parser, 'close-tag', (event, tag) =>
+      work.pop tag
 
-    wesabe.bind parser, 'text', (event, text) =>
-      work.push(text)
+    event.add parser, 'text', (event, text) =>
+      work.push text
 
-    wesabe.bind parser, 'attribute', (event, attr) =>
-      work.push(attr)
+    event.add parser, 'attribute', (event, attr) =>
+      work.push attr
 
     # parse the xml, executing all the callbacks above
-    parser.parse(xml, verboten)
+    parser.parse xml, verboten
 
-    @root.appendChild(work.stack[0])
+    @root.appendChild work.stack[0]
 
-  inspect: (refs, color, tainted) ->
-    # handle NodeJS-style inspect
-    if typeof refs is 'number'
-      refs = null
+  contentForInspect: ->
+    @documentElement
 
-    s = new wesabe.util.Colorizer()
-    s.disabled = !color
-    s.yellow('#<')
-     .bold(@constructor?.__module__?.name || 'Object')
-    s.print(' ', @documentElement.inspect(refs, color, tainted)) if @documentElement
-    return s.yellow('>').toString()
+
+module.exports = Document

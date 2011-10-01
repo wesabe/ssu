@@ -31,7 +31,7 @@ wesabe.provide("fi-scripts.com.citibank.accounts", {
 
   actions: {
     main: function() {
-      wesabe.dom.browser.go(browser, "https://web.da-us.citibank.com/cgi-bin/citifi/scripts/login2/login.jsp");
+      browser.go("https://web.da-us.citibank.com/cgi-bin/citifi/scripts/login2/login.jsp");
     },
 
     goDashboard: function() {

@@ -1,27 +1,30 @@
-wesabe.provide('xml.Text')
+Colorizer        = require 'util/Colorizer'
 
-class wesabe.xml.Text
+class Text
   constructor: (text) ->
-    @text = text || ''
+    @text = text or ''
 
   @::__defineGetter__ 'nodeValue', ->
     @text
 
   beginParsing: (parser) ->
-    @trigger('start-text', parser)
+    @trigger 'start-text', parser
 
   doneParsing: (parser) ->
     @parsed = true
-    @trigger('end-text text node', parser)
+    @trigger 'end-text text node', parser
 
   trigger: (events, parser) ->
-    parser.trigger(events, [this])
+    parser.trigger events, [this]
 
   inspect: (refs, color, tainted) ->
-    s = new wesabe.util.Colorizer()
+    s = new Colorizer()
     s.disabled = !color
 
     s.reset()
-     .print(wesabe.util._inspectString(@text, color, tainted))
+     .print(inspect @text)
      .reset()
      .toString()
+
+
+module.exports = Text

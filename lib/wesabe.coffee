@@ -5,7 +5,7 @@ exports.wesabe =
   ## MODULE GENERATION
 
   provide: (module, value) ->
-    @walk module, (part, mod, level, levels) ->
+    walk module, (part, mod, level, levels) ->
       mod[part] ||= if value? and (level is levels.length - 1)
         value
       else
@@ -17,8 +17,13 @@ exports.wesabe =
       parts[parts.length-1] = '__package__'
       module = parts[0..-2].join('.')
 
-    require "../application/chrome/content/wesabe/#{parts.join('/')}"
-    @walk module
+    loaded = require "../application/chrome/content/wesabe/#{parts.join('/')}"
+
+    walk module, (part, mod, level, levels) ->
+      mod[part] ||= if level is levels.length - 1
+        loaded
+      else
+        {}
 
   ## (STUB) TAINT HELPERS
 
@@ -37,7 +42,7 @@ exports.wesabe =
     typeof object is 'string'
 
   is: (object, klass) ->
-    object?.constructor == klass
+    object?.constructor is klass
 
   isTainted: -> false
 
@@ -83,12 +88,12 @@ exports.wesabe =
 
   ## INTERNAL
 
-  walk: (module, callback) ->
-    base = wesabe
-    parts = module.split('.')
+walk = (module, callback) ->
+  base = wesabe
+  parts = module.split('.')
 
-    for part, i in parts
-      callback part, base, i, parts if callback?
-      base = base[part]
+  for part, i in parts
+    callback part, base, i, parts if callback?
+    base &&= base[part]
 
-    return base
+  return base

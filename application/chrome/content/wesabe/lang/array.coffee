@@ -1,52 +1,44 @@
-wesabe.provide('lang.array')
+# lazy-load privacy.untaint
+untaint = (args...) ->
+  {untaint} = require 'util/privacy'
+  untaint args...
 
-wesabe.lang.array =
-  from: (object) ->
-    retval = []
 
-    for o, i in object
-      retval.push(o)
+from = (object) ->
+  item for item in object
 
-    return retval
+uniq = (array) ->
+  retval = []
 
-  uniq: (array) ->
-    retval = []
+  for item, i in array
+    retval.push(item) unless include retval, item
 
-    for item, i in array
-      retval.push(item) unless @include(retval, item)
+  return retval
 
-    return retval
+include = (array, object) ->
+  # check without considering taintedness
+  return true if object in array
 
-  include: (array, object) ->
-    object = wesabe.untaint(object)
+  object = untaint object
 
-    for item, i in array
-      return true if wesabe.untaint(array[i]) == object
+  for item in array
+    return true if untaint item is object
 
-    return false
+  return false
 
-  compact: (array) ->
-    retval = []
+compact = (array) ->
+  item for item in array when untaint item
 
-    for item, i in array
-      retval.push(item) if wesabe.untaint(item)
+equal = (a, b) ->
+  return false if a.length isnt b.length
 
-    return retval
+  for i in [0...a.length]
+    return false if a[i] isnt b[i]
 
-  equal: (a, b) ->
-    return false if a.length != b.length
+  return true
 
-    for i in [0...a.length]
-      return false if a[i] != b[i]
+zip = (a, b) ->
+  [a[i], b[i]] for i in [0...Math.max(a.length, b.length)]
 
-    return true
 
-  zip: (array1, array2) ->
-    result = []
-
-    for i in [0...Math.max(array1.length, array2.length)]
-      result.push([array1[i], array2[i]])
-
-    return result
-
-exports?.array = wesabe.lang.array
+module.exports = {from, uniq, include, compact, equal, zip}

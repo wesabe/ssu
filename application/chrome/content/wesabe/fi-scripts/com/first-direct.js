@@ -13,7 +13,7 @@ wesabe.download.Player.register({
 
   actions: {
     main: function() {
-      wesabe.dom.browser.go(browser, "https://www1.banking.first-direct.com/1/2/!ut/p/kcxml/");
+      browser.go("https://www1.banking.first-direct.com/1/2/!ut/p/kcxml/");
     },
   },
 

@@ -1,18 +1,20 @@
-wesabe.provide('xml.CloseTag')
+Element = require 'xml/Element'
 
-class wesabe.xml.CloseTag
+class CloseTag
   constructor: (name) ->
-    @name = name || ''
+    @name = name or ''
 
   beginParsing: (parser) ->
-    @trigger('start-close-tag', parser)
+    @trigger 'start-close-tag', parser
 
   doneParsing: (parser) ->
     @parsed = true
-    @trigger('end-close-tag close-tag node', parser)
+    @trigger 'end-close-tag close-tag node', parser
 
   trigger: (events, parser) ->
-    parser.trigger(events, [this])
+    parser.trigger events, [this]
 
   toElement: ->
-    new wesabe.xml.Element(@name)
+    new Element @name
+
+module.exports = CloseTag

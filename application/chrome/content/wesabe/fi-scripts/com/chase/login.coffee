@@ -17,7 +17,7 @@ wesabe.provide 'fi-scripts.com.chase.login',
 
   actions:
     main: ->
-      wesabe.dom.browser.go browser, "https://chaseonline.chase.com/Logon.aspx"
+      browser.go "https://chaseonline.chase.com/Logon.aspx"
 
     login: ->
       job.update 'auth.creds'

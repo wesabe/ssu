@@ -14,7 +14,7 @@ wesabe.provide("fi-scripts.org.texanscu.login", {
 
   actions: {
     main: function() {
-      wesabe.dom.browser.go(browser, "https://online.texanscu.org/Texans/Login.aspx");
+      browser.go("https://online.texanscu.org/Texans/Login.aspx");
     },
 
     login: function() {

@@ -1,5 +1,11 @@
-wesabe.provide('ofx.Request')
-wesabe.require('lang.date')
+date    = require 'lang/date'
+func    = require 'lang/func'
+type    = require 'lang/type'
+xhr     = require 'io/xhr'
+privacy = require 'util/privacy'
+{uuid}  = require 'ofx/UUID'
+
+Response = require 'ofx/Response'
 
 ## Request - build an OFX request message
 
@@ -8,36 +14,36 @@ wesabe.require('lang.date')
 ## are strings suitable for sending to OFX servers.  Currently supports
 ## account info, bank statement, and credit card statement requests.
 
-class wesabe.ofx.Request
+class Request
   constructor: (@fi, @username = 'anonymous00000000000000000000000', @password = 'anonymous00000000000000000000000', @job) ->
 
   request: (data, callback, metadata) ->
     # log the request if we *really* need to
-    wesabe.radioactive('OFX Request: ', data)
+    logger.radioactive('OFX Request: ', data)
 
-    wesabe.io.post @fi.ofxUrl, null, data,
+    xhr.post @fi.ofxUrl, null, data,
       before: (request) =>
         request.setRequestHeader("Content-type", "application/x-ofx")
         request.setRequestHeader("Accept", "*/*, application/x-ofx")
-        if not wesabe.isFunction(callback)
-          wesabe.lang.func.executeCallback(callback, 'before', [this].concat(metadata || []))
+        if not type.isFunction callback
+          func.executeCallback(callback, 'before', [this].concat(metadata || []))
 
       success: (request) =>
-        ofxresponse = new wesabe.ofx.Response(request.responseText, @job)
-        wesabe.success(callback, [this, ofxresponse, request])
+        ofxresponse = new Response request.responseText, @job
+        wesabe.success callback, [this, ofxresponse, request]
 
       failure: (request) =>
         ofxresponse = null
         try
-          ofxresponse = new wesabe.ofx.Response(request.responseText, @job)
+          ofxresponse = new Response request.responseText, @job
         catch e
-          wesabe.error("Could not parse response as OFX: ", request.responseText)
+          logger.error "Could not parse response as OFX: ", request.responseText
 
-        wesabe.failure(callback, [this, ofxresponse, request])
+        wesabe.failure callback, [this, ofxresponse, request]
 
       after: (request) =>
-        if not wesabe.isFunction(callback)
-          wesabe.lang.func.executeCallback(callback, 'after', [this].concat(metadata || []))
+        if not type.isFunction callback
+          func.executeCallback callback, 'after', [this].concat(metadata or [])
 
   fiProfile: ->
     @_init()
@@ -53,10 +59,10 @@ class wesabe.ofx.Request
 
     @request data,
       success: (self, response, request) ->
-        wesabe.lang.func.executeCallback(callback, 'success', [self, response, request])
+        func.executeCallback callback, 'success', [self, response, request]
 
       failure: (self, response, request) ->
-        wesabe.lang.func.executeCallback(callback, 'failure', [self, response, request])
+        func.executeCallback callback, 'failure', [self, response, request]
 
   accountInfo: ->
     @_init()
@@ -78,14 +84,14 @@ class wesabe.ofx.Request
                              .concat(response.creditcardAccounts)
                              .concat(response.investmentAccounts)
 
-          wesabe.success(callback, [{ accounts: accounts, text: request.responseText }])
+          wesabe.success callback, [{ accounts, text: request.responseText }]
         else
-          wesabe.error("ofx.Request#requestAccountInfo: login failure")
-          wesabe.failure(callback, [{ accounts: null, text: request.responseText, ofx: response }])
+          logger.error("ofx.Request#requestAccountInfo: login failure")
+          wesabe.failure callback, [{ accounts: null, text: request.responseText, ofx: response }]
 
       failure: (self, response, request) ->
-        wesabe.error('ofx.Request#requestAccountInfo: error: ', request.responseText)
-        wesabe.failure(callback, [{ accounts: null, text: request.responseText}])
+        logger.error 'ofx.Request#requestAccountInfo: error: ', request.responseText
+        wesabe.failure callback, [{ accounts: null, text: request.responseText}]
 
   bank_stmt: (ofx_account, dtstart) ->
     @_init()
@@ -113,27 +119,27 @@ class wesabe.ofx.Request
     "</OFX>\r\n"
 
   requestStatement: (account, options, callback) ->
-    account = wesabe.untaint(account)
+    account = privacy.untaint account
 
     data = switch account.accttype
              when 'CREDITCARD'
-               @creditcard_stmt(account, options.dtstart)
+               @creditcard_stmt account, options.dtstart
              when 'INVESTMENT'
-               @investment_stmt(account, options.dtstart)
+               @investment_stmt account, options.dtstart
              else
-               @bank_stmt(account, options.dtstart)
+               @bank_stmt account, options.dtstart
 
     @request data, {
       success: (self, response, request) ->
         if response.response && response.isSuccess()
-          wesabe.success(callback, [{ statement: response.getSanitizedResponse(), text: request.responseText }])
+          wesabe.success callback, [{ statement: response.getSanitizedResponse(), text: request.responseText }]
         else
-          wesabe.error('ofx.Request#requestStatement: response failure')
-          wesabe.failure(callback, [{ statement: null, text: request.responseText, ofx: response }])
+          logger.error 'ofx.Request#requestStatement: response failure'
+          wesabe.failure callback, [{ statement: null, text: request.responseText, ofx: response }]
 
       failure: (self, response, request) ->
-        wesabe.error('ofx.Request#requestStatement: error: ', request.responseText)
-        wesabe.failure(callback, [{ statement: null, text: request.responseText }])
+        logger.error 'ofx.Request#requestStatement: error: ', request.responseText
+        wesabe.failure callback, [{ statement: null, text: request.responseText }]
     }, [{
       request: this
       type: 'ofx.statement'
@@ -142,13 +148,13 @@ class wesabe.ofx.Request
     }]
 
   this::__defineGetter__ 'appId', ->
-    @_appId || 'Money'
+    @_appId or 'Money'
 
   this::__defineSetter__ 'appId', (appId) ->
     @_appId = appId
 
   this::__defineGetter__ 'appVersion', ->
-    @_appVersion || '1700'
+    @_appVersion or '1700'
 
   this::__defineSetter__ 'appVersion', (appVersion) ->
     @_appVersion = appVersion
@@ -156,8 +162,8 @@ class wesabe.ofx.Request
   # Private methods
 
   _init: ->
-    @uuid = new wesabe.ofx.UUID()
-    @datetime = wesabe.lang.date.format(new Date(), 'yyyyMMddHHmmss')
+    @uuid = uuid()
+    @datetime = date.format new Date(), 'yyyyMMddHHmmss'
 
   _header: ->
     "OFXHEADER:100\r\n" +
@@ -168,7 +174,7 @@ class wesabe.ofx.Request
     "CHARSET:1252\r\n" +
     "COMPRESSION:NONE\r\n" +
     "OLDFILEUID:NONE\r\n" +
-    "NEWFILEUID:" + @uuid + "\r\n\r\n"
+    "NEWFILEUID:#{@uuid}\r\n\r\n"
 
   _signon: ->
     "<SIGNONMSGSRQV1>\r\n" +
@@ -177,10 +183,10 @@ class wesabe.ofx.Request
     "<USERID>#{@username}\r\n" +
     "<USERPASS>#{@password}\r\n" +
     "<LANGUAGE>ENG\r\n" +
-    (if @fi.ofxOrg || @fi.ofxFid then "<FI>\r\n" else '') +
+    (if @fi.ofxOrg or @fi.ofxFid then "<FI>\r\n" else '') +
     (if @fi.ofxOrg then "<ORG>#{@fi.ofxOrg}\r\n" else '') +
     (if @fi.ofxFid then "<FID>#{@fi.ofxFid}\r\n" else '') +
-    (if @fi.ofxOrg || @fi.ofxFid then "</FI>\r\n" else '') +
+    (if @fi.ofxOrg or @fi.ofxFid then "</FI>\r\n" else '') +
     "<APPID>#{@appId}\r\n" +
     "<APPVER>#{@appVersion}\r\n" +
     "</SONRQ>\r\n" +
@@ -221,7 +227,7 @@ class wesabe.ofx.Request
     "<ACCTTYPE>#{accttype}\r\n" +
     "</BANKACCTFROM>\r\n" +
     "<INCTRAN>\r\n" +
-    "<DTSTART>#{wesabe.lang.date.format(dtstart, 'yyyyMMdd')}\r\n" +
+    "<DTSTART>#{date.format dtstart, 'yyyyMMdd'}\r\n" +
     "<INCLUDE>Y\r\n" +
     "</INCTRAN>\r\n" +
     "</STMTRQ>\r\n" +
@@ -238,7 +244,7 @@ class wesabe.ofx.Request
     "<ACCTID>#{acctid}\r\n" +
     "</CCACCTFROM>\r\n" +
     "<INCTRAN>\r\n" +
-    "<DTSTART>#{wesabe.lang.date.format(dtstart, 'yyyyMMdd')}\r\n" +
+    "<DTSTART>#{date.format dtstart, 'yyyyMMdd'}\r\n" +
     "<INCLUDE>Y\r\n" +
     "</INCTRAN>\r\n" +
     "</CCSTMTRQ>\r\n" +
@@ -256,7 +262,7 @@ class wesabe.ofx.Request
     "<ACCTID>#{acctid}\r\n" +
     "</INVACCTFROM>\r\n" +
     "<INCTRAN>\r\n" +
-    "<DTSTART>#{wesabe.lang.date.format(dtstart, 'yyyyMMdd')}\r\n" +
+    "<DTSTART>#{date.format dtstart, 'yyyyMMdd'}\r\n" +
     "<INCLUDE>Y\r\n" +
     "</INCTRAN>\r\n" +
     "<INCOO>Y\r\n" +
@@ -267,3 +273,6 @@ class wesabe.ofx.Request
     "</INVSTMTRQ>\r\n" +
     "</INVSTMTTRNRQ>\r\n" +
     "</INVSTMTMSGSRQV1>\r\n"
+
+
+module.exports = Request

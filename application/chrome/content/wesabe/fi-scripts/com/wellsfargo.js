@@ -73,7 +73,7 @@ wesabe.download.Player.register({
 
   actions: {
     main: function() {
-      wesabe.dom.browser.go(browser, 'https://wellsfargo.com/');
+      browser.go('https://wellsfargo.com/');
     },
 
     login: function() {

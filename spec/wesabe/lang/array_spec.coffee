@@ -18,14 +18,14 @@ describe 'wesabe.lang.array', ->
 
   describe '.from function', ->
     it 'returns an array with the same entries as the original', ->
-      expect(array.from(simpleArray)).toEqual(simpleArray)
+      expect(array.equal(array.from(simpleArray), simpleArray)).toBeTruthy()
 
     it 'returns a non-identical array', ->
       expect(array.from(simpleArray)).not.toBe(simpleArray)
 
     it 'copies function arguments', ->
-      makeArray = -> array.from(arguments)
-      expect(makeArray(1, 2, 3)).toEqual(simpleArray)
+      makeArray = (args...) -> array.from(args)
+      expect(array.equal(makeArray(1, 2, 3), simpleArray)).toBeTruthy()
 
   describe '.uniq function', ->
     it 'does not alter an already-uniq array', ->
@@ -45,8 +45,8 @@ describe 'wesabe.lang.array', ->
 
   describe '.compact function', ->
     it 'does not alter arrays with all truthy entries', ->
-      expect(array.compact(simpleArray)).toEqual(simpleArray)
-      expect(array.compact(arrayWithArrayEntries)).toEqual(arrayWithArrayEntries)
+      expect(array.equal(array.compact(simpleArray), simpleArray)).toBeTruthy()
+      expect(array.equal(array.compact(arrayWithArrayEntries), arrayWithArrayEntries)).toBeTruthy()
 
     it 'strips falsy entries', ->
       expect(array.compact(arrayWithFalsyEntries)).toEqual([])

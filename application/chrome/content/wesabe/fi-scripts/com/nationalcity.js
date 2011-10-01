@@ -7,7 +7,7 @@ wesabe.download.Player.register({
 
   actions: {
     main: function() {
-      wesabe.dom.browser.go(browser, "https://signonolb.nationalcity.com/olb/olblogin.jsp");
+      browser.go("https://signonolb.nationalcity.com/olb/olblogin.jsp");
     },
 
     username: function() {

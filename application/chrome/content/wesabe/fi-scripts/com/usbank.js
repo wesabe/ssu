@@ -7,7 +7,7 @@ wesabe.download.Player.register({
   actions: {
     main: function() {
       // https://www4.usbank.com/internetBanking/RequestRouter?requestCmdId=DisplayLoginPage
-      wesabe.dom.browser.go(browser, "http://www.usbank.com/");
+      browser.go("http://www.usbank.com/");
     },
   },
 

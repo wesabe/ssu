@@ -1,11 +1,19 @@
-wesabe.provide('xml.Parser')
-wesabe.require('xml.*')
+type   = require 'lang/type'
+event  = require 'util/event'
+Parser = require 'util/Parser'
 
-class wesabe.xml.Parser
+OpenTag   = require 'xml/OpenTag'
+CloseTag  = require 'xml/CloseTag'
+Attribute = require 'xml/Attribute'
+Text      = require 'xml/Text'
+
+{tryThrow, tryCatch} = require 'util/try'
+
+class XmlParser
   parse: (xml, verboten) ->
-    parser = @parser = new wesabe.util.Parser()
+    parser = @parser = new Parser()
 
-    wesabe.util.event.forward(parser, this)
+    event.forward parser, this
 
     work = @work =
       el: null
@@ -16,11 +24,11 @@ class wesabe.xml.Parser
           el.offset = parser.offset - 1 # <
           work.nodes.push(el)
           el.beginParsing(parser)
-        else if !el && @el
+        else if !el and @el
           oel = @el
           oel.doneParsing(parser)
 
-          if verboten && oel && wesabe.is(oel, wesabe.xml.OpenTag) && verboten.test(oel.name)
+          if verboten and oel and type.is(oel, OpenTag) and verboten.test(oel.name)
             return unless parser
 
             etag = "</#{@el.name}>"
@@ -66,7 +74,7 @@ class wesabe.xml.Parser
 
       # first letter
       opening: (p) ->
-        work.setEl(new wesabe.xml.OpenTag())
+        work.setEl(new OpenTag())
         el.name(p)
 
       # subsequent characters
@@ -86,7 +94,7 @@ class wesabe.xml.Parser
 
       # </
       closing: ->
-        work.setEl(new wesabe.xml.CloseTag())
+        work.setEl(new CloseTag())
         parser.tokens =
           '[a-zA-Z]': el.name
 
@@ -108,7 +116,7 @@ class wesabe.xml.Parser
 
       # first [a-zA-Z]
       start: (p) ->
-        work.setAttr(new wesabe.xml.Attribute())
+        work.setAttr(new Attribute())
         attr.name(p)
 
       # subsequent [a-zA-Z]
@@ -167,7 +175,7 @@ class wesabe.xml.Parser
     text =
       # first [^<]
       start: (p) ->
-        work.setText(new wesabe.xml.Text(p))
+        work.setText(new Text(p))
         parser.tokens =
           '<': text.end
           '[^<]': text.text
@@ -192,7 +200,7 @@ class wesabe.xml.Parser
       '<': el.start
       '\\s': noop
 
-    wesabe.tryThrow 'xml.Parser', (log) =>
+    tryThrow 'xml.Parser', (log) =>
       parser.parse(xml)
       delete @parser
       delete @work
@@ -200,3 +208,5 @@ class wesabe.xml.Parser
 
   stop: ->
     @parser?.stop()
+
+module.exports = XmlParser

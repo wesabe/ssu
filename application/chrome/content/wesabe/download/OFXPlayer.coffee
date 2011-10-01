@@ -1,25 +1,30 @@
-wesabe.provide('download.OFXPlayer')
-wesabe.require('ofx.*')
+date    = require 'lang/date'
+type    = require 'lang/type'
+extend  = require 'lang/extend'
+event   = require 'util/event'
+privacy = require 'util/privacy'
+{tryCatch, tryThrow} = require 'util/try'
+
+Request = require 'ofx/Request'
 
 # public methods
 
-class wesabe.download.OFXPlayer
+class OFXPlayer
   DAYS_OF_HISTORY: 365
 
   @register: (params) ->
-    klass = @create(params)
+    klass = @create params
 
     # make sure we put it where wesabe.require expects it
-    wesabe.provide("fi-scripts.#{params.fid}", klass)
+    wesabe.provide "fi-scripts.#{params.fid}", klass
 
     return klass
 
   @create: (params) ->
-    return ->
-      # inherit from OFXPlayer
-      wesabe.lang.extend(this, wesabe.download.OFXPlayer.prototype)
-      # subclass it
-      wesabe.lang.extend(this, params)
+    class klass extends this
+      constructor: ->
+        # subclass it
+        extend this, params
 
   #
   # Starts retrieving statements from the FI's OFX server.
@@ -47,26 +52,26 @@ class wesabe.download.OFXPlayer
   #
   beginGetAccounts: ->
     # tell the user we're logging in
-    @job.update('auth.creds')
+    @job.update 'auth.creds'
 
     @buildRequest().requestAccountInfo
       success: (response) =>
-        @onGetAccounts(response)
+        @onGetAccounts response
 
       failure: (response) =>
-        @onGetAccountsFailure(response)
+        @onGetAccountsFailure response
 
   #
   # Handles the response containing the account list.
   #
   onGetAccounts: (response) ->
-    @job.update('account.list')
+    @job.update 'account.list'
 
-    @accounts = wesabe.taint(response.accounts)
-    wesabe.debug('accounts=', @accounts)
+    @accounts = privacy.taint(response.accounts)
+    logger.debug 'accounts=', @accounts
 
-    if @accounts.length == 0
-      wesabe.warn('There are no accounts! This might not be right...')
+    if @accounts.length is 0
+      logger.warn 'There are no accounts! This might not be right...'
 
     # start downloading accounts in serial
     @processAccounts()
@@ -75,10 +80,10 @@ class wesabe.download.OFXPlayer
   # Handles a failure to get the account list.
   #
   onGetAccountsFailure: (response) ->
-    wesabe.error('Error retrieving list of accounts!')
-    @onOFXError response, ->
-      wesabe.warn("Document did not contain an OFX error, so just give up.")
-      @job.fail(503, 'fi.unavailable')
+    logger.error 'Error retrieving list of accounts!'
+    @onOFXError response, =>
+      logger.warn "Document did not contain an OFX error, so just give up."
+      @job.fail 503, 'fi.unavailable'
 
   #
   # Processes the next account in the list (FIFO). Called after the
@@ -87,45 +92,40 @@ class wesabe.download.OFXPlayer
   #
   processAccounts: ->
     job = @job
-    options = job.options || {}
+    options = job.options or {}
 
-    job.update('account.download')
-    wesabe.tryThrow 'OFXPlayer#processAccounts', (log) =>
-      if @accounts.length == 0
+    job.update 'account.download'
+    tryThrow 'OFXPlayer#processAccounts', (log) =>
+      if @accounts.length is 0
         # no more accounts, we're done
         job.succeed()
         return
 
       @account = @accounts.shift()
       dtstart = if options.since
-                  new Date(options.since)
+                  new Date options.since
                 else
-                  wesabe.lang.date.add(new Date(), -@DAYS_OF_HISTORY * wesabe.lang.date.DAYS)
+                  date.add new Date(), -@DAYS_OF_HISTORY * date.DAYS
 
-      @buildRequest().requestStatement @account, {dtstart: dtstart},
+      @buildRequest().requestStatement @account, {dtstart},
         before: =>
           # tell anyone who cares that we're starting to download an account
-          job.update('account.download')
-          job.timer.start('Download')
+          job.update 'account.download'
 
         success: (response) =>
-          @onDownloadComplete(response)
+          @onDownloadComplete response
 
         failure: (response) =>
-          @onDownloadFailure(response)
+          @onDownloadFailure response
 
         after: (response) =>
-          job.timer.end('Download')
 
   #
   # Skips the current account and continues with the rest.
   #
-  skipAccount: ->
-    if arguments.length
-      args = arguments
-    else
-      args = ["Skipping account=", @account]
-    wesabe.warn.apply(wesabe, args)
+  skipAccount: (args...) ->
+    args = ["Skipping account=", @account] if args.length
+    logger.warn args...
     delete @account
     @processAccounts()
 
@@ -133,16 +133,16 @@ class wesabe.download.OFXPlayer
   # Handles an unsuccessful OFX response.
   #
   onOFXError: (response, callback) ->
-    wesabe.error(response.text)
+    logger.error response.text
     if response.ofx
       if response.ofx.isGeneralError()
-        @job.fail(503, 'fi.unavailable')
+        @job.fail 503, 'fi.unavailable'
         return
       else if response.ofx.isAuthenticationError()
-        @job.fail(401, 'auth.creds.invalid')
+        @job.fail 401, 'auth.creds.invalid'
         return
       else if response.ofx.isAuthorizationError()
-        this.job.fail(403, 'auth.noaccess')
+        @job.fail 403, 'auth.noaccess'
         return
       # doh! didn't recognize any status
     else
@@ -152,13 +152,13 @@ class wesabe.download.OFXPlayer
       # send back a 500 Internal Server Error
 
     # couldn't make sense of what the FI said
-    callback.call(this) if wesabe.isFunction(callback)
+    callback.call(this) if type.isFunction callback
 
   #
   # Handles an OFX response containing a statement to be imported.
   #
   onDownloadComplete: (response) ->
-    wesabe.trigger('downloadSuccess', [response.statement])
+    event.trigger 'downloadSuccess', [response.statement]
 
     # done with this account
     @account.completed = true
@@ -170,26 +170,28 @@ class wesabe.download.OFXPlayer
   # Handles a failure to get a statement.
   #
   onDownloadFailure: (response) ->
-    wesabe.error('Error retrieving statement for account=', @account)
+    logger.error 'Error retrieving statement for account=', @account
     if response.ofx?.isGeneralError()
       # Document contained a general error, which often means that they had trouble
       # getting a specific account (or it's not available for download via OFX,
       # yet they list it anyway). Maybe it's ephemeral, maybe not. The prevailing
       # wisdom right now is to just skip the account and go on with our lives.
-      wesabe.warn("General error while downloading account: ", response.text)
+      logger.warn "General error while downloading account: ", response.text
       @skipAccount()
     else
       # some more serious/unknown error
       @onOFXError response, =>
         # called when there's no clear way to handle the response
-        wesabe.warn("Document did not contain an OFX error!")
+        logger.warn "Document did not contain an OFX error!"
         @skipAccount()
 
   #
   # Returns a new Request instance ready to be used.
   #
   buildRequest: ->
-    request = new wesabe.ofx.Request(@fi, @creds.username, @creds.password, @job)
+    request = new Request @fi, @creds.username, @creds.password, @job
     request.appId = @appId if @appId
     request.appVersion = @appVersion if @appVersion
     return request
+
+module.exports = OFXPlayer

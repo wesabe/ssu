@@ -1,8 +1,6 @@
-wesabe.provide 'util.event'
-wesabe.require 'util.data'
-wesabe.require 'lang.array'
-
-data = wesabe.util.data
+{isString} = require 'lang/type'
+array = require 'lang/array'
+data  = require 'util/data'
 
 guid = 0
 
@@ -12,91 +10,95 @@ canHandleEvents = (object) ->
   object?.nodeType not in [3, 4, 8] # text, cdata, comment
 
 # shamelessly adapted from jQuery
-wesabe.util.event =
-  add: (elem, type, handler) ->
-    if wesabe.isString(elem)
-      handler = type
-      type = elem
-      elem = wesabe
+add = (elem, type, handler) ->
+  if isString elem
+    handler = type
+    type = elem
+    elem = wesabe
 
-    return unless canHandleEvents(elem)
+  return unless canHandleEvents(elem)
 
-    handler.guid ||= ++guid
+  handler.guid ||= ++guid
 
-    events = data(elem, 'events') || data(elem, 'events', {})
-    handlers = events[type]
+  events = data(elem, 'events') || data(elem, 'events', {})
+  handlers = events[type]
 
-    handlers ||= events[type] = {}
+  handlers ||= events[type] = {}
 
-    handlers[handler.guid] = handler
+  handlers[handler.guid] = handler
 
-    elem.addEventListener?(type, handler, false)
+  elem.addEventListener?(type, handler, false)
 
-  remove: (elem, type, handler) ->
-    if wesabe.isString(elem)
-      handler = type
-      type = elem
-      elem = wesabe
+remove = (elem, type, handler) ->
+  if isString elem
+    handler = type
+    type = elem
+    elem = wesabe
 
-    return unless canHandleEvents(elem)
+  return unless canHandleEvents(elem)
 
-    events = data(elem, 'events') || data(elem, 'events', {})
+  events = data(elem, 'events') or data(elem, 'events', {})
 
-    if not type
-      # remove all events for elem
-      for type of events
-        wesabe.util.event.remove(elem, type)
+  if not type
+    # remove all events for elem
+    for type of events
+      remove elem, type
 
-    else
-      # remove events of a specific type
-      if events[type]
-        if handler
-          # remove a specific handler
-          delete events[type][handler.guid]
-          elem.removeEventListener?(elem, type, handler)
-        else
-          # remove all handlers for type
-          for handler of events[type]
-            @remove(elem, type, events[type][handler])
-
-  trigger: (elem, types, args) ->
-    if wesabe.isString(elem)
-      args = types
-      types = elem
-      elem = wesabe
-
-    events = data(elem, 'events') || data(elem, 'events', {})
-    forwards = data(elem, 'event-forwards')
-
-    for type in types.split(/\s+/)
-      if events[type]
-        args = wesabe.lang.array.from(args || [])
-
-        unless args[0]?.preventDefault
-          args.unshift
-            type: type
-            target: elem
-
+  else
+    # remove events of a specific type
+    if events[type]
+      if handler
+        # remove a specific handler
+        delete events[type][handler.guid]
+        elem.removeEventListener?(elem, type, handler)
+      else
+        # remove all handlers for type
         for handler of events[type]
-          events[type][handler].apply(elem, args)
+          remove elem, type, events[type][handler]
 
-    if forwards
-      for felem in forwards
-        @trigger(felem, types, args)
+trigger = (elem, types, args) ->
+  if isString elem
+    args = types
+    types = elem
+    elem = wesabe
 
-  forward: (from, to) ->
-    forwards = data(from, 'event-forwards') || data(from, 'event-forwards', [])
-    forwards.push(to)
+  events = data(elem, 'events') or data(elem, 'events', {})
+  forwards = data(elem, 'event-forwards')
 
-wesabe.bind = wesabe.util.event.add
-wesabe.unbind = wesabe.util.event.remove
-wesabe.trigger = wesabe.util.event.trigger
-wesabe.one = (elem, type, fn) ->
-  if wesabe.isString(elem)
+  for type in types.split(/\s+/)
+    if events[type]
+      args = array.from args or []
+
+      unless args[0]?.preventDefault
+        args.unshift
+          type: type
+          target: elem
+
+      for handler of events[type]
+        events[type][handler].apply(elem, args)
+
+  if forwards
+    for felem in forwards
+      trigger felem, types, args
+
+forward = (from, to) ->
+  forwards = data(from, 'event-forwards') or data(from, 'event-forwards', [])
+  forwards.push to
+
+one = (elem, type, fn) ->
+  if isString elem
     fn = type
     type = elem
     elem = wesabe
 
-  wesabe.bind elem, type, ->
-    wesabe.unbind(this, type, arguments.callee)
-    return fn.apply(this, arguments)
+  add elem, type, (args...) ->
+    remove this, type, arguments.callee
+    return fn.call(this, args...)
+
+# shortcuts
+wesabe.bind = add
+wesabe.unbind = remove
+wesabe.trigger = trigger
+wesabe.one = one
+
+module.exports = {add, remove, trigger, forward, one}

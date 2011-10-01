@@ -67,5 +67,25 @@ elif which -s aptitude 2>/dev/null; then
   bootstrap_aptitude
 fi
 
-yay "Done! Run script/server to start the application"
+if ! which -s ruby; then
+  warn "You don't have Ruby installed."
+  say  "While you don't need it for production, you will need it to use"
+  say  "the development tools provided in this package. Please install it"
+  say  "and run $0 again."
+else
+  if ! which -s bundle; then
+    info "Installing Bundler..."
+    if gem env | grep INSTALLATION | awk -F 'INSTALLATION DIRECTORY: ' '{ print $2 }' | xargs test -w; then
+      # can install without sudo
+      gem install bundler >>bootstrap.log 2>&1
+    else
+      sudo gem install bundler >>bootstrap.log 2>&1
+    fi
+  fi
+
+  bundle install >>bootstrap.log 2>&1
+
+  yay "Done! Run script/server to start the application"
+fi
+
 test -e bootstrap.log && rm -f bootstrap.log

@@ -1,77 +1,80 @@
-wesabe.require('lang.date')
+{parse, format, MONTH_NAMES} = require 'lang/date'
+number  = require 'lang/number'
+privacy = require 'util/privacy'
 
-wesabe.provide 'dom.date',
-  forElement: (element, format) ->
-    if wesabe.untaint(element).tagName.toLowerCase() == 'input'
-      new @TextInput(element, format);
-    else
-      new @SelectGroup(element);
-
-
-class wesabe.dom.date.TextInput
-  constructor: (element, format) ->
-    @element = wesabe.untaint(element)
-    @format  = format
-
-  this::__defineGetter__ 'date', ->
-    wesabe.lang.date.parse(@element.value)
-
-  this::__defineSetter__ 'date', ->
-    @element.value = wesabe.lang.date.format(date, @format)
+forElement = (element, format) ->
+  if privacy.untaint(element).tagName.toLowerCase() is 'input'
+    new TextInput element, format
+  else
+    new SelectGroup element
 
 
-class wesabe.dom.date.SelectGroup
+class TextInput
+  constructor: (element, @format) ->
+    @element = privacy.untaint element
+
+  @::__defineGetter__ 'date', ->
+    parse @element.value
+
+  @::__defineSetter__ 'date', (date) ->
+    @element.value = format date, @format
+
+
+class SelectGroup
   constructor: (container) ->
-    @container = wesabe.untaint(container)
+    @container = privacy.untaint container
     @locateYearSelect()
     @locateMonthSelect()
     @locateDaySelect()
 
-  this::__defineGetter__ 'date', ->
-    new Date(@year, @month, @day)
+  @::__defineGetter__ 'date', ->
+    new Date @year, @month, @day
 
-  this::__defineSetter__ 'date', ->
+  @::__defineSetter__ 'date', (date) ->
     @year = date.getFullYear()
     @month = date.getMonth()
     @day = date.getDate()
 
-  this::__defineGetter__ 'year', ->
-    @yearSelect && parseInt(@yearSelect.value, 10)
+  @::__defineGetter__ 'year', ->
+     number.parse(@yearSelect.value) if @yearSelect
 
-  this::__defineSetter__ 'year', ->
-    (@yearSelect.value = year.toString() if @yearSelect)
+  @::__defineSetter__ 'year', (year) ->
+    @yearSelect.value = year.toString() if @yearSelect
 
-  this::__defineGetter__ 'month', ->
-    @monthSelect && parseInt(@monthSelect.value, 10)
+  @::__defineGetter__ 'month', ->
+    number.parse(@monthSelect.value) if @monthSelect
 
-  this::__defineSetter__ 'month', ->
-    (@monthSelect.value = month.toString() if @monthSelect)
+  @::__defineSetter__ 'month', (month) ->
+    @monthSelect.value = month.toString() if @monthSelect
 
-  this::__defineGetter__ 'day', ->
-    @daySelect && parseInt(@daySelect.value, 10)
+  @::__defineGetter__ 'day', ->
+    number.parse(@daySelect.value) if @daySelect
 
-  this::__defineSetter__ 'day', ->
-    (@daySelect.value = day.toString() if @daySelect)
+  @::__defineSetter__ 'day', (day) ->
+    @daySelect.value = day.toString() if @daySelect
 
   locateYearSelect: ->
     # assume that one of the values is the current year
     thisYear = new Date().getFullYear()
-    xpath = wesabe.xpath.bind('.//select[.//option[contains(string(.), ":year")]]', {year: thisYear})
-    @yearSelect = wesabe.untaint(wesabe.dom.page.find(@container.ownerDocument, xpath, @container))
+    xpath = Pathway.bind('.//select[.//option[contains(string(.), ":year")]]', year: thisYear)
+    @yearSelect = privacy.untaint Page.wrap(@container.ownerDocument).find(xpath, @container)
 
-    wesabe.warn("Unable to find a <select> element containing years") unless @yearSelect
+    logger.warn "Unable to find a <select> element containing years" unless @yearSelect
 
   locateMonthSelect: ->
-    for month in wesabe.lang.date.MONTH_NAMES
-      xpath = wesabe.xpath.bind('.//select[.//option[contains(string(.), ":month")]]', {month: month})
-      @monthSelect = wesabe.untaint(wesabe.dom.page.find(@container.ownerDocument, xpath, @container))
+    for month in MONTH_NAMES
+      xpath = Pathway.bind('.//select[.//option[contains(string(.), ":month")]]', month: month)
+      @monthSelect = privacy.untaint Page.wrap(@container.ownerDocument).find(xpath, @container)
 
       return if @monthSelect
 
-    wesabe.warn("Unable to find a <select> element containing months")
+    logger.warn "Unable to find a <select> element containing months"
 
   locateDaySelect: ->
-    for select in wesabe.untaint(wesabe.dom.page.select(@container.ownerDocument, './/select', @container))
+    for select in privacy.untaint Page.wrap(@container.ownerDocument).select('.//select', @container)
       return @daySelect = select if select.options.length >= 30
 
-    wesabe.warn("Unable to find a <select> element containing days")
+    logger.warn "Unable to find a <select> element containing days"
+
+
+module.exports = {forElement}

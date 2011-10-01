@@ -15,7 +15,7 @@ wesabe.provide("fi-scripts.com.paypal.accounts", {
 
   actions: {
     main: function() {
-      wesabe.dom.browser.go(browser, "https://history.paypal.com/us/cgi-bin/webscr?cmd=_history-download");
+      browser.go("https://history.paypal.com/us/cgi-bin/webscr?cmd=_history-download");
     },
 
     download: function() {

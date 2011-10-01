@@ -39,7 +39,7 @@ wesabe.provide 'fi-scripts.com.chase.accounts',
       if not tmp.accounts
         action.collectAccounts()
         if tmp.accounts.length is 0
-          wesabe.warn "No accounts found! This is probably a bug."
+          logger.warn "No accounts found! This is probably a bug."
           page.dumpPrivately()
           return
 
@@ -56,7 +56,7 @@ wesabe.provide 'fi-scripts.com.chase.accounts',
 
   actions:
     goToNextAccount: ->
-      wesabe.dom.browser.go browser, tmp.account
+      browser.go tmp.account
 
     selectDownloadNowMethod: ->
       page.click e.download.method.choices.now.radio

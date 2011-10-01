@@ -75,7 +75,7 @@ wesabe.provide('fi-scripts.com.bankofamerica.northwest', {
 
     nwCollectAccounts: function() {
       // get a list of account links
-      var accountLinks = page.select(wesabe.xpath.bind(e.nw.account.link, {n: ''}));
+      var accountLinks = page.select(bind(e.nw.account.link, {n: ''}));
       // get the ids of all the accounts
       tmp.accounts = accountLinks.map(function(link) {
         return link.href.replace(/^.*accountHistory\.jsp\?idKey=(\d+).*$/i, '$1');
@@ -85,7 +85,7 @@ wesabe.provide('fi-scripts.com.bankofamerica.northwest', {
 
     nwGoAccount: function() {
       // click the link on the Balance Sheet for the current account
-      page.click(wesabe.xpath.bind(e.nw.account.link, {n: tmp.account}));
+      page.click(bind(e.nw.account.link, {n: tmp.account}));
     },
 
     // FIXME: <brian@wesabe.com> 2008-12-10: The simple -> complex change may apply to all NW accounts

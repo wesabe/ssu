@@ -6,7 +6,7 @@ wesabe.download.Player.register({
   // afterDownload: custom onDownloadSuccessful below
 
   dispatch: function() {
-    if (!page.defaultView.frameElement) {
+    if (!page.framed) {
       if (page.visible(e.loginButton)) {
         tmp.authenticated = false;
       }
@@ -19,14 +19,14 @@ wesabe.download.Player.register({
       }
     }
     else {
-      if (page.defaultView.name.match(/fx_top/i)) {
+      if (page.name.match(/fx_top/i)) {
         // if dispatch was called on the "top" frame, there's nothing for us
         // to do here, so simply return, some other dispatch call will do all
         // the heavy lifting.
         return;
       }
       else {
-        var nav_page = wesabe.dom.page.wrap(page.defaultView.top.frames[0].document);
+        var nav_page = page.topPage.framePages[0];
         tmp.authenticated = nav_page.visible(e.logoutButton);
       }
     }
@@ -105,10 +105,7 @@ wesabe.download.Player.register({
 
   actions: {
     main: function() {
-      wesabe.dom.browser.go(
-        browser,
-        "https://secure.fundsxpress.com/piles/fxweb.pile/fx?iid=CNB"
-      );
+      browser.go("https://secure.fundsxpress.com/piles/fxweb.pile/fx?iid=CNB");
     },
 
 
@@ -125,7 +122,7 @@ wesabe.download.Player.register({
       if (page.visible(e.logoutButton))
         page.click(e.accountsButton);
       else {
-        var nav_page = wesabe.dom.page.wrap(page.defaultView.top.frames[0].document);
+        var nav_page = page.topPage.framePages[0];
         nav_page.click(e.accountsButton);
       }
     },
@@ -133,7 +130,7 @@ wesabe.download.Player.register({
 
     goAccountHistoryPage: function() {
       wesabe.debug('trying to go to account history page');
-      page.click(wesabe.xpath.bind(
+      page.click(bind(
         e.specificAccountHistoryLink, { 'href' : wesabe.untaint(tmp.accountId) }
       ));
     },
@@ -164,7 +161,7 @@ wesabe.download.Player.register({
         page.click(e.logoutButton);
       }
       else {
-        var nav_page = wesabe.dom.page.wrap(page.defaultView.top.frames[0].document);
+        var nav_page = page.topPage.framePages[0];
         nav_page.click(e.logoutButton);
       }
     }
@@ -175,8 +172,8 @@ wesabe.download.Player.register({
     onDownloadSuccessful: function(browser, page) {
       delete this.tmp.accountId;
       this.onDocumentLoaded(
-        browser,
-        wesabe.dom.page.wrap(page.defaultView.top.frames[1].document)
+        wesabe.dom.Browser.wrap(browser),
+        page.topPage.framePages[1]
       );
     },
   },

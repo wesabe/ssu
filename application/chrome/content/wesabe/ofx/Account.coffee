@@ -1,8 +1,8 @@
-wesabe.provide('ofx.Account')
-wesabe.require('util.privacy')
+type    = require 'lang/type'
+privacy = require 'util/privacy'
 
 # Account - simple data container for account information
-class wesabe.ofx.Account
+class Account
   constructor: (accttype, acctid, bankid, desc) ->
     @accttype = accttype
     @acctid   = acctid
@@ -20,7 +20,9 @@ class wesabe.ofx.Account
 
     ('X' for i in [0...@acctid.length-4]).join('') + @acctid[-4..-1]
 
-wesabe.ready 'wesabe.util.privacy', =>
-  wesabe.util.privacy.registerTaintWrapper
-    detector: (o) -> wesabe.is(o, wesabe.ofx.Account)
-    getters: ["accttype", "acctid", "bankid", "desc", "masked_acctid"]
+privacy.registerTaintWrapper
+  detector: (o) -> type.is(o, Account)
+  getters: ["accttype", "acctid", "bankid", "desc", "masked_acctid"]
+
+
+module.exports = Account

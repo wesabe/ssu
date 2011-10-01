@@ -58,7 +58,7 @@ wesabe.provide('fi-scripts.uk.co.hsbc.accounts', {
             .map(function(el){ return el.value }));
 
       tmp.accounts = keys.map(function(key) {
-        var link = page.findStrict(wesabe.xpath.bind(e.accounts.page.listing.accountLink, {value: key}));
+        var link = page.findStrict(bind(e.accounts.page.listing.accountLink, {value: key}));
         return {key: key, name: link.innerHTML};
       });
 
@@ -71,7 +71,7 @@ wesabe.provide('fi-scripts.uk.co.hsbc.accounts', {
 
     goToAccountPage: function() {
       log.info("going to account ", tmp.account);
-      page.click(wesabe.xpath.bind(e.accounts.page.listing.accountLink, {value: tmp.account.key}));
+      page.click(bind(e.accounts.page.listing.accountLink, {value: tmp.account.key}));
     },
 
     goToDownloadPage: function() {

@@ -7,7 +7,7 @@ wesabe.download.Player.register({
 
   actions: {
     main: function() {
-      wesabe.dom.browser.go(browser, "https://cibng.ibanking-services.com/cib/CEBMainServlet/Login?FIORG=274&FIFID=051074030");
+      browser.go("https://cibng.ibanking-services.com/cib/CEBMainServlet/Login?FIORG=274&FIFID=051074030");
     },
 
     userId: function() {
@@ -24,7 +24,7 @@ wesabe.download.Player.register({
 
     goToDownloadPage: function() {
       job.update('account.download');
-      wesabe.dom.browser.go(browser, '/cib/CEBMainServlet/DownloadTxns');
+      browser.go('/cib/CEBMainServlet/DownloadTxns');
     },
 
     download: function() {

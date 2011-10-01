@@ -1,6 +1,4 @@
-wesabe.provide('xml.NodeList')
-
-class wesabe.xml.NodeList
+class NodeList
   constructor: (nodes) ->
     @nodes = nodes || []
 
@@ -12,3 +10,5 @@ class wesabe.xml.NodeList
 
   push: (node) ->
     @nodes.push(node)
+
+module.exports = NodeList

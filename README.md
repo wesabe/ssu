@@ -1,17 +1,19 @@
 SSU
 ===
 
-SSU is a programmatic interface to your bank. It was originally designed
+SSU is a scripted web site navigator & scraper. It was originally designed
 and conceived as part of Wesabe's infrastructure and has since been
 open-sourced. Its original design goal was to extract [OFX][ofx] data
 given bank usernames and passwords for use on wesabe.com.
 
 [ofx]: http://en.wikipedia.org/wiki/Open_Financial_Exchange
 
-The system it uses to get this data is XulRunner, a project from Mozilla
+The system it uses to get this data is [XulRunner][XulRunner], a project from Mozilla
 that provides a customizable (and scriptable) browser. SSU has scripts
 for each financial institution it supports that describes how to log in
 and download data from that institution's web site.
+
+[XulRunner]: https://developer.mozilla.org/en/XULrunner
 
 It was originally written in JavaScript but is currently mostly
 [CoffeeScript][CoffeeScript]. You can write bank scripts in either language, though
@@ -43,7 +45,7 @@ an account at one of these institutions. To check, go to the
 [fi-scripts][fi-scripts] folder and start looking for your bank. Let's
 say your bank is Chase, whose site is chase.com. We store the scripts
 for financial institutions in a reverse DNS folder structure, so you
-need to look in the `com` directory for the `chase.js` script.
+need to look in the `com` directory for the `chase.coffee` script.
 
 [fi-scripts]: https://github.com/wesabe/ssu/tree/master/application/chrome/content/wesabe/fi-scripts
 
@@ -98,9 +100,9 @@ institution's website!
 So how do I use this for real?
 ------------------------------
 
-The only known application that uses it is the one that used it at
-Wesabe: [pfc][pfc], specifically [this file that controls the SSU
-process][daemon] and [this file to talk to it][sync_job].
+The original application that used SSU is the one SSU was written for at
+Wesabe: [pfc][pfc]. You can see how to manage SSU in [this file that controls
+the SSU process][daemon] and [this file that talks to it][sync_job].
 
 [pfc]: https://github.com/wesabe/pfc
 [daemon]: https://github.com/wesabe/pfc/blob/master/app/models/ssu/daemon.rb
@@ -129,8 +131,9 @@ You'll similarly get responses back as JSON lines:
 
 You can use any programming language you like that supports spawning
 processes and network sockets to manage an SSU instance. This project
-ships with really basic examples in the [server][server] (spawning) and
-[console][console] (communication & managing via [api.rb][api.rb]) scripts.
+ships with development tools that also serve as basic examples in the [server][server]
+(spawning) and [console][console] (communication & managing via [api.rb][api.rb])
+scripts.
 
 [server]: https://github.com/wesabe/ssu/blob/master/bin/server
 [console]: https://github.com/wesabe/ssu/blob/master/script/console
@@ -144,12 +147,12 @@ your financial insitution:
 
     ssu$ script/generate player com.ally "Ally Bank" https://www.ally.com/
     Generating with player generator:
-         [ADDED]  application/chrome/content/wesabe/fi-scripts/com/ally.js
-         [ADDED]  application/chrome/content/wesabe/fi-scripts/com/ally/login.js
-         [ADDED]  application/chrome/content/wesabe/fi-scripts/com/ally/accounts.js
+         [ADDED]  application/chrome/content/wesabe/fi-scripts/com/ally.coffee
+         [ADDED]  application/chrome/content/wesabe/fi-scripts/com/ally/login.coffee
+         [ADDED]  application/chrome/content/wesabe/fi-scripts/com/ally/accounts.coffee
 
-You can probably leave the base script (`ally.js` in this example)
-alone and start filling in `login.js` with the info required to navigate
+You can probably leave the base script (`ally.coffee` in this example)
+alone and start filling in `login.coffee` with the info required to navigate
 the site. Once you've added something and created a matching credential
 file, go ahead and try it out:
 
