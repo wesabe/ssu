@@ -236,7 +236,10 @@ class Controller
   eval: (data) ->
     try
       script = data.script
-      @scope ||= {logger: Logger.loggerForFile('repl'), __filename: 'repl', __dirname: '.'}
+      @scope ||=
+        logger: Logger.loggerForFile('repl'),
+        __filename: 'repl',
+        __dirname: '.'
       @scope.job = @job
 
       if data.type is 'text/coffeescript'
