@@ -51,11 +51,11 @@ inspect = (object, showHidden=off, depth=2, opts={}) ->
     style 'null', 'null', opts
   else if classForInspect is Boolean or object is true or object is false
     style 'boolean', object.toString(), opts
-  else if classForInspect is Array or type.isArray(object) or type.is(object, HTMLCollection)
+  else if classForInspect is Array or type.isArray(object) or (HTMLCollection? and type.is(object, HTMLCollection))
     inspectArray object, showHidden, depth, opts
   else if classForInspect is RegExp or type.isRegExp object
     inspectRegExp object, opts
-  else if classForInspect in [Element, HTMLElement, XULElement] or type.is object, Element
+  else if classForInspect in [Element?, HTMLElement?, XULElement?] or (Element? and type.is object, Element)
     inspectElement object, opts
   else if classForInspect is Number or typeof object is 'number'
     inspectNumber object, opts
