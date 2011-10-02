@@ -540,9 +540,9 @@ class Player
     @page = page
 
     setTimeout =>
-      return if @job.done or @job.paused
-
       for dispatch in @dispatches
+        return if @job.done or @job.paused
+
         result = tryThrow "#{module}#dispatch(#{dispatch.name})", (log) =>
           @callWithMagicScope dispatch.callback, browser, page, {log}
 

@@ -39,8 +39,6 @@ class CompoundPlayer
         @job.fail 400, "goal.unreachable"
 
     nextPlayer = =>
-      @currentPlayer?.job = null
-
       if playerClass = @players[++@playerIndex]
         @currentPlayer = new playerClass()
         @currentPlayer.job = @job
