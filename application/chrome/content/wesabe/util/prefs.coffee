@@ -8,10 +8,34 @@ file    = require 'io/file'
 inspect = require 'util/inspect'
 {tryCatch, tryThrow} = require 'util/try'
 
+fallbackPreferencesRoot =
+  _values: {}
+
+  getCharPref: (key) ->
+    @_values[key]
+
+  getIntPref: (key) ->
+    @_values[key]
+
+  getBoolPref: (key) ->
+    @_values[key]
+
+  setCharPref: (key, value) ->
+    @_values[key] = value
+
+  setIntPref: (key, value) ->
+    @_values[key] = value
+
+  setBoolPref: (key, value) ->
+    @_values[key] = value
+
 getPreferencesRoot = ->
-  service = Components.classes['@mozilla.org/preferences-service;1']
-    .getService(Components.interfaces.nsIPrefService)
-  service.getBranch('')
+  try
+    service = Cc['@mozilla.org/preferences-service;1']
+      .getService(Ci.nsIPrefService)
+    service.getBranch('')
+  catch ex
+    fallbackPreferencesRoot
 
 #
 # Loads preferences from a Mozilla prefs.js format preference file.
@@ -42,7 +66,7 @@ load = (path) ->
 #
 # Get a preference by its full name. Example:
 #
-#   prefs.get('browser.dom.window.dump.enabled'); // => false
+#   prefs.get 'browser.dom.window.dump.enabled' // => false
 #
 # NOTE: because this is used in logging, this function may not use `logger'.
 #
