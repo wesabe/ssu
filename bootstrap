@@ -6,7 +6,7 @@ test -e bootstrap.log && rm -f bootstrap.log
 
 bootstrap_darwin()
 {
-  XULVERSION="1.9.1.18"
+  XULVERSION="1.9.1.19"
 
   ROOT="/Library/Frameworks/XUL.framework"
   THIS="$ROOT/Versions/Current"
@@ -14,7 +14,7 @@ bootstrap_darwin()
   if [ -d $THIS ]; then
     info "XUL.framework version $(basename $(readlink $THIS)) is already installed."
   else
-    URL="http://mozilla.mirrors.tds.net/pub/mozilla.org/xulrunner/releases/1.9.1.18/runtimes/xulrunner-1.9.1.18.en-US.mac-pkg.dmg"
+    URL="http://mozilla.mirrors.tds.net/pub/mozilla.org/xulrunner/releases/1.9.1.19/runtimes/xulrunner-1.9.1.19.en-US.mac-pkg.dmg"
     DOWNLOAD="$HOME/Downloads/$(basename $URL)"
     MOUNTPOINT="/Volumes/XULRunnerFramework"
 
