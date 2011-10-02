@@ -1,3 +1,4 @@
+array                = require 'lang/array'
 type                 = require 'lang/type'
 {trim}               = require 'lang/string'
 {tryCatch, tryThrow} = require 'util/try'
@@ -52,13 +53,19 @@ callWithScope = (fn, context, scope={}, args=[]) ->
      body = fn
    else
      body = fn.toString().match(/^[^\{]*\{((.*\n*)*)\}/m)[1]
-     argNames = fn.toString().match(/^function\s*\((.*)\)/)?[1].split(/\s*,\s*/)
-     if argNames
-       for name, i in argNames
-         name = trim name
-         scope[name] = args[i]
+     for name, i in argNames fn
+       scope[trim name] = args[i]
 
   return new Function('__scope__', support + "with(__scope__){\n#{body}\n}").call(context, scope)
+
+# Public: Returns the names of the arguments that fn accepts.
+#
+#    func.argNames (a, b) -> a + b  # ['a', 'b']
+argNames = (fn) ->
+  if match = fn.toString().match(/^function\s*\((.*)\)/)
+    array.compact match[1].split(/\s*,\s*/)
+  else
+    []
 
 #
 # Executes a callback by name or, if only one callback was given, the
@@ -114,4 +121,4 @@ wesabe.callback = (callback, which, args) ->
   executeCallback callback, (if which then 'success' else 'failure'), args
 
 
-module.exports = {callWithScope, executeCallback, wrap}
+module.exports = {callWithScope, executeCallback, wrap, argNames}

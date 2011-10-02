@@ -68,3 +68,13 @@ describe 'wesabe.lang.func', ->
 
       # calling foo() with obj2 as the context returns obj2's bar
       expect(func.wrap(obj.foo, obj2)()).toBe(1)
+
+  describe '.argNames function', ->
+    it 'returns an empty array when the function has no arguments', ->
+      expect(func.argNames(->)).toEqual([])
+
+    it 'returns an array of argument names', ->
+      expect(func.argNames((browser, page) ->)).toEqual(['browser', 'page'])
+
+    # it 'ignores splats', ->
+    #  expect(func.argNames((first, second, rest...) ->)).toEqual(['first', 'second'])
