@@ -2,7 +2,9 @@ wesabe.provide 'fi-scripts.com.chase.login',
   dispatch: ->
     return if page.present e.logoff.link
 
-    if page.present e.login.error.general
+    if page.present e.outage.indicator
+      job.fail 503, 'fi.unavailable'
+    else if page.present e.login.error.general
       job.fail 401, 'auth.creds.invalid'
     else if page.present e.login.error.lockedOut
       job.fail 403, 'auth.noaccess'
@@ -59,6 +61,12 @@ wesabe.provide 'fi-scripts.com.chase.login',
       continueButton: [
         '//form[@name="logonform"]//input[@type="image" or @type="submit"]'
         '//*[contains(@id, "Logon") or contains(@id, "logon")]//input[@type="image" or @type="submit"]'
+      ]
+
+    outage:
+      indicator: [
+        '//title[contains(string(.), "Outage Chase")]'
+        '//text()[contains(., "This website is temporarily unavailable")]'
       ]
 
     logoff:
