@@ -1,12 +1,12 @@
-date = wesabe.require 'lang.date'
+date = require 'lang/date'
 
 describe 'wesabe.lang.date', ->
   describe '.parse method', ->
     it 'warns when the date is not parsable', ->
-      spyOn(wesabe, 'warn')
+      spyOn(logger, 'warn')
       date.parse('omgwtfbbq')
 
-      expect(wesabe.warn).toHaveBeenCalledWith('unable to parse date: ', 'omgwtfbbq')
+      expect(logger.warn).toHaveBeenCalledWith('unable to parse date: ', 'omgwtfbbq')
 
     it 'returns null when the date is not parsable', ->
       expect(date.parse('omgwtfbbq')).toBeNull()
