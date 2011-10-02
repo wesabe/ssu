@@ -2,6 +2,8 @@ wesabe.provide 'fi-scripts'
 
 extend         = require 'lang/extend'
 date           = require 'lang/date'
+array          = require 'lang/array'
+dateForElement = (require 'dom/date').forElement
 {trim}         = require 'lang/string'
 func           = require 'lang/func'
 type           = require 'lang/type'
@@ -241,6 +243,12 @@ class Player
 
     return retval
 
+  @::__defineGetter__ 'elements', ->
+    @constructor.elements
+
+  @::__defineGetter__ 'e', ->
+    @elements
+
   resume: (answers) ->
     if type.isArray answers
       for {key, value} in answers
@@ -316,21 +324,24 @@ class Player
           @onDownloadSuccessful browser, page
 
 
-  #
-  # Answers whatever security questions are on the page by
+  # Public: Answers whatever security questions are on the page by
   # using the xpaths given in e.security.
   #
   # NOTE: Called with magic scope!
   #
   answerSecurityQuestions: ->
+    @answerSecurityQuestionsWithoutMagicScope browser ? @browser, page ? @page
 
+  # Internal: Answers whatever security questions are on the page by
+  # using the xpaths given in e.security.
+  #
+  # browser - The context Browser.
+  # page - The context Page.
+  answerSecurityQuestionsWithoutMagicScope: (browser, page) ->
     # these are here because this function is called with magic scope
     # and therefore won't see the variables we defined above
-    {trim} = require 'lang/string'
-    privacy = require 'util/privacy'
-
-    questions = page.select e.security.questions
-    qanswers  = page.select e.security.answers
+    questions = page.select @e.security.questions
+    qanswers  = page.select @e.security.answers
 
     if questions.length isnt qanswers.length
       logger.error "Found ", questions.length, " security questions, but ",
@@ -350,13 +361,13 @@ class Player
 
     data = questions: []
     for question, i in questions
-      answer   = answers[question]
+      answer   = @answers[question]
       element  = qanswers[i]
 
       if answer
         page.fill element, answer
       else
-        log.debug "element = ", element, " -- element.type = ", element.type
+        logger.debug "element = ", element, " -- element.type = ", element.type
         data.questions.push
           key: question
           label: question
@@ -364,16 +375,16 @@ class Player
           type: privacy.untaint(element.type) or "text"
 
     if data.questions.length
-      job.suspend 'suspended.missing-answer.auth.security', data
+      @job.suspend 'suspended.missing-answer.auth.security', data
       return false
 
-    job.update 'auth.security'
+    @job.update 'auth.security'
 
     # choose to bypass the security questions if we can
-    page.check e.security.setCookieCheckbox if e.security.setCookieCheckbox
-    page.fill e.security.setCookieSelect, e.security.setCookieOption if e.security.setCookieSelect
+    page.check @e.security.setCookieCheckbox if @e.security.setCookieCheckbox
+    page.fill @e.security.setCookieSelect, @e.security.setCookieOption if @e.security.setCookieSelect
     # submit the form
-    page.click e.security.continueButton
+    page.click @e.security.continueButton
 
     return true
 
@@ -390,12 +401,13 @@ class Player
   # @public
   #
   fillDateRange: ->
-    date = require 'lang/date'
-    dateForElement = (require 'dom/date').forElement
-    type = require 'lang/type'
-    formatString = e.download.date.format or 'MM/dd/yyyy'
+    @fillDateRangeWithoutMagicScope @browser, @page
 
-    opts   = e.download.date
+  # Internal: Fills out the date form fields for a download.
+  fillDateRangeWithoutMagicScope: (browser, page) ->
+    formatString = @elements.download.date.format or 'MM/dd/yyyy'
+
+    opts   = @elements.download.date
     fromEl = privacy.untaint page.find(opts.from)
     toEl   = privacy.untaint page.find(opts.to)
 
@@ -577,6 +589,7 @@ class Player
       bind: (args...) => Pathway.bind(args...)
       logger: log
       log: log
+      isMagicScope: on
     }, scope or {}), args
 
 
