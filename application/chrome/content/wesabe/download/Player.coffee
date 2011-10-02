@@ -234,7 +234,10 @@ class Player
 
       logger.info 'History is ', (hi.name for hi in @history).join(' -> ')
 
-      @callWithMagicScope fn, browser, page, extend({log}, scope or {})
+      if func.argNames(fn).length > 0
+        fn.call @, browser, page
+      else
+        @callWithMagicScope fn, browser, page, extend({log}, scope or {})
 
     return retval
 
