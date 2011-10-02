@@ -1,5 +1,3 @@
-silentLogging = false
-
 exports.wesabe =
 
   ## MODULE GENERATION
@@ -25,68 +23,7 @@ exports.wesabe =
       else
         {}
 
-  ## (STUB) TAINT HELPERS
-
-  taint: (object) ->
-    object
-
-  untaint: (object) ->
-    object
-
-  ## TYPE CHECKING
-
-  isFunction: (object) ->
-    typeof object is 'function'
-
-  isString: (object) ->
-    typeof object is 'string'
-
-  is: (object, klass) ->
-    object?.constructor is klass
-
-  isTainted: -> false
-
-  ## LOGGING
-
-  radioactive: (args...) ->
-    @log 'radioactive', args
-
-  debug: (args...) ->
-    @log 'debug', args
-
-  info: (args...) ->
-    @log 'info', args
-
-  warn: (args...) ->
-    @log 'warn', args
-
-  error: (args...) ->
-    @log 'error', args
-
-  fatal: (args...) ->
-    @log 'fatal', args
-
-  log: (level, args...) ->
-    return if silentLogging
-    console.log [level.toUpperCase(), ': ', args...].join('')
-
-  setLoggerSilent: (silent) ->
-    silentLogging = silent
-
-  tryCatch: (name, callback) ->
-    try
-      callback wesabe
-    catch err
-      @error name, ':', err
-
-  tryThrow: (name, callback) ->
-    try
-      callback wesabe
-    catch err
-      @error name, ':', err
-      throw err
-
-  ## INTERNAL
+## INTERNAL
 
 walk = (module, callback) ->
   base = wesabe
