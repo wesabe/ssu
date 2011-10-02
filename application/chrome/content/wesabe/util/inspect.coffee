@@ -148,7 +148,7 @@ inspectFunction = (fn, opts) ->
   style 'shell', string, opts
 
 inspectRegExp = (regexp, opts) ->
-  style 'regexp', regexp.toSource(), opts
+  style 'regexp', regexp.toString(), opts
 
 inspectElement = (element, opts) ->
   attrs = (" #{nodeName}#{style 'punct', '=', opts}#{inspect nodeValue, undefined, undefined, opts}" for {nodeName, nodeValue} in element.attributes).join('')
