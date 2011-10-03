@@ -1,70 +1,47 @@
 # This is the login part of the <%= org %>
-# script, included by <%= script_path %>.js one level up.
+# script, included by <%= script_path %>.coffee one level up.
 #
 # This part handles logging in, and contains all the
 # logic and page element references related to it.
 #
 wesabe.provide "fi-scripts.<%= fid %>.login",
-  # The "dispatch" function is called every time a page
-  # load occurs (using the ondomready callback, not onload).
+  # This is your opportunity to look at the page, figure
+  # out where you are, and go to the next page, trigger a
+  # download, or pass/fail the job.
   #
-  # It gives you an opportunity to look at the page, figure
-  # out where you are, and take one or more actions.
+  # page - A dom/Page providing access to the just-loaded page,
+  #        allows finding things on the page, filling in forms, etc.
+  #        While most of the time this will be the top-level Page in
+  #        a Browser, it might also represent a frame inside another
+  #        Page.
   #
-  # The function is called with several implicit arguments,
-  # which means that they are not in the argument list, but
-  # are nonetheless available. Here they are:
+  # browser - A dom/Browser allows navigating away from the current
+  #           URL and getting the current top-level URL.
   #
-  # @param [dom/Page] page
-  #   A Page instance providing access to the just-loaded page,
-  #   allows finding things on the page, filling in forms, etc.
   #
-  #   While most of the time this will be the top-level Page in
-  #   a Browser, it might also represent a frame inside another
-  #   Page.
+  # Examples
   #
-  # @param [dom/Browser] browser
-  #   A Browser instance, allows navigating away from the current
-  #   URL and getting the current top-level URL.
+  #   # update the job status to say you're logging in
+  #   @job.update 'auth.creds'
   #
-  # @param [download/Job] job
-  #   Represents the status of one sync job, and has a status
-  #   (numeric HTTP-like code, e.g. 200) and a result (string value that
-  #   elaborates on the status, e.g. "ok").
+  #   # fail the current job because the user credentials are wrong
+  #   @job.fail 401, 'auth.creds.invalid'
   #
-  #   It is used primarily to convey changes in state
-  #   (e.g. job.update 'auth.creds' to mean "I'm filling in the user's
-  #   credentials), as well as success and failure (i.e. job.succeed()
-  #   and job.fail ..., examples below).
+  #   # pass the current job because you got what you came here for
+  #   @job.succeed()
   #
-  # @param [ActionProxy] action
-  #   Calling "action.foo()" will run the "foo" action with all the
-  #   right implicit arguments. Any arguments you pass will be ignored,
-  #   so if you want to pass state around at all, use +tmp+.
   #
-  # @param [Object] tmp
-  #   An object that is the same throughout the job, and may be used
-  #   to store and share state in +dispatch+ and any of the actions.
+  #   # temporarily store a list of account numbers for use later
+  #   @tmp.accountNumbers = (option.value for option in page.select @e.accounts.options)
   #
-  #  Often, this is used to store the list of accounts (tmp.accounts)
-  #  and the current account (tmp.account).
+  #   # NOTE: You may NOT store page elements in @tmp.
+  #   # Any page elements retrieved using page.find(), page.select(), etc
+  #   # will likely not be valid the next time you try to do something
+  #   # with them, for example passing them to page.click().
   #
-  #  You may NOT store page elements retrieved using page.find(),
-  #  page.select(), etc. If you attempt to use them after the page
-  #  has changed (i.e. dispatch has been called again) then passing
-  #  them to page.click() etc. will simply do nothing.
-  #
-  # @param [Object] answers
-  #   Contains the user's credentials, such as username and password.
-  #   Also contains the answers to security questions.
-  #
-  # @param [Object] e
-  #   The result of merging all the "elements" from the main Player
-  #   and all sub-players together (e.g. e.login.user.field).
-  #
-  dispatch: ->
+  dispatch: (browser, page) ->
     # replace with your own custom logic for determining login status
-    return if page.present e.logoff.link
+    return if page.present @e.logoff.link
 
     # replace with your own custom logic for how to log in
     #   NOTE: the order of the below is important
@@ -79,18 +56,18 @@ wesabe.provide "fi-scripts.<%= fid %>.login",
     #   come later, like errors logging in, before the cases that
     #   chronologically precede them, like doing the actual login.
     #
-    if page.present e.login.error.user
-      job.fail 401, 'auth.user.invalid'
-    else if page.present e.login.error.pass
-      job.fail 401, 'auth.pass.invalid'
-    else if page.present e.login.error.creds
-      job.fail 401, 'auth.creds.invalid'
-    else if page.present(e.login.error.general
-      job.fail 401, 'auth.unknown'
-    else if page.present e.login.error.noAccess
-      job.fail 403, 'auth.noaccess'
-    else if page.present e.login.user.field
-      action.login()
+    if page.present @e.login.error.user
+      @job.fail 401, 'auth.user.invalid'
+    else if page.present @e.login.error.pass
+      @job.fail 401, 'auth.pass.invalid'
+    else if page.present @e.login.error.creds
+      @job.fail 401, 'auth.creds.invalid'
+    else if page.present @e.login.error.general
+      @job.fail 401, 'auth.unknown'
+    else if page.present @e.login.error.noAccess
+      @job.fail 403, 'auth.noaccess'
+    else if page.present @e.login.user.field
+      @login browser, page
 
   # Actions are discrete steps that can be taken,
   # and often leave the current page, triggering
@@ -101,19 +78,19 @@ wesabe.provide "fi-scripts.<%= fid %>.login",
   #
   actions:
     # sample -- replace this with your own custom logic
-    login: ->
-      page.fill e.login.user.field, answers.username
-      page.fill e.login.pass.field, answers.password
+    login: (browser, page) ->
+      page.fill @e.login.user.field, @answers.username
+      page.fill @e.login.pass.field, @answers.password
       # causes the form to be submitted, triggering another page
       # load, which then calls dispatch again -- hopefully as a
       # logged-in user this time
-      page.click e.login.continueButton
+      page.click @e.login.continueButton
 
     # sample -- replace this with your own custom logic
-    logoff: ->
-      page.click e.logoff.link
+    logoff: (browser, page) ->
+      page.click @e.logoff.link
       # notify our owner that the job succeeded
-      job.succeed()
+      @job.succeed()
 
   # elements are xpaths or sets of xpaths that
   # illustrate how to access a particular element

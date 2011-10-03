@@ -20,7 +20,7 @@ wesabe.download.Player.register
     # The "main" action is the entry point into the script,
     # and is the first thing that is run. It should trigger
     # a page load, which calls "dispatch" (see login.js).
-    main: ->
+    main: (browser) ->
       # TODO: change the url to go to the login page for <%= org %>
       browser.go "<%= login_url %>"
 
