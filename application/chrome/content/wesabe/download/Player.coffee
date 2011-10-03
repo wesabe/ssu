@@ -86,7 +86,7 @@ class Player
     if params.dispatchFrames is off
       klass::filters.push
         name: 'frame blocker'
-        test: ->
+        test: (browser, page) ->
           if page.framed
             logger.info "skipping frame page load: ", page.title
             return false
@@ -236,10 +236,7 @@ class Player
 
       logger.info 'History is ', (hi.name for hi in @history).join(' -> ')
 
-      if func.argNames(fn).length > 0
-        fn.call @, browser, page
-      else
-        @callWithMagicScope fn, browser, page, extend({log}, scope or {})
+      @callWithAppropriateScope fn, browser, page, extend({log}, scope or {})
 
     return retval
 
@@ -544,7 +541,7 @@ class Player
         return if @job.done or @job.paused
 
         result = tryThrow "#{module}#dispatch(#{dispatch.name})", (log) =>
-          @callWithMagicScope dispatch.callback, browser, page, {log}
+          @callWithAppropriateScope dispatch.callback, browser, page, {log}
 
         if result is false
           logger.info "dispatch chain halted"
@@ -558,7 +555,7 @@ class Player
   shouldDispatch: (browser, page) ->
     for filter in @filters
       result = tryCatch "#{@constructor.fid}#filter(#{filter.name})", (log) =>
-        switch r = @callWithMagicScope filter.test, browser, page, {log}
+        switch r = @callWithAppropriateScope filter.test, browser, page, {log}
           when true
             log.debug "forcing dispatch"
           when false
@@ -571,6 +568,12 @@ class Player
 
     logger.debug "no filter voted to force or abort dispatch, so forcing dispatch by default"
     return true
+
+  callWithAppropriateScope: (fn, browser, page, scope, args...) ->
+    if func.argNames(fn).length > 0
+      fn.call @, browser, page
+    else
+      @callWithMagicScope fn, browser, page, scope or {}
 
   callWithMagicScope: (fn, browser, page, scope, args...) ->
     log = scope.logger or scope.log or logger
