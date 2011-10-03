@@ -41,7 +41,7 @@ class WesabeSniffer
     chars.replace /^\s+|\s+$/, ''
 
   getMIMETypeFromContent: (request, data, length) ->
-    # dump "WesabeSniffer.getMIMETypeFromContent(#{request}, #{data}, #{length})"
+    # dump "WesabeSniffer.getMIMETypeFromContent(#{request}, #{data}, #{length})\n"
 
     collecting = true
     if collecting
@@ -49,10 +49,10 @@ class WesabeSniffer
       checkable = false
       try
         # chan = request.QueryInterface Ci.nsIChannel
-        # dump "WesabeSniffer.getMTFC: mime-type: #{chan.contentType}"
+        # dump "WesabeSniffer.getMTFC: mime-type: #{chan.contentType}\n"
         http = request.QueryInterface Ci.nsIHttpChannel
         compression = http.getResponseHeader "Content-Encoding"
-        # dump "WesabeSniffer.getMTFC: encoding-type: #{compression}"
+        # dump "WesabeSniffer.getMTFC: encoding-type: #{compression}\n"
         # TODO: 12.4.2007 (tmason@wesabe.com) - use nsIStreamConverterService
         # (@mozilla.org/streamConverters;1) for a conversion from gzip to uncompressed.
       catch ex
@@ -62,19 +62,19 @@ class WesabeSniffer
       try
         http = request.QueryInterface Ci.nsIHttpChannel
         cdHeader = http.getResponseHeader "content-disposition"
-        # dump "WesabeSniffer.getMTFC: content-disposition: #{cdHeader}"
+        # dump "WesabeSniffer.getMTFC: content-disposition: #{cdHeader}\n"
         if cdHeader.length > 0
           cd = cdHeader.toLowerCase().split('filename=')
           if cd.length > 1 and cd[1].length > 0
-            filename = cd[1..]
-            # dump "WesabeSniffer.getMTFC: filename: #{filename}"
+            filename = cd[1]
+            # dump "WesabeSniffer.getMTFC: filename: #{filename}}\n"
             ext = @sniffExt filename
-            # dump "WesabeSniffer.getMTFC: sniffed extension revealed '#{ext}'"
+            # dump "WesabeSniffer.getMTFC: sniffed extension revealed '#{ext}'\n"
       catch ex
         # do nothing - merely means the header does not exist
 
       if ext.length > 0 or checkable
-        # dump("WesabeSniffer.getMTFC: --- Content sniffing --- ");
+        # dump "WesabeSniffer.getMTFC: --- Content sniffing --- "
         intercept = true
         stringData = @dataToString data
         # dump "WesabeSniffer: getMTFC: checking data: \n#{stringData[0...25]}\n"
@@ -113,10 +113,12 @@ class WesabeSniffer
           return "application/x-ssu-intercept"
 
   sniffExt: (filename) ->
-    for ext in ['ofx', 'qif', 'ofc', 'qfx', 'pdf']
-      if filename.indexOf(".#{ext}") >= 0
-        return ext
-    return ""
+    ext = filename.match(/\.(\w+)/)?[1]?.toLowerCase()
+
+    if ext in ['ofx', 'qif', 'ofc', 'qfx', 'pdf']
+      ext
+    else
+      ''
 
 WesabeSnifferFactory =
   createInstance: (outer, iid) ->

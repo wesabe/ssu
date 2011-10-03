@@ -44,7 +44,7 @@
           if (cdHeader.length > 0) {
             cd = cdHeader.toLowerCase().split('filename=');
             if (cd.length > 1 && cd[1].length > 0) {
-              filename = cd.slice(1);
+              filename = cd[1];
               ext = this.sniffExt(filename);
             }
           }
@@ -86,15 +86,13 @@
       }
     };
     WesabeSniffer.prototype.sniffExt = function(filename) {
-      var ext, _i, _len, _ref;
-      _ref = ['ofx', 'qif', 'ofc', 'qfx', 'pdf'];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        ext = _ref[_i];
-        if (filename.indexOf("." + ext) >= 0) {
-          return ext;
-        }
+      var ext, _ref, _ref2;
+      ext = (_ref = filename.match(/\.(\w+)/)) != null ? (_ref2 = _ref[1]) != null ? _ref2.toLowerCase() : void 0 : void 0;
+      if (ext === 'ofx' || ext === 'qif' || ext === 'ofc' || ext === 'qfx' || ext === 'pdf') {
+        return ext;
+      } else {
+        return '';
       }
-      return "";
     };
     return WesabeSniffer;
   })();
