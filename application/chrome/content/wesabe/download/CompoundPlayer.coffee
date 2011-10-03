@@ -1,18 +1,13 @@
 extend = require 'lang/extend'
+Player = require 'download/Player'
 
-class CompoundPlayer
-  @register: (params) ->
-    klass = @create params
-
-    # make sure we put it where wesabe.require expects it
-    wesabe.provide "fi-scripts.#{klass.fid}", klass
-
-    return klass
-
-  @create: (params) ->
+class CompoundPlayer extends Player
+  @create: (params, callback) ->
     class klass extends this
       @fid: params.fid
       @org: params.org
+
+    callback? klass
 
     extend klass.prototype, params
 
