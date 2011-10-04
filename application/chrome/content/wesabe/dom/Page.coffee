@@ -1,7 +1,3 @@
-#
-# Provides a wrapper around an +HTMLDocument+ to simplify interaction with it.
-#
-
 {Pathway} = require 'xpath'
 Colorizer = require 'util/Colorizer'
 inspect   = require 'util/inspect'
@@ -14,9 +10,7 @@ english   = require 'util/words'
 privacy   = require 'util/privacy'
 {tryCatch, tryThrow} = require 'util/try'
 
-# ==== Types (shortcuts for use in this file)
-# Xpath:: <String, Array[String], Pathway, Pathset>
-#
+# Internal: Event name to internal type mapping.
 EVENT_TYPE_MAP =
   click:     'MouseEvents'
   mousedown: 'MouseEvents'
@@ -32,83 +26,153 @@ EVENT_TYPE_MAP =
   blur:      'UIEvents'
   focusout:  'UIEvents'
 
+# Internal: Base error class for errors raised in Page.
+class PageError
+  constructor: (@page, @message) ->
+
+  raise: ->
+    error = new Error @message
+    error.name = @constructor.name
+    error.page = @page
+    throw error
+
+  @raise: (page, message) ->
+    (new @ page, message).raise()
+
+# Internal: Specialized error for when an attempt to
+# interact with elements from another page happens.
+class DocumentMismatchError extends PageError
+  # Internal: Asserts that element belongs to document.
+  #
+  # node - Any Node whose ownership we'd like to verify.
+  # document - Any Document we'd like to verify as the owner.
+  #
+  # Returns nothing.
+  # Raises DocumentMismatchError if element's owner isn't document.
+  @assert: (page, node) ->
+    if node.ownerDocument isnt page.document
+      @raise page, node
+
+  constructor: (page, @node) ->
+    super page, "you're attempting to use a node (#{inspect @node}) that doesn't belong to this page"
+
+# Internal: Specialized error for when we were unable to find a node.
+class NodeNotFoundError extends PageError
+  constructor: (page, @xpath) ->
+    super page, "expected to find a node matching #{inspect @xpath}, but none were found"
+
+# Internal: Specialized error for when we're looking for an element's containing form.
+class MissingFormError extends PageError
+  constructor: (page, @xpath, @document) ->
+    super page, "expected node matching #{inspect @xpath} to be contained by a <form>"
+
+
+# Public: Provides a wrapper around an +HTMLDocument+ to simplify interaction with it.
+#
+# Examples
+#
+#   # click the first link on a page
+#   page.click '//a'
+#
+#   # fill in a search field
+#   page.fill '//input[@name="q"]', "doctor who"
 class Page
   constructor: (@document) ->
 
-  #
-  # Returns the title of this page.
-  #
+  # Public: Gets the String page title, tainted.
   @::__defineGetter__ 'title', ->
     privacy.taint @document.title
 
+  # Public: Sets the String page title.
   @::__defineSetter__ 'title', (title) ->
     @document.title = privacy.untaint title
 
-  #
-  # Returns the window name for this page.
-  #
+  # Public: Gets the tainted String page name, tainted.
   @::__defineGetter__ 'name', ->
     privacy.taint @defaultView.name
 
-  #
-  # Returns the +Window+ associated with this page.
-  #
+  # Public: Gets this page's Window, tainted.
   @::__defineGetter__ 'defaultView', ->
     privacy.taint @document.defaultView
 
-  #
-  # Returns the URL of this page.
-  #
+  # Public: Gets this page's String URL, tainted.
   @::__defineGetter__ 'url', ->
     privacy.taint @document.URL
 
+  # Public: Gets this page's HTMLBodyElement, tainted.
+  @::__defineGetter__ 'body', ->
+    privacy.taint @document.body
+
+  # Public: Determines whether this page is framed or not.
   #
-  # Returns true if this page is in a frame, false otherwise.
-  #
+  # Returns a Boolean that's true if this page is framed.
   @::__defineGetter__ 'framed', ->
     if frameElement = @defaultView.frameElement
       return frameElement.tagName?.toLowerCase() isnt 'browser'
     else
       return false
 
+  # Public: Gets the Page at the root of the frame hierarchy.
   #
-  # Returns the top-most +Page+, the one at the root of the frame hierarchy.
-  #
+  # Returns a Page that is not contained by any other pages.
   @::__defineGetter__ 'topPage', ->
     @constructor.wrap @defaultView.top.document
 
+  # Public: Gets all Pages contained in this Page's frames.
   #
-  # Returns an array of +Page+ objects wrapping all the frames contained in this +Page+.
-  #
+  # Return an Array containing Pages.
   @::__defineGetter__ 'framePages', ->
     @constructor.wrap frame.document for frame in @defaultView.frames
 
+  # Public: Finds the first matching node. This is like select(), but
+  # returns the first matching node rather than all matching nodes.
   #
-  # Finds the first node matching +xpathOrNode+ with optional
-  # +scope+ when it is an xpath, returns it when it's a node.
+  # xpathOrNode - If it's a Node, just returns it. Otherwise it should
+  #               be a String xpath.
+  # scope - An Element to restrict the xpath search to, ignored if xpathOrNode
+  #         is a Node.
   #
-  # ==== Parameters
-  # xpathOrNode<HTMLElement, Xpath>:: The thing to look for.
-  # scope<HTMLElement>:: The element to scope the search to.
+  # Examples
   #
-  # ==== Returns
-  # HTMLElement, null:: The found element, if one was found.
+  #   # finds the first link on the page
+  #   page.find '//a'
   #
-  # @public
+  #   # nodes passed in will simply be returned.
+  #   link = page.find '//a'
+  #   (page.find link) is link
+  #   # => true
   #
+  # Returns a tainted Node.
+  # Raises DocumentMismatchError given a node not belonging to this page.
   find: (xpathOrNode, scope) ->
-    return xpathOrNode if xpathOrNode?.nodeType
+    if xpathOrNode?.nodeType
+      DocumentMismatchError.assert @, xpathOrNode
+      return xpathOrNode
+
     xpath = Pathway.from(xpathOrNode)
     return xpath.first(@document, scope)
 
+  # Public: Finds an Element by id.
   #
-  # Shorthand for finding an element by id, returns null if not found.
+  # id - A String matching a page element's id attribute.
   #
+  # Examples
+  #
+  #   page.click page.byId('next-button')
+  #
+  # Returns a tainted Element or null if no matching Element was found.
   byId: (id) ->
-    privacy.taint @document.getElementById(id)
+    privacy.taint @document.getElementById(privacy.untaint id)
 
+  # Public: Finds a matching anchor on this page.
   #
-  # Find a link either by id, href, content, or using a matcher function.
+  # matcher - If a String, matches links whose id or href matches exactly
+  #           or whose text content contains matcher.
+  #           If a Function, it will be called with each link on the page
+  #           until it returns true, which will cause that link to match.
+  # scope - An Element to restrict the link search to.
+  #
+  # Examples
   #
   #   # matches <a id="formSubmitButton">
   #   page.link 'formSubmitButton'
@@ -120,7 +184,11 @@ class Page
   #   # matches the first link whose content text is longer than 1000 characters
   #   page.link (a) -> page.text(a).length > 1000
   #
+  # Returns an HTMLAnchorElement matching matcher and contained by scope, or null
+  # if no link on the page matches.
   link: (matcher, scope) ->
+    matcher = privacy.untaint matcher
+
     if type.isString matcher
       escaped = matcher.replace /"/, '\\"'
       @find """//a[@id="#{escaped}" or @href="#{escaped}" or contains(string(.), "#{escaped}")]""", scope
@@ -131,64 +199,78 @@ class Page
 
       return null
 
+  # Public: Finds matching nodes on the page. This is much like find(), but returns
+  # all matching nodes instead of a single node.
   #
-  # Finds all nodes matching +xpathOrNode+ with optional
-  # +scope+ when it is an xpath, returns it when it's a node.
+  # xpathOrNode - If it's a Node, returns it wrapped in an Array.
+  #               Otherwise it should be a String xpath.
+  # scope - An Element to restrict the search to.
   #
-  # ==== Parameters
-  # xpathOrNode<HTMLElement, Xpath>:: The thing to look for.
-  # scope<HTMLElement>:: The element to scope the search to.
+  # Examples
   #
-  # ==== Returns
-  # tainted(Array[HTMLElement]):: The found elements.
+  #   # finds all links on the page
+  #   page.select '//a'
   #
-  # @public
+  #   # gets a string containing all the text strings in the <body>
+  #   (page.select '//text()', page.body).join('')
   #
+  # Returns an Array of tainted Nodes found by xpath.
+  # Raises DocumentMismatchError given a node not belonging to this page.
   select: (xpathOrNode, scope) ->
-    return xpathOrNode if xpathOrNode?.nodeType
+    if xpathOrNode?.nodeType
+      DocumentMismatchError.assert @, xpathOrNode
+      return [xpathOrNode]
+
     xpath = Pathway.from(xpathOrNode)
-    return xpath.select(@document, scope and @find(scope))
+    return xpath.select @document, scope and @find(scope)
 
+  # Public: Finds the first matching node, throwing an error
+  # if there is no such matching node. Use this when you want to blow up
+  # when the node cannot be found.
   #
-  # Finds the first node matching +xpathOrNode+ with optional
-  # +scope+ when it is an xpath, returns it when it's a node. If nothing
-  # is found an exception is thrown.
+  # xpathOrNode - If it's a Node, just returns it. Otherwise it should
+  #               be a String xpath.
+  # scope - An Element to restrict the xpath search to, ignored if xpathOrNode
+  #         is a Node.
   #
-  # ==== Parameters
-  # xpathOrNode<Xpath, HTMLElement>:: The thing to look for.
-  # scope<HTMLElement>:: The element to scope the search to.
+  # Examples
   #
-  # ==== Returns
-  # tainted(HTMLElement):: The found element.
+  #   # raises NodeNotFoundError because the xpath condition can never be satisfied
+  #   page.findStrict '//*[@id!=@id]'
   #
-  # ==== Raises
-  # Error:: When no element is found.
+  #   # just like page.find() when there's at least one link on the page
+  #   link = page.findStrict '//a'
   #
-  # @public
-  #
+  # Returns a tainted Node.
+  # Raises DocumentMismatchError given a node not belonging to this page.
+  # Raises NodeNotFoundError given an xpath for which there are no matches.
   findStrict: (xpathOrNode, scope) ->
-    result = @find xpathOrNode, scope
-    throw new Error "No element found matching #{inspect xpathOrNode}" unless result
-    return result
+    if result = @find xpathOrNode, scope
+      return result
 
+    NodeNotFoundError.raise @, xpathOrNode
+
+  # Public: Fills an element with a given value. Note that the value will
+  # be truncated according to any maxlength property found on the Element.
   #
-  # Fills the given node/xpath endpoint with the given value.
+  # xpathOrNode - If it's an Element, uses it as the Element to fill.
+  #               Otherwise it should be a String xpath.
+  # valueOrXpathOrNode - If it's a String, the value to use when filling
+  #                      the Element. Otherwise it should be an Element
+  #                      whose value we use to fill the Element.
   #
-  # ==== Parameters
-  # xpathOrNode<HTMLElement, Xpath>:: The thing to fill.
-  # valueOrXpathOrNode<Xpath, HTMLElement>::
-  #   The value to set the node to if it's a string, or the element whose
-  #   value to use otherwise.
+  # Examples
   #
-  # ==== Raises
-  # Error:: When the element can't be found.
+  #   # fill in the search field
+  #   page.fill '//input[@name="q"]', "angry birds"
   #
-  # ==== Notes
-  # The value assigned is truncated according to the maxlength property,
-  # if present. This also triggers the +change+ event on the element it finds.
+  #   # select an option in a dropdown
+  #   colorSelect = page.findStrict '//select[@name="color"]'
+  #   page.fill colorSelect, colorSelect.options[1]
   #
-  # @public
-  #
+  # Returns nothing.
+  # Raises DocumentMismatchError given a node not belonging to this page.
+  # Raises NodeNotFoundError given an xpath for which there are no matches.
   fill: (xpathOrNode, valueOrXpathOrNode) ->
     tryThrow 'Page.fill', (log) =>
       element = privacy.untaint @findStrict(xpathOrNode)
@@ -204,9 +286,9 @@ class Page
 
       log.radioactive 'value=', value
 
-      maxlength = element.getAttribute("maxlength")
+      maxlength = element.getAttribute "maxlength"
       if value and maxlength
-        maxlength = number.parse(maxlength)
+        maxlength = number.parse maxlength
         if maxlength
           log.warn "Truncating value to ", maxlength, " characters"
           value = value[0...maxlength]
@@ -240,20 +322,20 @@ class Page
       @fireEvent element, 'focusout'
       @fireEvent element, 'blur'
 
+  # Public: Clicks the given element by firing mousedown, click,
+  # and mouseup events.
   #
-  # Clicks the given node/xpath endpoint.
+  # xpathOrNode - If it's an Element, uses it as the Element to click.
+  #               Otherwise it should be a String xpath.
   #
-  # ==== Parameters
-  # xpathOrNode<HTMLElement, Xpath>:: The thing to click.
+  # Examples
   #
-  # ==== Raises
-  # Error:: When the element can't be found.
+  #   # clicks a logoff link
+  #   page.click page.link("Log off")
   #
-  # ==== Notes
-  # Triggers the events +mousedown+, +click+, then +mouseup+.
-  #
-  # @public
-  #
+  # Returns nothing.
+  # Raises DocumentMismatchError given a node not belonging to this page.
+  # Raises NodeNotFoundError given an xpath for which there are no matches.
   click: (xpathOrNode) ->
     tryThrow 'Page.click', (log) =>
       element = @findStrict xpathOrNode
@@ -262,75 +344,90 @@ class Page
       @fireEvent element, 'click'
       @fireEvent element, 'mouseup'
 
+  # Public: Checks an element.
   #
-  # Checks the element given by +xpathOrNode+.
+  # xpathOrNode - If it's an Element, uses it as the Element to check.
+  #               Otherwise it should be a String xpath.
   #
-  # ==== Parameters
-  # xpathOrNode<HTMLElement, Xpath>:: The thing to check.
+  # Examples
   #
-  # ==== Raises
-  # Error:: When the element can't be found.
+  #   # checks all checkboxes on a page
+  #   page.check '//input[@type="checkbox"]'
   #
-  # @public
-  #
+  # Returns nothing.
+  # Raises DocumentMismatchError given a node not belonging to this page.
+  # Raises NodeNotFoundError given an xpath for which there are no matches.
   check: (xpathOrNode) ->
     tryThrow 'Page.check', (log) =>
       element = @findStrict xpathOrNode
       log.info 'element=', element
       privacy.untaint(element).checked = true
+      @fireEvent element, 'change'
 
+  # Public: Unchecks an element.
   #
-  # Unchecks the element given by +xpathOrNode+.
+  # xpathOrNode - If it's an Element, uses it as the Element to uncheck.
+  #               Otherwise it should be a String xpath.
   #
-  # ==== Parameters
-  # xpathOrNode<HTMLElement, Xpath>:: The thing to uncheck.
+  # Examples
   #
-  # ==== Raises
-  # Error:: When the element can't be found.
+  #   # unchecks all checkboxes on a page
+  #   page.uncheck '//input[@type="checkbox"]'
   #
-  # @public
-  #
+  # Returns nothing.
+  # Raises DocumentMismatchError given a node not belonging to this page.
+  # Raises NodeNotFoundError given an xpath for which there are no matches.
   uncheck: (xpathOrNode) ->
     tryThrow 'Page.uncheck', (log) =>
       element = @findStrict xpathOrNode
       log.info('element=', element)
       privacy.untaint(element).checked = false
+      @fireEvent element, 'change'
 
+  # Public: Simulates submitting a form.
   #
-  # Simulates submitting a form.
+  # xpathOrNode - If it's an HTMLFormElement, uses it as the HTMLFormElement to submit.
+  #               If it's any other Element, searches through its ancestors to find an HTMLFormElement.
+  #               Otherwise it should be a String xpath.
   #
-  # ==== Parameters
-  # xpathOrNode<HTMLElement, Xpath>:: The thing to uncheck.
+  # Examples
   #
-  # ==== Raises
-  # Error::
-  #   When the element can't be found or when it is not a form
-  #   or contained by a form.
+  #   # submits a form by name
+  #   page.submit '//form[@name="quickreplyform"]'
   #
-  # ==== Notes
-  # The found element can be either a form or a descendent of a form.
+  #   # submits the form containing the search field
+  #   page.submit '//input[@name="q"]'
   #
-  # @public
-  #
+  # Returns nothing.
+  # Raises DocumentMismatchError given a node not belonging to this page.
+  # Raises NodeNotFoundError given an xpath for which there are no matches.
   submit: (xpathOrNode) ->
     tryThrow 'Page.submit', (log) =>
       element = @findStrict xpathOrNode
       log.info 'element=', element
       # find the containing form
+      element = privacy.untaint element
       element = element.parentNode while element and element.tagName.toLowerCase() isnt 'form'
-      throw new Error 'No form found wrapping element! Cannot submit' unless element
+
+      unless element
+        MissingFormError.raise @, xpathOrNode
 
       @fireEvent element, 'submit'
 
+  # Internal: Fires an event on the given node/xpath endpoint.
   #
-  # Fires an event on the given node/xpath endpoint.
+  # xpathOrNode - If it's an Element, uses it as the event's target Element.
+  #               Otherwise it should be a String xpath.
+  # type - The name of the event to fire (e.g. 'click').
   #
-  # ==== Parameters
-  # xpathOrNode<HTMLElement, Xpath>:: The thing to fire the event on.
-  # type<String>:: The name of the event to fire (e.g. 'click').
+  # Examples
   #
-  # @public
+  #   # fire the keypress event with the letter 'a'
+  #   @fireEvent input, 'keypress', charCode: 'a'
   #
+  # Returns nothing.
+  # Raises DocumentMismatchError given a node not belonging to this page.
+  # Raises NodeNotFoundError given an xpath for which there are no matches.
   fireEvent: (xpathOrNode, eventType, args...) ->
     options = if args.length is 1 and typeof args[args.length-1] is 'object' then args.pop() else {}
     element = privacy.untaint(@findStrict xpathOrNode)
@@ -354,17 +451,27 @@ class Page
 
     element.dispatchEvent(event)
 
+  # Public: Determines whether a node is visible.
   #
-  # Determines whether the given node/xpath endpoint is visible.
+  # xpathOrNode - If it's a Node, uses it as the Node to check for visibility.
+  #               Otherwise it should be a String xpath.
   #
-  # ==== Parameters
-  # xpathOrNode<HTMLElement, Xpath>:: The thing to check for visibility.
+  # Examples
   #
-  # ==== Notes
-  # Returns +true+ when given a text node.
+  #   page.visible '//imnotonthispage'
+  #   # => false
   #
-  # @public
+  #   page.visible '//div[contains(@style, "display:none")]'
+  #   # => false
   #
+  #   page.visible '//body'
+  #   # => true
+  #
+  #   page.visible '//div[@class="this-class-hides-things"]//a'
+  #   # => false
+  #
+  # Returns a Boolean indicating whether the Node is visible.
+  # Raises DocumentMismatchError given a node not belonging to this page.
   visible: (xpathOrNode) ->
     element = privacy.untaint @find(xpathOrNode)
 
@@ -383,52 +490,40 @@ class Page
     # must be visible
     return true
 
+  # Pubilc: Determines whether a node is present.
   #
-  # Determines whether the given node/xpath endpoint is visible.
+  # xpathOrNode - If it's a Node, it's automatically present.
+  #               Otherwise it should be a String xpath.
   #
-  # ==== Parameters
-  # xpathOrNode<HTMLElement, Xpath>:: The thing to check for existence.
-  # scope<HTMLElement>:: The element to scope the search to.
-  #
-  # @public
-  #
+  # Returns a Boolean indicating whether the Node is present.
+  # Raises DocumentMismatchError given a node not belonging to this page.
   present: (xpathOrNode, scope) ->
     !!(@find xpathOrNode, scope)
 
-  #
-  # Generates a percentage match between the page and the xpaths based on
+  # Public: Generates a percentage match between the page and the xpaths based on
   # how many of the elements are present on the page.
   #
-  # ==== Parameters
-  # xpaths<Array[String, Pathway]>:: The xpaths to look for.
+  # xpaths - An Array of xpaths to search for.
   #
-  # ==== Returns
-  # Number:: A number between 0 and 1 representing a percentage match.
-  #
-  # @public
-  #
+  # Returns a Number between 0 and 1 representing a percentage match.
   match: (xpaths) ->
     match = 0
     for xpath in xpaths
-      xpath = wesabe.xpath.from(xpath)
+      xpath = Pathway.from xpath
       match++ if @present xpath
 
     return match / xpaths.length
 
-  #
-  # Gets all the cells associated with the given node. For a <th> or <td> node,
+  # Public: Gets all the cells associated with the given node. For a <th> or <td> node,
   # that's all the <td> elements in the same column. For a <tr> node, that's
   # all the <td> elements in the same row.
   #
-  # @param xpathOrNode [HTMLElement, Xpath]
-  #   The thing to get related cells for.
+  # xpathOrNode - The <td>, <tr> or xpath String to use.
   #
-  # @return [tainted(Array[HTMLElement]), null]
-  #   The cells related to +xpathOrNode+, or +null+ if the found node
-  #   is not of a type that has related cells.
-  #
-  # @public
-  #
+  # Returns an Array of HTMLTableCellElements in the row given by a <tr> or in the column
+  # given by a <td> or <th>.
+  # Raises DocumentMismatchError given a node not belonging to this page.
+  # Raises NodeNotFoundError given an xpath for which there are no matches.
   cells: (xpathOrNode) ->
     node = privacy.untaint @findStrict(xpathOrNode)
     name = node.tagName.toLowerCase()
@@ -443,27 +538,26 @@ class Page
       else
         null
 
+  # Public: Finds the next matching sibling.
   #
-  # Finds the next sibling matching +siblingMatcher+, if given.
+  # xpathOrNode - The Element whose next sibling to get or a String
+  #               xpath to locate said element.
+  # siblingMatcher - An xpath expression to use to match the next sibling (default: '*').
   #
-  # @param xpathOrNode [HTMLElement, Xpath]
-  #   The thing whose next sibling is wanted.
-  # @param siblingMatcher [String, null]
-  #   An Xpath expression to use to match the following sibling (defaults to "*").
-  #
-  # @return [tainted([HTMLElement]), null]
-  #
+  # Returns an Element, tainted.
+  # Raises DocumentMismatchError given a node not belonging to this page.
+  # Raises NodeNotFoundError given an xpath for which there are no matches.
   next: (xpathOrNode, siblingMatcher='*') ->
     @find "following-sibling::#{siblingMatcher}", @findStrict(xpathOrNode)
 
+  # Public: Gets the text content of the Node.
   #
-  # Returns the text content of +xpathOrNode+.
+  # xpathOrNode - If it's a Node, retrieve all its text.
+  #               Otherwise it should be a String xpath.
   #
-  # @param xpathOrNode [HTMLElement, Xpath]
-  #   The thing whose text is wanted.
-  #
-  # @return [tainted([String])]
-  #
+  # Returns a String containing all Node's text, tainted.
+  # Raises DocumentMismatchError given a node not belonging to this page.
+  # Raises NodeNotFoundError given an xpath for which there are no matches.
   text: (xpathOrNode) ->
     node = @findStrict xpathOrNode
     if node.nodeType is 3
@@ -472,28 +566,37 @@ class Page
       textNodes = @select './/text()', node
     privacy.taint (privacy.untaint(node.nodeValue) for node in textNodes).join('')
 
+  # Public: Determines whether an Element has a given class.
   #
-  # Returns +true+ if +xpathOrNode+ has class +className+, +false+ otherwise.
+  # xpathOrNode - If it's an Element, use it to check the class.
+  #               Otherwise it should be a String xpath.
+  # className - The class to check the Element for.
   #
+  # Examples
+  #
+  #   page.hasClass page.find('//div[@class="section"]'), 'section'
+  #   # => true
+  #
+  #   page.hasClass page.find('//div[@class="section"]'), 'section'
+  #   # => true
+  #
+  # Returns true if the Element has the given class.
+  # Raises DocumentMismatchError given a node not belonging to this page.
+  # Raises NodeNotFoundError given an xpath for which there are no matches.
   hasClass: (xpathOrNode, className) ->
     " #{@findStrict(xpathOrNode).className} ".indexOf(" #{className} ") > -1
 
+  # Public: Goes back one step in the page's history.
   #
-  # Goes back one step in the document's window's history.
-  #
-  # @public
-  #
+  # Returns nothing.
   back: ->
     @document.defaultView.history.back()
 
+  # Public: Inject some javascript into a document by appending a script tag.
   #
-  # Inject some javascript into a document by appending a script tag.
+  # script - JavaScript to be run in the page.
   #
-  # @param script [String]
-  #   JavaScript to be put into the page and executed.
-  #
-  # @public
-  #
+  # Returns nothing.
   inject: (script) ->
     element = @document.createElementNS "http://www.w3.org/1999/xhtml", "script"
     element.setAttribute "type", "text/javascript"
@@ -501,16 +604,11 @@ class Page
     element.innerHTML = script
     @document.documentElement.appendChild element
 
-  #
-  # Dumps the HTML and PNG representations of the page to the profile
+  # Public: Dumps the HTML and PNG representations of the page to the profile
   # under +%PROFILE_DIR%/wesabe-page-dumps+.
   #
-  # @return Options
-  #   :html<String>:: The path of the dumped HTML.
-  #   :png<String>:: The path of the dumped PNG.
-  #
-  # @public
-  #
+  # Returns an Object whose html property is the path of the dumped HTML,
+  # and whose png property is the path of the dumped PNG.
   dump: ->
     tryThrow 'Page.dump', =>
       folder = dir.profile
@@ -543,9 +641,11 @@ class Page
 
     return null
 
-  # This method replaces all words in text nodes with asterisks unless
-  # the word is a dictionary word (defined in wesabe.util.words.list),
+  # Public: This method replaces all words in text nodes with asterisks unless
+  # the word is a dictionary word (defined in util/words),
   # then dumps the page as usual.
+  #
+  # Returns nothing.
   dumpPrivately: ->
     for text in @select '//body//text()'
       text = privacy.untaint text
@@ -570,12 +670,18 @@ class Page
 
     @dump
 
+  # Internal: Returns alternate content for util/inspect to use when
+  # generating a string representing this Page.
+  #
+  # Returns an Object.
   contentForInspect: ->
     url: @url, title: @title, name: @name
 
+  # Public: Wraps documents in Pages.
   #
-  # Wraps documents for scripts to have easy helper access.
+  # document - Either a Page or a Document to be wrapped.
   #
+  # Returns document if document is a Page, otherwise returns a new Page wrapping document.
   @wrap: (document) ->
     if type.is document, @
       document
