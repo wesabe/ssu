@@ -645,7 +645,8 @@ class Page
   # the word is a dictionary word (defined in util/words),
   # then dumps the page as usual.
   #
-  # Returns nothing.
+  # Returns an Object whose html property is the path of the dumped HTML,
+  # and whose png property is the path of the dumped PNG.
   dumpPrivately: ->
     for text in @select '//body//text()'
       text = privacy.untaint text
