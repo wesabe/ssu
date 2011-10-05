@@ -1,6 +1,6 @@
-number = wesabe.require 'lang.number'
+number = require 'lang/number'
 
-describe 'wesabe.lang.number', ->
+describe 'lang/number', ->
   describe '.parseOrdinalPhrase function', ->
     it 'works with nth', ->
       expect(number.parseOrdinalPhrase('the 145th item')).toEqual(145)

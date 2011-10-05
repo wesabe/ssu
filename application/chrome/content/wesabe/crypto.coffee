@@ -1,38 +1,40 @@
+# emulate the node.js crypto module
 type = require 'lang/type'
 
-md5 = null
+# adapted from https://developer.mozilla.org/en/nsICryptoHash#Computing_the_Hash_of_a_String
+class Hash
+  constructor: (@algorithm) ->
+    @_impl = Cc['@mozilla.org/security/hash;1'].createInstance(Ci.nsICryptoHash)
 
-try
-  # assume we're in xulrunner
-  cryptoHash = Cc['@mozilla.org/security/hash;1'].createInstance(Ci.nsICryptoHash)
-
-  # adapted from https://developer.mozilla.org/en/nsICryptoHash#Computing_the_Hash_of_a_String
-  md5 = (object) ->
-    arr = []
-
-    if type.isArray object
-      arr = object
-    else if type.isString object
+  update: (data) ->
+    if type.isArray data
+      arr = data
+    else if type.isString data
       converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter)
       converter.charset = "UTF-8"
-      arr = converter.convertToByteArray object, {}
+      arr = converter.convertToByteArray data, {}
 
-    cryptoHash.init(Ci.nsICryptoHash.MD5)
-    cryptoHash.update(arr, arr.length)
-    hash = cryptoHash.finish(false)
+    @_impl.init @algorithm
+    @_impl.update arr, arr.length
 
-    # Unpack the binary data bin2hex style
-    return ("0#{hash.charCodeAt(i).toString(16)}".slice(-2) for c, i in hash).join('')
+    return this
 
-catch xulErr
-  try
-    # maybe we're in node.js
-    crypto = require 'crypto'
+  digest: (format) ->
+    hash = @_impl.finish false
 
-    md5 = (object) ->
-      crypto.createHash('md5').update(object).digest('hex')
-  catch nodeErr
-    logger.error 'Could not load xulrunner or node.js crypto package: ', xulErr, nodeErr
+    switch format
+      when 'hex'
+        # Unpack the binary data bin2hex style
+        return ("0#{hash.charCodeAt(i).toString(16)}".slice(-2) for c, i in hash).join('')
+      else
+        throw new Error "unknown digest format #{format}"
+
+createHash = (algorithmName) ->
+  switch algorithmName
+    when 'md5'
+      return new Hash Ci.nsICryptoHash.MD5
+    else
+      throw new Error "unknown crypto algorithm #{algorithmName}"
 
 
-module.exports = {md5}
+module.exports = {createHash}

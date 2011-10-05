@@ -1,6 +1,6 @@
 uuid = 0
 cache = {}
-expando = "wesabe#{new Date().getTime()}"
+expando = "ssu#{new Date().getTime()}"
 
 # shamelessly adapted from jQuery.data
 data = (elem, name, data) ->

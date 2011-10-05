@@ -1,4 +1,4 @@
-{md5}   = require 'crypto'
+crypto  = require 'crypto'
 type    = require 'lang/type'
 array   = require 'lang/array'
 inspect = require 'util/inspect'
@@ -25,7 +25,7 @@ class ImageData
     return new @constructor rect, data
 
   @::__defineGetter__ 'signature', ->
-    md5 @data
+    crypto.createHash('md5').update(object).digest('hex')
 
   findPoint: (options) ->
     p = options.start

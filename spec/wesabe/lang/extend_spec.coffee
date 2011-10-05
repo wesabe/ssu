@@ -1,6 +1,6 @@
-extend = wesabe.require 'lang.extend'
+extend = require 'lang/extend'
 
-describe 'wesabe.lang.extend', ->
+describe 'lang/extend', ->
   it 'copies keys from the source to the target', ->
     source = {a: 1, b: 2}
     target = {}

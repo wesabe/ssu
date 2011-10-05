@@ -1,6 +1,6 @@
 date = require 'lang/date'
 
-describe 'wesabe.lang.date', ->
+describe 'lang/date', ->
   describe '.parse method', ->
     it 'warns when the date is not parsable', ->
       spyOn(logger, 'warn')

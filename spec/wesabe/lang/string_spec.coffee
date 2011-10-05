@@ -1,6 +1,6 @@
-string = wesabe.require 'lang.string'
+string = require 'lang/string'
 
-describe 'wesabe.lang.string', ->
+describe 'lang/string', ->
   describe '.trim function', ->
     it 'trims preceding whitespace', ->
       expect(string.trim(' \n\tabc')).toEqual('abc')

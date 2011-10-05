@@ -1,6 +1,6 @@
-array = wesabe.require 'lang.array'
+array = require 'lang/array'
 
-describe 'wesabe.lang.array', ->
+describe 'lang/array', ->
   simpleArray = null
   arrayWithUniqueEntries = null
   arrayWithDuplicates = null

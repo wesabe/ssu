@@ -1,6 +1,6 @@
-func = wesabe.require 'lang.func'
+func = require 'lang/func'
 
-describe 'wesabe.lang.func', ->
+describe 'lang/func', ->
   describe '.callWithScope function', ->
     it 'allows calling a function with a specific context', ->
       GLOBAL.context = {}

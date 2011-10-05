@@ -4,7 +4,7 @@ extend = (target, source, options={}) ->
 
   for own key of source
     if key of target and options.merge and typeof target[key] is 'object' and typeof source[key] is 'object'
-        wesabe.lang.extend target[key], source[key], options
+      extend target[key], source[key], options
 
     else if key not of target or options.override
       getter = source.__lookupGetter__(key)
