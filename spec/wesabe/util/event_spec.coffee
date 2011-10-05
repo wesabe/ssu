@@ -1,4 +1,4 @@
-event = wesabe.require 'util.event'
+event = require 'util/event'
 
 class FakeElement
   nodeType: 1
@@ -18,7 +18,7 @@ class FakeCDataSection
   nodeType: 4
   nodeName: '#cdata-section'
 
-describe 'wesabe.util.event', ->
+describe 'util/event', ->
   describe 'given a javascript object', ->
     object = null
 
@@ -27,62 +27,62 @@ describe 'wesabe.util.event', ->
 
     it 'does not add a native event handler', ->
       expect(object.addEventListener).toBeUndefined()
-      wesabe.bind(object, 'click', -> alert('foo'))
+      event.add object, 'click', -> alert 'foo'
 
     it 'allows triggering a bound event', ->
-      handler = jasmine.createSpy('handler')
-      wesabe.bind(object, 'click', handler)
-      wesabe.trigger(object, 'click')
+      handler = jasmine.createSpy 'handler'
+      event.add object, 'click', handler
+      event.trigger object, 'click'
       expect(handler).toHaveBeenCalled()
 
     it 'allows unbinding a handler', ->
-      handler = jasmine.createSpy('handler')
-      wesabe.bind(object, 'click', handler)
-      wesabe.unbind(object, 'click', handler)
-      wesabe.trigger(object, 'click')
+      handler = jasmine.createSpy 'handler'
+      event.add object, 'click', handler
+      event.remove object, 'click', handler
+      event.trigger object, 'click'
       expect(handler).not.toHaveBeenCalled()
 
     it 'allows binding a one-time handler', ->
       counter = 0
       incr = -> counter++
-      wesabe.one(object, 'click', incr)
+      event.one object, 'click', incr
 
       # make sure it's 1 after the first trigger
-      wesabe.trigger(object, 'click')
+      event.trigger object, 'click'
       expect(counter).toEqual(1)
 
       # and that it's still 1 after the second
-      wesabe.trigger(object, 'click')
+      event.trigger object, 'click'
       expect(counter).toEqual(1)
 
     it 'allows triggering multiple events by using multiple words', ->
-      clickHandler = jasmine.createSpy('clickHandler')
-      mousedownHandler = jasmine.createSpy('mousedownHandler')
-      wesabe.bind(object, 'click', clickHandler)
-      wesabe.bind(object, 'mousedown', mousedownHandler)
+      clickHandler = jasmine.createSpy 'clickHandler'
+      mousedownHandler = jasmine.createSpy 'mousedownHandler'
+      event.add object, 'click', clickHandler
+      event.add object, 'mousedown', mousedownHandler
 
-      wesabe.trigger(object, 'mousedown click')
+      event.trigger object, 'mousedown click'
       expect(clickHandler).toHaveBeenCalled()
       expect(mousedownHandler).toHaveBeenCalled()
 
     it 'allows binding more than one handler to the same event', ->
-      handler1 = jasmine.createSpy('handler1')
-      handler2 = jasmine.createSpy('handler2')
-      wesabe.bind(object, 'click', handler1)
-      wesabe.bind(object, 'click', handler2)
+      handler1 = jasmine.createSpy 'handler1'
+      handler2 = jasmine.createSpy 'handler2'
+      event.add object, 'click', handler1
+      event.add object, 'click', handler2
 
-      wesabe.trigger(object, 'click')
+      event.trigger object, 'click'
       expect(handler1).toHaveBeenCalled()
       expect(handler2).toHaveBeenCalled()
 
     afterEach ->
-      wesabe.unbind(object)
+      event.remove object
 
   describe 'without giving an object at all', ->
     it 'defaults to using the wesabe root object', ->
-      handler = jasmine.createSpy('handler')
-      wesabe.bind('click', handler)
-      wesabe.trigger(wesabe, 'click')
+      handler = jasmine.createSpy 'handler'
+      event.add 'click', handler
+      event.trigger wesabe, 'click'
       expect(handler).toHaveBeenCalled()
 
   describe 'given an Element', ->
@@ -92,13 +92,13 @@ describe 'wesabe.util.event', ->
       element = new FakeElement()
 
     it 'adds a native event handler', ->
-      handler = -> alert('foo')
-      spyOn(element, 'addEventListener')
-      wesabe.bind(element, 'click', handler)
-      expect(element.addEventListener).toHaveBeenCalledWith('click', handler, false)
+      handler = -> alert 'foo'
+      spyOn element, 'addEventListener'
+      event.add element, 'click', handler
+      expect(element.addEventListener).toHaveBeenCalledWith 'click', handler, false
 
     afterEach ->
-      wesabe.unbind(element)
+      event.remove element
 
   describe 'given a TextNode', ->
     text = null
@@ -107,9 +107,9 @@ describe 'wesabe.util.event', ->
       text = new FakeTextNode()
 
     it 'does not bind events', ->
-      handler = jasmine.createSpy('handler')
-      wesabe.bind(text, 'click', handler)
-      wesabe.trigger(text, 'click', handler)
+      handler = jasmine.createSpy 'handler'
+      event.add text, 'click', handler
+      event.trigger text, 'click', handler
       expect(handler).not.toHaveBeenCalled()
 
   describe 'given a Comment', ->
@@ -119,9 +119,9 @@ describe 'wesabe.util.event', ->
       comment = new FakeCommentNode()
 
     it 'does not bind events', ->
-      handler = jasmine.createSpy('handler')
-      wesabe.bind(comment, 'click', handler)
-      wesabe.trigger(comment, 'click', handler)
+      handler = jasmine.createSpy 'handler'
+      event.add comment, 'click', handler
+      event.trigger comment, 'click', handler
       expect(handler).not.toHaveBeenCalled()
 
   describe 'given a CDATA section', ->
@@ -131,7 +131,7 @@ describe 'wesabe.util.event', ->
       cdata = new FakeCDataSection()
 
     it 'does not bind events', ->
-      handler = jasmine.createSpy('handler')
-      wesabe.bind(cdata, 'click', handler)
-      wesabe.trigger(cdata, 'click', handler)
+      handler = jasmine.createSpy 'handler'
+      event.add cdata, 'click', handler
+      event.trigger cdata, 'click', handler
       expect(handler).not.toHaveBeenCalled()
