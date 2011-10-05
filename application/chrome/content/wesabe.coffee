@@ -7,7 +7,11 @@
 # taking a small slice out of it will not spread the seeds of doom.
 #
 
-window.onerror = (error) ->
+if window? and not GLOBAL?
+  # we're in a DOM-ish environment rather than a commonjs-ish environment
+  window.GLOBAL = window
+
+GLOBAL.onerror = (error) ->
   # dump "oh no! #{error}\n"
   try
     Logger.rootLogger.error "uncaught exception: ", error
@@ -238,17 +242,21 @@ walk = (module, callback) ->
 
   return base
 
-@wesabe = wesabe
-@require = wesabe.CommonJSRequire
+GLOBAL.wesabe = wesabe
+
+# if we ain't in a commonjs environment then set up our own
+require ?= wesabe.CommonJSRequire
+GLOBAL.require = require
 
 # NOTE: We load Logger before everything else, otherwise nobody loaded before
 # Logger will have their `logger' object in scope.
-Logger  = @require 'Logger'
+Logger  = require 'Logger'
+GLOBAL.logger ?= Logger.rootLogger
 
-inspect = @require 'util/inspect'
-prefs   = @require 'util/prefs'
-type    = @require 'lang/type'
-{trim}  = @require 'lang/string'
+inspect = require 'util/inspect'
+prefs   = require 'util/prefs'
+type    = require 'lang/type'
+{trim}  = require 'lang/string'
 
 
 # colorize the logging if appropriate

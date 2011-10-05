@@ -193,6 +193,9 @@ setTimeout ->
 Logger.getFileAppender = ->
   return fileAppender if fileAppender
 
+  # if we're not in xulrunner just return null for now
+  return null unless Cc?
+
   rootLogger.debug 'Registering file logger'
 
   try

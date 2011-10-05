@@ -209,3 +209,4 @@ do ->
 
 
 @bootstrap = bootstrap
+@GLOBAL = this

@@ -96,6 +96,7 @@ one = (elem, type, fn) ->
     return fn.call(this, args...)
 
 # shortcuts
+wesabe ?= require '../../../wesabe'
 wesabe.bind = add
 wesabe.unbind = remove
 wesabe.trigger = trigger

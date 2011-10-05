@@ -238,4 +238,5 @@
     return _results;
   })();
   this.bootstrap = bootstrap;
+  this.GLOBAL = this;
 }).call(this);
