@@ -24,9 +24,14 @@ fs = require 'fs'
 path = require 'path'
 root = path.join(path.dirname(fs.realpathSync(__filename)), '..')
 
-require.paths.unshift "#{root}/lib"
-require.paths.unshift "#{root}/application/chrome/content/wesabe"
-{wesabe} = require 'wesabe'
+GLOBAL.dump = (str) ->
+  str = str[0..str.length-2] if str.substring(str.length-1) is '\n'
+  console.log str
+
+wesroot = "#{root}/application/chrome/content/wesabe"
+require.paths.unshift wesroot
+
+{wesabe} = require wesroot
 GLOBAL.wesabe = wesabe
 
 require('repl').start('js> ')
