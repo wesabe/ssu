@@ -93,7 +93,7 @@ inspectObject = (object, showHidden, depth, opts) ->
   content = object.contentForInspect?()
 
   # if it's a simple object then just enumerate the properties
-  if not content or content?.constructor is Object
+  if not content or content.constructor?.name in ['Object', null, undefined]
     content ||= object
 
     properties = for own k of content
@@ -115,10 +115,10 @@ inspectObject = (object, showHidden, depth, opts) ->
     contentString = inspect content, showHidden, depth-1, opts
 
   string = "{"
-  if object.constructor isnt Object and object.constructor?.name
     string += style 'class', object.constructor.name, opts
     string += " " if contentString.length
   string += contentString
+  if object.constructor?.name not in ['Object', null, undefined]
   string += "}"
 
 inspectArray = (object, showHidden, depth, opts) ->
