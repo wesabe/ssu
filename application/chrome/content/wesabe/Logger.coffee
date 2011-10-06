@@ -108,7 +108,7 @@ class Logger
     objects = [objects] unless 'length' of objects
 
     @appender @format(objects, level)
-    null
+    undefined
 
   #
   # Use when logging sensitive data, such as a password.
