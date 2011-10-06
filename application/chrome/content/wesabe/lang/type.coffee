@@ -54,6 +54,7 @@ type =
     object?.constructor is type
 
 # make all these available as shortcuts on the wesabe object
+wesabe ?= require '../../wesabe'
 for own name, fn of type
   wesabe[name] = logger.wrapDeprecated "wesabe.#{name}", "type.#{name}", fn, type
 
