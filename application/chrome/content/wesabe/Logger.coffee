@@ -53,7 +53,7 @@ class Logger
   # The higher the level, the more attention you should pay.
   #
   @::__defineGetter__ 'level', ->
-    @_level ? @_parent?._level ? levelCodeForName getPref('wesabe.logger.level')
+    @_level ? @_parent?._level ? levelCodeForName getPref('wesabe.logger.level') ? LEVELS.debug
 
   @::__defineSetter__ 'level', (level) ->
     @_level = (levelCodeForName level) ? level
