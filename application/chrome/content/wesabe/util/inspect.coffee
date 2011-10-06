@@ -115,10 +115,10 @@ inspectObject = (object, showHidden, depth, opts) ->
     contentString = inspect content, showHidden, depth-1, opts
 
   string = "{"
-    string += style 'class', object.constructor.name, opts
-    string += " " if contentString.length
-  string += contentString
   if object.constructor?.name not in ['Object', null, undefined]
+    string += " #{style 'class', object.constructor.name, opts}"
+    string += " " if contentString.length is 0
+  string += " #{contentString} " if contentString.length
   string += "}"
 
 inspectArray = (object, showHidden, depth, opts) ->
