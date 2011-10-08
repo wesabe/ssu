@@ -14,7 +14,7 @@ class Api
     end
 
     def profile
-      self['eval', {:script => 'wesabe.io.dir.profile.path'}]
+      self['eval', {:script => '(require "io/Dir").profile.path', :type => 'text/coffeescript'}]
     end
 
     def [](action, body=nil)

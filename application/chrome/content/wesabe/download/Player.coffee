@@ -10,8 +10,8 @@ type           = require 'lang/type'
 event          = require 'util/event'
 prefs          = require 'util/prefs'
 inspect        = require 'util/inspect'
-dir            = require 'io/dir'
-file           = require 'io/file'
+Dir            = require 'io/Dir'
+File           = require 'io/File'
 {download}     = require 'io/Downloader'
 uuid           = (require 'ofx/UUID').string
 privacy        = require 'util/privacy'
@@ -156,15 +156,13 @@ class Player
       @setErrorTimeout 'global'
 
       tryThrow 'Player#downloadSuccess', (log) =>
-        folder = dir.profile
-        folder.append 'statements'
-        unless folder.exists()
-          dir.create(folder)
+        statements = Dir.profile.child('statements')
+        unless statements.exists
+          statements.create()
 
-        statement = folder.clone()
-        statement.append uuid()
+        statement = folder.child(uuid()).asFile
 
-        file.write statement, data
+        statement.write data
 
         metadata = @job.nextDownloadMetadata or {}
         delete @job.nextDownloadMetadata
@@ -269,14 +267,10 @@ class Player
     page = @page
 
     newStatementFile = =>
-      folder = dir.profile
-      folder.append 'statements'
-      dir.create(folder) unless folder.exists()
+      folder = Dir.profile.child('statements')
+      folder.create() unless folder.exists
 
-      statement = folder.clone()
-      statement.append uuid()
-
-      return statement
+      return folder.child(uuid())
 
 
     # allow pre-registering information about the next download
@@ -300,7 +294,7 @@ class Player
         throw new Error "Expected metadata #{metadata} to have data to write"
 
       statement = newStatementFile()
-      file.write statement, metadata.data
+      statement.write metadata.data
       delete metadata.data
       @job.recordSuccessfulDownload statement, metadata
       @onDownloadSuccessful browser, page

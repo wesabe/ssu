@@ -24,14 +24,13 @@ fs = require 'fs'
 path = require 'path'
 root = path.join(path.dirname(fs.realpathSync(__filename)), '..')
 
-GLOBAL.dump = (str) ->
-  str = str[0..str.length-2] if str.substring(str.length-1) is '\n'
-  console.log str
+# bring in a few things to make node.js be semi-compatible with xulrunner
+require path.join(root, 'lib/node-ext')
 
+# bring in the main wesabe code
 wesroot = "#{root}/application/chrome/content/wesabe"
 require.paths.unshift wesroot
-
-{wesabe} = require wesroot
+wesabe = require wesroot
 GLOBAL.wesabe = wesabe
 
 

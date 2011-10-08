@@ -5,16 +5,18 @@
 # $ jasmine-node --coffee spec
 
 path = require 'path'
-fs = require 'fs'
+fs   = require 'fs'
+root = path.join(path.dirname(fs.realpathSync(__filename)), '..')
 
-require.paths.unshift path.join(path.dirname(fs.realpathSync(__filename)), '../application/chrome/content/wesabe')
+# bring in a few things to make node.js be semi-compatible with xulrunner
+require path.join(root, 'lib/node-ext')
 
-GLOBAL.dump = (str) ->
-  str = str[0..str.length-2] if str.substring(str.length-1) is '\n'
-  console.log str
+# bring in the main wesabe code
+wesroot = path.join(root, 'application/chrome/content/wesabe')
+require.paths.unshift wesroot
+require wesroot
 
-require path.join(path.dirname(fs.realpathSync(__filename)), '../application/chrome/content/wesabe')
-
+# set up a logger for all of node.js
 Logger = require 'Logger'
 GLOBAL.logger = Logger.rootLogger
 logger.appender = ->

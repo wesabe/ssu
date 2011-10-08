@@ -12,8 +12,8 @@
 logger = (require 'Logger').loggerForFile 'main'
 
 
-dir             = require 'io/dir'
-file            = require 'io/file'
+Dir             = require 'io/Dir'
+File            = require 'io/File'
 json            = require 'lang/json'
 inspect         = require 'util/inspect'
 cookies         = require 'util/cookies'
@@ -25,7 +25,7 @@ ContentListener = require 'io/ContentListener'
 {tryThrow, tryCatch} = require 'util/try'
 
 
-CONFIG = '/etc/ssu/xulrunner.js'
+CONFIG = new File '/etc/ssu/xulrunner.js'
 
 
 class Application
@@ -60,30 +60,30 @@ class Application
       (require 'io/process').pid
 
   loadPrefs: ->
-    if file.exists CONFIG
+    if CONFIG.exists
       logger.info 'Loading global preferences from ', CONFIG
       prefs.load CONFIG
 
   loadCookies: ->
-    cookiesFile = dir.profile.path+'/cookies'
-    if file.exists cookiesFile
-      tryCatch 'Loading cookies from ' + cookiesFile, ->
-        cookies.restore(file.read(file.open(cookiesFile)))
+    cookiesFile = Dir.profile.child('cookies').asFile
+    if cookiesFile.exists
+      tryCatch "Loading cookies from #{cookiesFile}", ->
+        cookies.restore cookiesFile.read()
 
   startController: (options={}) ->
     @controller = new Controller()
     return @controller.start options.port
 
   writeConfig: (config) ->
-    configFile = file.open "#{dir.profile.path}/config"
+    configFile = Dir.profile.child('config').asFile
     logger.debug 'Writing configuration to ', configFile.path, ': ', config
-    file.write configFile, json.render(config)
+    configFile.write json.render(config)
 
-    pidFile = file.open "#{dir.profile.path}/pid"
+    pidFile = Dir.profile.child('pid').asFile
     if config.pid
-      file.write pidFile, "#{config.pid}"
-    else if file.exists pidFile
-      file.unlink pidFile
+      pidFile.write "#{config.pid}"
+    else if pidFile.exists
+      pidFile.unlink()
 
   listenForDownloads: ->
     contentListener = ContentListener.sharedInstance

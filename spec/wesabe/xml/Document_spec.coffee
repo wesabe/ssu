@@ -1,7 +1,7 @@
 Document = require 'xml/Document'
 Text     = require 'xml/Text'
 
-describe 'wesabe.xml.Document', ->
+describe 'xml/Document', ->
   it 'throws an exception on a blank XML string', ->
     try
       new Document ''
