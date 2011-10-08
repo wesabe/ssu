@@ -4,7 +4,7 @@
 
 type    = require 'lang/type'
 func    = require 'lang/func'
-file    = require 'io/file'
+File    = require 'io/File'
 inspect = require 'util/inspect'
 {tryCatch, tryThrow} = require 'util/try'
 
@@ -53,9 +53,9 @@ getPreferencesRoot = ->
 # WARNING: At this point this function is NOT SAFE and will eval the
 # contents of the file in a non-safe way. Please know what you're doing.
 #
-load = (path) ->
-  tryCatch "prefs.load(#{path})", (log) =>
-    data = file.read(path)
+load = (file) ->
+  tryCatch "prefs.load(#{file})", (log) =>
+    data = File.read file
 
     if /^#/.test(data)
       # data includes unparseable first line, remove it

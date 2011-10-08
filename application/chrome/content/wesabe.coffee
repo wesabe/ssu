@@ -33,10 +33,17 @@ wesabe =
     return caller
 
   getLineForStackFrame: (frame) ->
-    (bootstrap.getContent frame.filename).split('\n')[frame.lineNumber]
+    if bootstrap?
+      # xulrunner
+      (bootstrap.getContent frame.filename).split('\n')[frame.lineNumber]
+    else
+      # nodejs
+      (require 'io/File').read(frame.filename).split('\n')[frame.lineNumber]
 
   correctStackFrameInfo: (frame) ->
-    evalFile = window.bootstrap.uri
+    return unless bootstrap?
+
+    evalFile = bootstrap.uri
     if frame.filename[frame.filename.length-evalFile.length..] is evalFile
       if info = bootstrap.infoForEvaledLineNumber frame.lineNumber
         frame.filename = info.filename
@@ -292,3 +299,6 @@ Logger.rootLogger.printer = (object) ->
 
 # write logs to a file rather than stdout
 Logger.rootLogger.appender = Logger.getFileAppender()
+
+
+module?.exports = wesabe

@@ -49,9 +49,9 @@ type =
   isTainted: (object) ->
     object?.isTainted?()
 
-  is: (object, type) ->
-    object instanceof type or
-    object?.constructor is type
+  is: (a, b) ->
+    a instanceof b or
+    a?.constructor is b
 
 # make all these available as shortcuts on the wesabe object
 wesabe ?= require '../../wesabe'

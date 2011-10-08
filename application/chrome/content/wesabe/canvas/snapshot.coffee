@@ -1,9 +1,9 @@
-file = require 'io/file'
+File = require 'io/File'
 
 TYPE = 'image/png'
 
 writeToFile = (window, path) ->
-  file.write path, serializeCanvas(canvasWithContentsOfWindow(window))
+  File.write path, serializeCanvas(canvasWithContentsOfWindow(window))
 
   return true
 

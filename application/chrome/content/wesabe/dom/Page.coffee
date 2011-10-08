@@ -3,8 +3,8 @@ Colorizer = require 'util/Colorizer'
 inspect   = require 'util/inspect'
 type      = require 'lang/type'
 number    = require 'lang/number'
-dir       = require 'io/dir'
-file      = require 'io/file'
+Dir       = require 'io/Dir'
+File      = require 'io/File'
 snapshot  = require 'canvas/snapshot'
 english   = require 'util/words'
 privacy   = require 'util/privacy'
@@ -611,9 +611,7 @@ class Page
   # and whose png property is the path of the dumped PNG.
   dump: ->
     tryThrow 'Page.dump', =>
-      folder = dir.profile
-      folder.append 'wesabe-page-dumps'
-      dir.create folder
+      Dir.profile.child('wesabe-page-dumps').create()
 
       html = folder.clone()
       png = folder.clone()
@@ -622,7 +620,7 @@ class Page
       png.append "#{basename}.png"
 
       logger.debug 'Dumping contents of current page to ', html.path, ' and ', png.path
-      file.write html, "<html>#{@document.documentElement.innerHTML}</html>"
+      File.write html, "<html>#{@document.documentElement.innerHTML}</html>"
       snapshot.writeToFile @document.defaultView, png.path
 
       html: html.path

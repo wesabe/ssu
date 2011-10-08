@@ -3,8 +3,8 @@ type    = require 'lang/type'
 func    = require 'lang/func'
 cookies = require 'util/cookies'
 event   = require 'util/event'
-dir     = require 'io/dir'
-file    = require 'io/file'
+Dir     = require 'io/Dir'
+File    = require 'io/File'
 xhr     = require 'io/xhr'
 Job     = require 'download/Job'
 Logger  = require 'Logger'
@@ -173,13 +173,12 @@ class Controller
         version: @job.version
 
   statement_list: (data) ->
-    statements = dir.profile
-    statements.append 'statements'
+    statements = Dir.profile.child 'statements'
     list = []
 
-    if statements.exists()
-      list = for {path} in dir.read statements
-               path.match(/\/([^\/]+)$/)[1]
+    if statements.exists
+      list = for {file} in statements.children()
+               file.basename
 
     response:
       status: 'ok'
@@ -191,14 +190,12 @@ class Controller
                status: 'error'
                error: "statement id required"
 
-    statement = dir.profile
-    statement.append 'statements'
-    statement.append data
+    statement = Dir.profile.child('statements').child(data)
 
     if statement.exists()
       response:
         status: 'ok'
-        'statement.read': file.read statement
+        'statement.read': statement.read()
     else
       response:
         status: 'error'

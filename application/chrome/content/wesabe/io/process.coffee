@@ -1,5 +1,5 @@
-file   = require 'io/file'
-dir    = require 'io/dir'
+File   = require 'io/File'
+Dir    = require 'io/Dir'
 number = require 'lang/number'
 
 class PID
@@ -7,15 +7,15 @@ class PID
     return @_pid if @_pid
 
     process = Cc["@mozilla.org/process/util;1"].createInstance(Ci.nsIProcess)
-    pidhelper = file.open "#{dir.root.path}/script/pidhelper"
-    pidfile = file.open "#{dir.root.path}/pid#{new Date().getTime()}"
+    pidhelper = Dir.root.child 'script/pidhelper'
+    pidfile = Dir.root.child "pid#{new Date().getTime()}"
 
-    process.init pidhelper
+    process.init pidhelper.localFile
     args = ['-p', '-o', pidfile.path]
     process.run true, args, args.length
 
-    pid = file.read pidfile
-    file.unlink pidfile
+    pid = pidfile.read()
+    pidfile.unlink()
 
     @_pid = number.parse(pid) if pid
 

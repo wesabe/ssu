@@ -1,4 +1,5 @@
 number = require 'lang/number'
+privacy = require 'util/privacy'
 
 describe 'lang/number', ->
   describe '.parseOrdinalPhrase function', ->
@@ -35,7 +36,7 @@ describe 'lang/number', ->
       expect(number.parse('12')).toEqual(12)
 
     it 'works with tainted numeric strings', ->
-      expect(number.parse(wesabe.taint('12'))).toEqual(12)
+      expect(number.parse(privacy.taint('12'))).toEqual(12)
 
     it 'returns NaN for non-numeric strings', ->
       for string in ['', 'hey there', '!!0']

@@ -1,4 +1,5 @@
-{open} = require 'io/file'
+type = require 'lang/type'
+File = require 'io/File'
 
 class Downloader
   constructor: (@url, @file, @callback) ->
@@ -6,16 +7,16 @@ class Downloader
     @_ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService)
 
     @_downloader.QueryInterface Ci.nsIDownloader
-    @_downloader.init this, @file
+    @_downloader.init this, @file.localFile
 
   @::__defineGetter__ 'file', ->
     @_file
 
   @::__defineSetter__ 'file', (file) ->
-    if file.path?
+    if type.is file, File
       @_file = file
     else
-      @_file = open file
+      @_file = new File file
 
   #
   # Starts the download. This is the only public method for this class.
@@ -44,7 +45,7 @@ class Downloader
       catch err
         contentType = undefined
 
-     wesabe.callback @callback, req.status is 0, [file, suggestedFilename, contentType]
+     wesabe.callback @callback, req.status is 0, [new File(file.path), suggestedFilename, contentType]
 
      delete @_httpChannel
      delete @_downloader
