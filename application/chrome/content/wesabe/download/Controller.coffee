@@ -192,7 +192,7 @@ class Controller
 
     statement = Dir.profile.child('statements').child(data)
 
-    if statement.exists()
+    if statement.exists
       response:
         status: 'ok'
         'statement.read': statement.read()
