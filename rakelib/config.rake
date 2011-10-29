@@ -3,7 +3,7 @@ require 'readline'
 
 SSU_CONFIG_DIR = '/etc/ssu'
 SSU_CONFIG_FILES = {
-  :xulrunner => 'xulrunner.js', 
+  :xulrunner => 'xulrunner.js',
 }
 
 class Object
@@ -50,10 +50,10 @@ def readline_with_default(prompt, default)
   else
     prompt = "#{prompt} [#{default}]" unless default.blank?
   end
-  
+
   result = Readline.readline("#{prompt} ")
   return default if result.blank?
-  
+
   case default
   when TrueClass, FalseClass
     result =~ /y/i
@@ -69,29 +69,29 @@ namespace :config do
     sh("sudo mkdir -p #{SSU_CONFIG_DIR}") unless File.directory?(SSU_CONFIG_DIR)
     sh("sudo chown -R #{ENV['USER']} #{SSU_CONFIG_DIR}") unless File.owned?(SSU_CONFIG_DIR)
   end
-  
+
   desc "Reset all the configuration for this application"
   task 'reset' do
     Dir[config_path('*')].each do |path|
       sh("mv #{path} #{path}.backup")
     end
   end
-  
+
   desc "Restore configuration from backup"
   task 'restore' do
     Dir[config_path('*.backup')].each do |path|
       sh("mv #{path} #{path.sub(/\.backup$/, '')}")
     end
   end
-  
+
   desc "Guides you through configuring xulrunner"
   task 'xulrunner' => %w[config:base] do
     puts "** Configuring XulRunner"
-    
+
     path  = config_path(:xulrunner)
     prefs = {}
 
-    if File.readable?(path) 
+    if File.readable?(path)
       prefs = File.read(path).to_a
 
       prefs = prefs.inject({}) do |m, pref|
@@ -99,10 +99,10 @@ namespace :config do
         m
       end
     end
-    
+
     http, http_port, type = 'network.proxy.http', 'network.proxy.http_port', 'network.proxy.type'
     ssl, ssl_port = 'network.proxy.ssl', 'network.proxy.ssl_port'
-    
+
     if readline_with_default("Should xulrunner use a manual proxy?", !prefs[http].blank?)
       prefs[http] = readline_with_default("What HTTP proxy host should xulrunner use?", prefs[http])
       prefs[http_port] = readline_with_default("What HTTP proxy port should xulrunner use?", prefs[http_port]).to_i
@@ -117,12 +117,12 @@ namespace :config do
       prefs.delete(ssl_port)
       prefs.delete(type) if prefs[type] == 1
     end
-    
+
     level = 'wesabe.logger.level'
     prefs[level] = 'debug' if prefs[level].blank?
     prefs[level] = readline_with_default("What logger level should the xulrunner use?", prefs[level])
 
-    puts "Writing xulrunning configuration to: #{ path }"    
+    puts "Writing xulrunning configuration to: #{ path }"
     File.open(path, 'w') do |config|
       config.puts "# Mozilla Preference File"
       config.puts "// written by #{__FILE__}"

@@ -8,13 +8,13 @@ wesabe.provide('fi-scripts.com.bankofamerica.loans', {
         action.goAccountOverview();
       }
     }
-  }, 
+  },
 
   actions: {
     loanAccountSkip: function() {
       skipAccount("Skipping loan account (account=", tmp.account, ")");
       reload();
-    }, 
+    },
   },
 
   elements: {
@@ -22,9 +22,9 @@ wesabe.provide('fi-scripts.com.bankofamerica.loans', {
       account: {
         indicator: [
           '//tr[contains(string(.), "Original loan amount")]',
-        ], 
-      }, 
-    }, 
+        ],
+      },
+    },
   },
 });
 

@@ -18,7 +18,7 @@ class URL
     "#{@protocol}//#{@hostAndPort}#{@pathname}#{@search||''}"
 
 #
-# Joins two or more urls and/or fragments together. Note that the first one 
+# Joins two or more urls and/or fragments together. Note that the first one
 # MUST be an absolute url, and the rest may be absolute or relative.
 # Simple example:
 #
