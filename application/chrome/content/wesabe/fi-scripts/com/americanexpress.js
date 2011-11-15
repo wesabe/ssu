@@ -1,9 +1,9 @@
-wesabe.download.CompoundPlayer.register({
+require('download/CompoundPlayer').register({
   fid: 'com.americanexpress',
   org: 'American Express Cards',
 
   players: [
-    wesabe.download.Player.register({
+    require('download/Player').create({
       fid: 'com.americanexpress.web',
       org: 'American Express Cards',
 
@@ -46,7 +46,7 @@ wesabe.download.CompoundPlayer.register({
       },
     }),
 
-    wesabe.download.OFXPlayer.create({
+    require('download/OFXPlayer').create({
       fid: 'com.americanexpress',
       org: 'American Express Cards',
 
