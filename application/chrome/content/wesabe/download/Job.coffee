@@ -7,6 +7,8 @@ Timer  = require 'util/Timer'
 Page    = require 'dom/Page'
 Browser = require 'dom/Browser'
 Player  = require 'download/Player'
+OFXPlayer = require 'download/OFXPlayer'
+CompoundPlayer = require 'download/CompoundPlayer'
 
 class Job
   constructor: (jobid, fid, creds, user_id, options) ->

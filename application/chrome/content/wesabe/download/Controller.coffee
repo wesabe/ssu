@@ -177,7 +177,7 @@ class Controller
     list = []
 
     if statements.exists
-      list = for {file} in statements.children()
+      list = for file in statements.children()
                file.basename
 
     response:
@@ -192,7 +192,7 @@ class Controller
 
     statement = Dir.profile.child('statements').child(data)
 
-    if statement.exists()
+    if statement.exists
       response:
         status: 'ok'
         'statement.read': statement.read()
