@@ -1,4 +1,3 @@
-{Pathway} = require 'xpath'
 Colorizer = require 'util/Colorizer'
 inspect   = require 'util/inspect'
 type      = require 'lang/type'
@@ -8,6 +7,7 @@ File      = require 'io/File'
 snapshot  = require 'canvas/snapshot'
 english   = require 'util/words'
 privacy   = require 'util/privacy'
+{Pathway, bind} = require 'xpath'
 {tryCatch, tryThrow} = require 'util/try'
 
 # Internal: Event name to internal type mapping.
@@ -333,6 +333,28 @@ class Page
 
       @fireEvent element, 'focusout'
       @fireEvent element, 'blur'
+
+  # Public: Finds an input or select matching the id, name, or label.
+  #
+  # idNameOrLabel - A field id, name, or label.
+  # scope - An Element to restrict the xpath search to, ignored if xpathOrNode
+  #         is a Node.
+  #
+  # Examples
+  #
+  #   page.fill page.field('username'), answers.username
+  #
+  # Returns either a tainted Element or null if no matching Element is found.
+  field: (idNameOrLabel, scope) ->
+    if field = @find bind('//*[name()="input" or name()="select"][@id=":label" or @name=":label"]', label: idNameOrLabel)
+      return field
+
+    if label = @find bind('//label[contains(string(.), ":label")]', label: idNameOrLabel)
+      if fieldId = label.getAttribute('for')
+        return @byId fieldId
+
+    return null
+
 
   # Public: Clicks the given element by firing mousedown, click,
   # and mouseup events.
