@@ -160,7 +160,7 @@ class Player
         unless statements.exists
           statements.create()
 
-        statement = folder.child(uuid()).asFile
+        statement = statements.child(uuid()).asFile
 
         statement.write data
 
