@@ -588,12 +588,14 @@ class Page
   #
   # xpathOrNode - If it's a Node, retrieve all its text.
   #               Otherwise it should be a String xpath.
+  # scope - An Element to restrict the xpath search to, ignored if xpathOrNode
+  #         is a Node.
   #
   # Returns a String containing all Node's text, tainted.
   # Raises DocumentMismatchError given a node not belonging to this page.
   # Raises NodeNotFoundError given an xpath for which there are no matches.
-  text: (xpathOrNode) ->
-    node = @findStrict xpathOrNode
+  text: (xpathOrNode, scope) ->
+    node = @findStrict xpathOrNode, scope
     if node.nodeType is 3
       textNodes = [node]
     else
