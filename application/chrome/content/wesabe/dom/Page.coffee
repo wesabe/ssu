@@ -164,6 +164,18 @@ class Page
   byId: (id) ->
     privacy.taint @document.getElementById(privacy.untaint id)
 
+  # Public: Finds Elements by class name.
+  #
+  # className - A String matching a page element's class attribute.
+  #
+  # Examples
+  #
+  #   page.click page.byClass('addressLine1')
+  #
+  # Returns an Array of tainted Elements.
+  byClass: (className) ->
+    privacy.taint @document.getElementsByClassName(privacy.untaint className)
+
   # Public: Finds a matching anchor on this page.
   #
   # matcher - If a String, matches links whose id or href matches exactly
