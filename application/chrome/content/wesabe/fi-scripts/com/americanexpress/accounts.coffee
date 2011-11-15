@@ -36,7 +36,7 @@ wesabe.provide 'fi-scripts.com.americanexpress.accounts',
       job.update 'account.download'
 
       for element in page.select activity.account.container
-        name = page.find activity.account.name, element
+        name = page.text activity.account.name, element
         last90Days = page.find activity.statements.timeFrame.last90Days, element
         sinceLast = page.find activity.statements.timeFrame.sinceLastDownload, element
 
@@ -86,7 +86,7 @@ wesabe.provide 'fi-scripts.com.americanexpress.accounts',
             ]
 
             name: [
-              './/*[@class="cardDesc"]' # relative to container
+              './/*[@class="cardDescription"]' # relative to container
             ]
 
           statements:
