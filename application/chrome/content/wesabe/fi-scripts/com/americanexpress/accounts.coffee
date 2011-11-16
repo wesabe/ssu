@@ -1,39 +1,41 @@
 wesabe.provide 'fi-scripts.com.americanexpress.accounts',
-  dispatch: ->
-    if page.present e.accounts.download.activity.indicator
+  dispatch: (browser, page) ->
+    return unless @job.goal is 'statements'
+
+    if page.present @e.accounts.download.activity.indicator
       # Download Card Activity
-      action.download()
-    else if page.present e.accounts.activity.indicator
+      @download browser, page
+    else if page.present @e.accounts.activity.indicator
       # Card Activity
-      action.goToDownloadPage()
-    else if page.present e.accounts.summary.indicator
+      @goToDownloadPage browser, page
+    else if page.present @e.accounts.summary.indicator
       # Summary of Accounts
-      action.goToActivityPage()
+      @goToActivityPage browser, page
 
   actions:
-    goToActivityPage: ->
-      job.update 'account.list'
-      page.click e.accounts.summary.recentActivityLink
+    goToActivityPage: (browser, page) ->
+      @job.update 'account.list'
+      page.click @e.accounts.summary.recentActivityLink
 
-    goToDownloadPage: ->
+    goToDownloadPage: (browser, page) ->
       # clicking the download link creates an in-page modal dialog that has
       # a hidden input field with the url to go to for OFX downloads, so first
       # we click that link
-      page.click e.accounts.activity.downloadLink
+      page.click @e.accounts.activity.downloadLink
       # and then we navigate to the url we get from the hidden input
-      browser.go page.findStrict(e.accounts.activity.ofxDownloadLinkHiddenField).value
+      browser.go page.findStrict(@e.accounts.activity.ofxDownloadLinkHiddenField).value
 
-    changeFormat: ->
-      page.click e.accounts.download.activity.format.changeLink
+    changeFormat: (browser, page) ->
+      page.click @e.accounts.download.activity.format.changeLink
 
-    selectFormat: ->
-      page.check e.accounts.download.format.ofx
-      page.click e.accounts.download.format.continueButton
+    selectFormat: (browser, page) ->
+      page.check @e.accounts.download.format.ofx
+      page.click @e.accounts.download.format.continueButton
 
-    download: ->
-      activity = e.accounts.download.activity
+    download: (browser, page) ->
+      activity = @e.accounts.download.activity
 
-      job.update 'account.download'
+      @job.update 'account.download'
 
       for element in page.select activity.account.container
         name = page.text activity.account.name, element
@@ -47,7 +49,7 @@ wesabe.provide 'fi-scripts.com.americanexpress.accounts',
           log.info "Selecting since last download for account: ", name
           page.click sinceLast
 
-      page.click e.accounts.download.activity.continueButton
+      page.click @e.accounts.download.activity.continueButton
 
   elements:
     accounts:

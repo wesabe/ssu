@@ -1,31 +1,31 @@
 wesabe.provide 'fi-scripts.com.americanexpress.login',
-  dispatch: ->
-    tmp.authenticated = page.visible e.logout.link
+  dispatch: (browser, page) ->
+    @tmp.authenticated = page.visible @e.logout.link
 
-    unless tmp.authenticated
-      if page.present e.login.error.general
+    unless @tmp.authenticated
+      if page.present @e.login.error.general
         job.fail 401, 'auth.creds.invalid'
-      else if page.present e.login.error.blank
+      else if page.present @e.login.error.blank
         job.fail 401, 'auth.creds.invalid.blank'
-      else if page.present e.login.error.locked
+      else if page.present @e.login.error.locked
         job.fail 403, 'auth.creds.locked'
-      else if page.present e.login.user.field
-        action.login()
+      else if page.present @e.login.user.field
+        @login browser, page
 
-  alertReceived: ->
+  alertReceived: (message) ->
     if message.match /Please fill in both the "User ID" and "Password" fields/
       job.fail 401, 'auth.creds.invalid.blank'
 
   actions:
-    login: ->
-      job.update 'auth.creds'
-      page.fill e.login.user.field, answers.username
-      page.fill e.login.pass.field, answers.password
-      page.click e.login.continueButton
+    login: (browser, page) ->
+      @job.update 'auth.creds'
+      page.fill @e.login.user.field, @answers.username
+      page.fill @e.login.pass.field, @answers.password
+      page.click @e.login.continueButton
 
-    logout: ->
-      job.succeed()
-      page.click e.logout.link
+    logout: (browser, page) ->
+      @job.succeed()
+      page.click @e.logout.link
 
   elements:
     login:
@@ -77,6 +77,7 @@ wesabe.provide 'fi-scripts.com.americanexpress.login',
         # login page
         '//input[contains(@onclick, "loginNow")]'
         '//form[@name="frmLogin"]//input[@type="submit" or @type="image"]'
+        '//a[@id="loginLink"]'
       ]
 
     logout:

@@ -12,19 +12,19 @@
         "fi-scripts.com.americanexpress.login"
         "fi-scripts.com.americanexpress.accounts"
       ]
-      dispatch: ->
-        if page.present e.errors.systemNotResponding
-          tmp.systemNotRespondingTTL ||= 4
-          tmp.systemNotRespondingTTL--
-          unless tmp.systemNotRespondingTTL
-            job.fail 503, "fi.unavailable"
+      dispatch: (browser, page) ->
+        if page.present @e.errors.systemNotResponding
+          @tmp.systemNotRespondingTTL ||= 4
+          @tmp.systemNotRespondingTTL--
+          unless @tmp.systemNotRespondingTTL
+            @job.fail 503, "fi.unavailable"
           else
-            log.warn "Amex system is not responding (retrying, TTL=", tmp.systemNotRespondingTTL, ")"
-            setTimeout (-> action.main()), 15000
+            logger.warn "Amex system is not responding (retrying, TTL=", @tmp.systemNotRespondingTTL, ")"
+            setTimeout (-> @main browser), 15000
           false
 
       actions:
-        main: ->
+        main: (browser) ->
           browser.go "https://www.americanexpress.com/"
 
       elements:
