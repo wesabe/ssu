@@ -32,7 +32,16 @@ parseOrdinalPhrase = (string) ->
 
 parse = (string) ->
   return NaN if string is ''
-  Number untaint(string)
+
+  if m = untaint(string).match /([\d,\.]+)/
+    parts = m[1].replace(/,/g, '').split '.'
+    if parts.length is 1
+      Number parts[0]
+    else
+      fraction = parts.pop()
+      Number(parts.join('')) + Number(fraction) / 100
+  else
+    NaN
 
 
 module.exports = {parse, parseOrdinalPhrase}

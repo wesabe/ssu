@@ -39,5 +39,9 @@ describe 'lang/number', ->
       expect(number.parse(privacy.taint('12'))).toEqual(12)
 
     it 'returns NaN for non-numeric strings', ->
-      for string in ['', 'hey there', '!!0']
+      for string in ['', 'hey there']
         expect(isNaN(number.parse(string))).toBeTruthy()
+
+    it 'works with monetary values', ->
+      expect(number.parse('balance $1,389.60')).toEqual(1389.6)
+      expect(number.parse('1,234')).toEqual(1234)
