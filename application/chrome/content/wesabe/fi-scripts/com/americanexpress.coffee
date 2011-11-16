@@ -7,7 +7,7 @@
       fid: "com.americanexpress.web"
       org: "American Express Cards"
       dispatchFrames: false
-      afterDownload: "logout"
+      afterLastGoal: "logout"
       includes: [
         "fi-scripts.com.americanexpress.login"
         "fi-scripts.com.americanexpress.accounts"
