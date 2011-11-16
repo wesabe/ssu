@@ -2,10 +2,36 @@ File = require 'io/File'
 
 TYPE = 'image/png'
 
-writeToFile = (window, path) ->
-  File.write path, serializeCanvas(canvasWithContentsOfWindow(window))
+imageDataForWindow = (window) ->
+  serializeCanvas canvasWithContentsOfWindow(window)
+
+imageDataForImage = (image) ->
+  serializeCanvas canvasWithImage(image)
+
+writeToFile = (windowOrImage, path) ->
+  data = if windowOrImage?.tagName?.toLowerCase() is 'img'
+    imageDataForImage windowOrImage
+  else
+    imageDataForWindow windowOrImage
+
+  File.write path, data
 
   return true
+
+canvasWithImage = (image) ->
+  document = image.ownerDocument
+  canvas   = document.createElement 'canvas'
+  width    = image.width
+  height   = image.height
+
+  canvas.setAttribute 'width', width
+  canvas.setAttribute 'height', height
+
+  context = canvas.getContext '2d'
+  context.drawImage image, 0, 0
+
+  return canvas
+
 
 canvasWithContentsOfWindow = (window) ->
   document = window.document
@@ -31,4 +57,4 @@ serializeCanvas = (canvas) ->
   return atob(dataurl.substring(13 + TYPE.length)) # hack off scheme
 
 
-module.exports = {writeToFile}
+module.exports = {writeToFile, imageDataForWindow, imageDataForImage}
