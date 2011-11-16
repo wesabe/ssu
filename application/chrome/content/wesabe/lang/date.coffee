@@ -5,6 +5,15 @@ MONTH_NAMES = [
   'Aug','Sep','Oct','Nov','Dec'
 ]
 
+MONTH_NAME_PATTERN = "(?:#{MONTH_NAMES.join('|')})"
+DAY_PATTERN   = "\\b(?:[0-3]?[0-9])\\b"
+MONTH_PATTERN = "\\b(?:0?[0-9]|1[0-2])\\b"
+
+DATE_FORMATS = [
+  {pattern: new RegExp("(#{MONTH_NAME_PATTERN})\\s+(#{DAY_PATTERN})", 'i'),       m: 1, d: 2} # may 5
+  {pattern: /^(\d{4})[-\/]?(\d{1,2})[-\/]?(\d{1,2})$/,                      y: 1, m: 2, d: 3} # 2011-7-11
+]
+
 DAY_NAMES = [
   'Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday',
   'Sun','Mon','Tue','Wed','Thu','Fri','Sat'
@@ -23,18 +32,24 @@ DAY    = DAYS    = 24 * HOURS
 privacy = require 'util/privacy'
 
 parse = (string) ->
-  string = privacy.untaint string
+  string = trim privacy.untaint(string)
+
+  # try to parse it ourselves
+  for {pattern, y, m, d} in DATE_FORMATS
+    if match = string.match pattern
+      year = y? and match[y] or new Date().getFullYear()
+      month = m? and match[m] or new Date().getMonth()+1
+      day = match[d]
+
+      for name, i in MONTH_NAMES
+        if name.toLowerCase() is month.toLowerCase()
+          month = (i%12)+1
+          break
+
+      return new Date Number(year), Number(month)-1, Number(day)
 
   idate = Date.parse string
   if isNaN(idate)
-    # try to parse it ourselves
-    string = trim string
-
-    # 2011-7-11
-    if m = string.match /^(\d{4})[-\/]?(\d{1,2})[-\/]?(\d{1,2})$/
-      return new Date m[1], Number(m[2])-1, m[3]
-
-    # still couldn't do it
     logger.warn 'unable to parse date: ', string
     return null
 

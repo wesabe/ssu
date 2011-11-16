@@ -20,6 +20,9 @@ describe 'lang/date', ->
     it 'parses dates in the format MMM DD, YYYY', ->
       expect(date.parse('Jul 15, 2011')).toEqual(new Date(2011, 6, 15))
 
+    it 'parses loose text among gibberish', ->
+      expect(date.parse('payment due date dec 9')).toEqual(new Date(new Date().getFullYear(), 11, 9))
+
   describe '.add method', ->
     it 'adds a certain number of milliseconds', ->
       expect(date.add(new Date(2011, 6, 1, 0, 0, 0), 10*date.SECONDS).getSeconds()).toEqual(10)
