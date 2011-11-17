@@ -1,4 +1,5 @@
-Colorizer        = require 'util/Colorizer'
+Colorizer = require 'util/Colorizer'
+inspect   = require 'util/inspect'
 
 class Text
   constructor: (text) ->
