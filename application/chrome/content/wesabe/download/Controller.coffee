@@ -1,6 +1,7 @@
 json    = require 'lang/json'
 type    = require 'lang/type'
 func    = require 'lang/func'
+string  = require 'lang/string'
 cookies = require 'util/cookies'
 event   = require 'util/event'
 Dir     = require 'io/Dir'
@@ -238,7 +239,7 @@ class Controller
       @scope.job = @job
 
       if data.type is 'text/coffeescript'
-        script = CoffeeScript.compile "return (-> #{script})()"
+        script = string.trim(CoffeeScript.compile "(-> #{script})()")
       else
         script = "(function(){#{script}})()" if /[;\n]/.test script
 
