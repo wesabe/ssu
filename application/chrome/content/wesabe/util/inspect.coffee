@@ -30,6 +30,11 @@ COLOR_SCHEME =
 # a terminal.
 #
 
+ELEMENTS = []
+ELEMENTS.push Element if Element?
+ELEMENTS.push HTMLElement if HTMLElement?
+ELEMENTS.push XULElement if XULElement?
+
 inspect = (object, showHidden=off, depth=2, opts={}) ->
   opts.color    ?= off
   opts.sanitize ?= type.isTainted object
@@ -55,7 +60,7 @@ inspect = (object, showHidden=off, depth=2, opts={}) ->
     inspectArray object, showHidden, depth, opts
   else if classForInspect is RegExp or type.isRegExp object
     inspectRegExp object, opts
-  else if classForInspect in [Element?, HTMLElement?, XULElement?] or (Element? and type.is object, Element)
+  else if classForInspect in ELEMENTS or (Element? and type.is object, Element)
     inspectElement object, opts
   else if classForInspect is Number or typeof object is 'number'
     inspectNumber object, opts
@@ -90,12 +95,15 @@ inspectObject = (object, showHidden, depth, opts) ->
   return style 'shell', object.toString(), opts if depth < 0
 
   # allow the object to override the thing we display as its content
-  content = object.contentForInspect?()
+  hasContentForInspect = object.contentForInspect?
+  content = if hasContentForInspect
+              object.contentForInspect()
+            else
+              object
 
-  # if it's a simple object then just enumerate the properties
-  if not content or content.constructor?.name in ['Object', null, undefined]
-    content ||= object
 
+  if not hasContentForInspect or content?.constructor?.name is 'Object'
+    # simple objects just get enumerated properties
     properties = for own k of content
       getter = content.__lookupGetter__? k
       setter = content.__lookupSetter__? k
@@ -110,6 +118,9 @@ inspectObject = (object, showHidden, depth, opts) ->
         "#{k}: #{inspect content[k], showHidden, depth-1, opts}"
 
     contentString = properties.join ', '
+  else if hasContentForInspect and not content?
+    # explicit alternate content that is null/undefined gets an empty string
+    contentString = ''
   else
     # otherwise do a full inspect call on it
     contentString = inspect content, showHidden, depth-1, opts
