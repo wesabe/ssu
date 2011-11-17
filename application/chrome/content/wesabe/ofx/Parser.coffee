@@ -1,12 +1,13 @@
 XmlParser = require 'xml/Parser'
 Parser    = require 'util/Parser'
-event     = require 'util/event'
+{EventEmitter} = require 'events2'
 
-class OfxParser
+class OfxParser extends EventEmitter
   parse: (ofx) ->
     hparser = @parser = new Parser()
 
-    event.forward hparser, this
+    hparser.onAny (args...) =>
+      @emit hparser.event, args...
 
     noop = ->
     quit = -> false

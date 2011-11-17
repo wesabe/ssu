@@ -1,14 +1,15 @@
 date   = require 'lang/date'
 extend = require 'lang/extend'
 type   = require 'lang/type'
-event  = require 'util/event'
 Timer  = require 'util/Timer'
 
 Page    = require 'dom/Page'
 Browser = require 'dom/Browser'
 Player  = require 'download/Player'
 
-class Job
+{EventEmitter} = require 'events2'
+
+class Job extends EventEmitter
   constructor: (jobid, fid, creds, user_id, options) ->
     @jobid = jobid
     @fid = fid
@@ -28,7 +29,7 @@ class Job
     @result = result
     @data[result] = data if data
     logger.info 'Updating job to: ', result
-    event.trigger this, 'update'
+    @emit 'update'
 
   suspend: (result, data, callback) ->
     @version++
@@ -37,16 +38,17 @@ class Job
     @data[result] = data
 
     if callback
-      event.add player, 'timeout', callback
-      event.one this, 'resume', ->
-        event.remove player, 'timeout', callback
+      player.on 'timeout', callback
+      @once 'resume', =>
+        player.off 'timeout', callback
 
     logger.warn 'Suspending job for ', result, '=', data
-    event.trigger this, 'update suspend'
+    @emit 'update'
+    @emit 'suspend'
 
   resume: (creds) ->
     logger.warn 'Resuming job'
-    event.trigger this, 'resume'
+    @emit 'resume'
     @update 'resumed'
     @player.resume creds
 
@@ -62,7 +64,9 @@ class Job
     @player.finish() if type.isFunction @player.finish
     @status = status or (if successful then 200 else 400)
     @result = result or (if successful then 'ok' else 'fail')
-    event.trigger this, "update #{successful and 'succeed' or 'fail'} complete"
+    @emit 'update'
+    @emit successful and 'succeed' or 'fail'
+    @emit 'complete'
     @timer.end 'Total'
 
     org = @player.org
@@ -80,7 +84,7 @@ class Job
     logger.info "Starting job for #{@player.org} (#{@fid})"
     @player.start @creds, new Browser()
 
-    event.trigger this, 'begin'
+    @emit 'begin'
     @timer.start 'Total'
 
   nextGoal: ->

@@ -1,5 +1,4 @@
 type      = require 'lang/type'
-event     = require 'util/event'
 inspect   = require 'util/inspect'
 Colorizer = require 'util/Colorizer'
 
@@ -82,19 +81,19 @@ class Document
 
         throw new Error "Unexpected closing tag #{inspect closeTag}"
 
-    event.add parser, 'start-open-tag', (event, tag) =>
+    parser.on 'start-open-tag', (tag) =>
       work.push tag.toElement()
 
-    event.add parser, 'end-open-tag', (event, tag) =>
+    parser.on 'end-open-tag', (tag) =>
       work.setName tag.name
 
-    event.add parser, 'close-tag', (event, tag) =>
+    parser.on 'close-tag', (tag) =>
       work.pop tag
 
-    event.add parser, 'text', (event, text) =>
+    parser.on 'text', (text) =>
       work.push text
 
-    event.add parser, 'attribute', (event, attr) =>
+    parser.on 'attribute', (attr) =>
       work.push attr
 
     # parse the xml, executing all the callbacks above

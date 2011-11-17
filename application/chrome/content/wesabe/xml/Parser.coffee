@@ -1,5 +1,4 @@
 type   = require 'lang/type'
-event  = require 'util/event'
 Parser = require 'util/Parser'
 
 OpenTag   = require 'xml/OpenTag'
@@ -7,13 +6,15 @@ CloseTag  = require 'xml/CloseTag'
 Attribute = require 'xml/Attribute'
 Text      = require 'xml/Text'
 
+{EventEmitter} = require 'events2'
 {tryThrow, tryCatch} = require 'util/try'
 
-class XmlParser
+class XmlParser extends EventEmitter
   parse: (xml, verboten) ->
     parser = @parser = new Parser()
 
-    event.forward parser, this
+    parser.onAny (args...) =>
+      @emit parser.event, args...
 
     work = @work =
       el: null

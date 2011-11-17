@@ -1,6 +1,6 @@
 type  = require 'lang/type'
 func  = require 'lang/func'
-event = require 'util/event'
+{sharedEventEmitter} = require 'events2'
 {tryCatch, tryThrow} = require 'util/try'
 
 xhr =
@@ -31,12 +31,12 @@ xhr =
     before = =>
       # call `before' callback if it's given as a separate callback
       func.executeCallback callback, 'before', [req] unless type.isFunction callback
-      event.trigger 'before-xhr', [req]
+      sharedEventEmitter.emit 'before-xhr', req
 
     after = =>
       # call `after' callback if it's given as a separate callback
       func.executeCallback callback, 'after', [req] unless type.isFunction callback
-      event.trigger 'after-xhr', [req]
+      sharedEventEmitter.emit 'after-xhr', req
 
     tryThrow "xhr(#{method} #{path})", (log) =>
       if params and not (data or method.match(/get/i))

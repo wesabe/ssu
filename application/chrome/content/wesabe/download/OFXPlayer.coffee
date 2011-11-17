@@ -1,9 +1,9 @@
 date    = require 'lang/date'
 type    = require 'lang/type'
 extend  = require 'lang/extend'
-event   = require 'util/event'
 privacy = require 'util/privacy'
 {tryCatch, tryThrow} = require 'util/try'
+{sharedEventEmitter} = require 'events2'
 
 Request = require 'ofx/Request'
 
@@ -158,7 +158,7 @@ class OFXPlayer
   # Handles an OFX response containing a statement to be imported.
   #
   onDownloadComplete: (response) ->
-    event.trigger 'downloadSuccess', [response.statement]
+    sharedEventEmitter.emit 'downloadSuccess', response.statement
 
     # done with this account
     @account.completed = true

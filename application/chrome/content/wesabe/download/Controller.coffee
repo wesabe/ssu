@@ -3,13 +3,14 @@ type    = require 'lang/type'
 func    = require 'lang/func'
 string  = require 'lang/string'
 cookies = require 'util/cookies'
-event   = require 'util/event'
 Dir     = require 'io/Dir'
 File    = require 'io/File'
 xhr     = require 'io/xhr'
 Job     = require 'download/Job'
 Logger  = require 'Logger'
 inspect = require 'util/inspect'
+
+{EventEmitter} = require 'events2'
 {tryCatch, tryThrow} = require 'util/try'
 
 class Controller
@@ -117,7 +118,7 @@ class Controller
                       data.callback
 
         if callbacks.length
-          event.add @job, 'update', =>
+          @job.on 'update', =>
             params =
               status: @job.status
               result: @job.result

@@ -7,7 +7,6 @@ dateForElement = (require 'dom/date').forElement
 {trim}         = require 'lang/string'
 func           = require 'lang/func'
 type           = require 'lang/type'
-event          = require 'util/event'
 prefs          = require 'util/prefs'
 inspect        = require 'util/inspect'
 Dir            = require 'io/Dir'
@@ -20,7 +19,9 @@ Browser        = require 'dom/Browser'
 UserAgent      = require 'xul/UserAgent'
 Bridge         = require 'dom/Bridge'
 {Pathway}      = require 'xpath'
+{EventEmitter} = require 'events2'
 
+{sharedEventEmitter} = require 'events2'
 {tryThrow, tryCatch} = require 'util/try'
 
 DEFAULT_TIMEOUTS =
@@ -28,7 +29,7 @@ DEFAULT_TIMEOUTS =
   global:   300 # 5m
   security: 180 # 3m
 
-class Player
+class Player extends EventEmitter
   @register: (params) ->
     @create params, (klass) ->
       # make sure we put it where wesabe.require expects it
@@ -148,10 +149,11 @@ class Player
       UserAgent.revertToDefault()
 
     # set up the callbacks for page load and download done
-    event.add browser, 'DOMContentLoaded', (evt) =>
+    browser.addEventListener 'DOMContentLoaded', (evt) =>
       @onDocumentLoaded Browser.wrap(browser), Page.wrap(evt.target)
+    , no
 
-    event.add 'downloadSuccess', (evt, data, suggestedFilename, contentType) =>
+    sharedEventEmitter.on 'downloadSuccess', (data, suggestedFilename, contentType) =>
       @job.update 'account.download.success'
       @setErrorTimeout 'global'
 
@@ -178,7 +180,7 @@ class Player
         @job.recordSuccessfulDownload statement, extend({suggestedFilename, contentType}, metadata)
         @onDownloadSuccessful @browser, @page
 
-    event.add 'downloadFail', (evt) =>
+    sharedEventEmitter.on 'downloadFail', =>
       logger.warn 'Failed to download a statement! This is bad, but a failed job is worse, so we press on'
       @job.update 'account.download.failure'
       @setErrorTimeout 'global'
@@ -186,12 +188,12 @@ class Player
 
     @setErrorTimeout 'global'
     # start the security question timeout when the job is suspended
-    event.add @job, 'suspend', =>
+    @job.on 'suspend', =>
       @clearErrorTimeout 'action'
       @clearErrorTimeout 'global'
       @setErrorTimeout 'security'
 
-    event.add @job, 'resume', =>
+    @job.on 'resume', =>
       @clearErrorTimeout 'security'
       @setErrorTimeout 'global'
 
@@ -455,7 +457,7 @@ class Player
     logger.debug "Timeout ", timeoutType, " set (", duration, " seconds)"
 
     tt[timeoutType] = setTimeout =>
-      event.trigger this, 'timeout', [timeoutType]
+      @emit 'timeout', timeoutType
       return if @job.done
       logger.error "Timeout ", timeoutType, " (", duration, " seconds) reached, abandoning job"
       tryCatch "Player#setErrorTimeout(page dump)", =>

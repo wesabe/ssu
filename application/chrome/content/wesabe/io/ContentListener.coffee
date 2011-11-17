@@ -1,11 +1,11 @@
 StreamListener = require 'io/StreamListener'
 
-{trigger} = require 'util/event'
+{EventEmitter} = require 'events2'
 {tryThrow, tryCatch} = require 'util/try'
 
 sharedContentListener = null
 
-class ContentListener
+class ContentListener extends EventEmitter
   @__defineGetter__ 'sharedInstance', ->
     sharedContentListener ||= new this()
 
@@ -40,7 +40,7 @@ class ContentListener
           filename = @suggestedFilenameForRequest request
           originalContentType = @originalContentTypeForRequest request
           log.debug "got some data (filename=", filename, ", contentType=", originalContentType, ")"
-          trigger this, 'after-receive', [data, filename, originalContentType]
+          @emit 'after-receive', data, filename, originalContentType
         ), contentType)
 
     return false

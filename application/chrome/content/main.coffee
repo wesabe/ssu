@@ -19,10 +19,10 @@ inspect         = require 'util/inspect'
 cookies         = require 'util/cookies'
 prefs           = require 'util/prefs'
 privacy         = require 'util/privacy'
-event           = require 'util/event'
 Controller      = require 'download/Controller'
 ContentListener = require 'io/ContentListener'
 {tryThrow, tryCatch} = require 'util/try'
+{sharedEventEmitter} = require 'events2'
 
 
 CONFIG = new File '/etc/ssu/xulrunner.js'
@@ -88,8 +88,8 @@ class Application
   listenForDownloads: ->
     contentListener = ContentListener.sharedInstance
     contentListener.init window, "application/x-ssu-intercept"
-    event.add contentListener, 'after-receive', (_, data, filename, contentType) ->
-      event.trigger 'downloadSuccess', [data, filename, contentType]
+    contentListener.on 'after-receive', (data, filename, contentType) ->
+      sharedEventEmitter.emit 'downloadSuccess', data, filename, contentType
 
 
 # Wesabe Sniffer registration - if not already registered.

@@ -11,6 +11,7 @@
   <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
   <script type="application/x-javascript" src="coffee-script.js"/>
   <script type="application/x-javascript" src="json2.js"/>
+  <script type="application/x-javascript" src="eventemitter2.js"/>
   <script type="text/coffeescript" src="wesabe.coffee"/>
   <script type="text/coffeescript" src="main.coffee"/>
 

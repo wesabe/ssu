@@ -1,7 +1,7 @@
 Page      = require 'dom/Page'
 type      = require 'lang/type'
-{trigger} = require 'util/event'
 
+{EventEmitter} = require 'events2'
 {tryThrow, tryCatch} = require 'util/try'
 
 bridges = []
@@ -32,7 +32,7 @@ bridges = []
 #       id = data[0]
 #       logger.info "id of clicked element was ", id
 #
-class Bridge
+class Bridge extends EventEmitter
   constructor: (@document, @callback) ->
     @document = Page.wrap(@document)
     @requests = {}
@@ -99,7 +99,7 @@ class Bridge
     else
       logger.warn 'bridge response did not contain an id'
 
-    trigger this, 'response', [response]
+    @emit 'response', response
 
 #
 # This function only exists so that the string inside it can be

@@ -1,10 +1,9 @@
-{isFunction} = require 'lang/type'
-inspect = require 'util/inspect'
-event   = require 'util/event'
+{isFunction}   = require 'lang/type'
+inspect        = require 'util/inspect'
+{EventEmitter} = require 'events2'
 
-
-class Parser
-  this::__defineSetter__ 'tokens', (tokens) ->
+class Parser extends EventEmitter
+  @::__defineSetter__ 'tokens', (tokens) ->
     @__tokens__ = for own tok, callback of tokens
                     {pattern: new RegExp("^#{tok}$"), callback}
 
@@ -38,7 +37,7 @@ class Parser
           throw new Error("Unknown callback type ", callback, ", please pass a Function or a Parser")
 
         @offset++
-        return retval != false
+        return retval isnt false
 
     throw new Error("Unexpected #{p} (offset=#{@offset}, before=#{
                     inspect @parsing[@offset-15...@offset]
@@ -50,6 +49,7 @@ class Parser
                     inspect patterns}")
 
   trigger: (events, args) ->
-    event.trigger this, events, args
+    for event in events.split(' ')
+      @emit event, args...
 
 module.exports = Parser
