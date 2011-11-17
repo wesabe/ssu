@@ -38,7 +38,7 @@ class XmlParser
             else
               throw new Error("Could not skip to #{etag} because it is not present after offset #{parser.offset}")
 
-        @el = el;
+        @el = el
 
       attr: null
       setAttr: (attr) ->
