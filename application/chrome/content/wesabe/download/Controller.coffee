@@ -22,7 +22,7 @@ class Controller
 
     if @port
       # bind only to a specific port
-      retriesLeft = 0
+      retriesLeft = 1
     else
       # start at 5000 and try up to 5100
       retriesLeft = 100
