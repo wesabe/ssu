@@ -59,7 +59,7 @@ class Controller
 
       pump = Cc['@mozilla.org/network/input-stream-pump;1'].createInstance(Ci.nsIInputStreamPump)
       pump.init(stream, -1, -1, 0, 0, false)
-      pump.asyncRead({
+      pump.asyncRead
         onStartRequest: (request, context) =>
           log.radioactive this
           @request = ''
@@ -77,33 +77,33 @@ class Controller
             requestText = @request[0...index]
             @request = @request[index+1..]
 
-            request      = json.parse requestText
-            response     = @dispatch request
-            try
-              responseText = "#{json.render response}\n"
-              log.radioactive responseText
-              outstream.write responseText, responseText.length
-            catch e
-              log.error e
-      }, null)
+            request = json.parse requestText
+            @dispatch request, (response) =>
+              try
+                responseText = "#{json.render response}\n"
+                log.radioactive responseText
+                outstream.write responseText, responseText.length
+              catch e
+                log.error e
+      , null
 
   onStopListening: (serv, status) ->
     logger.debug "Controller#onStopListening"
 
-  dispatch: (request) ->
+  dispatch: (request, respond) ->
     request.action = request.action.replace /\./g, '_'
     tryCatch 'Controller#dispatch', (log) =>
       if type.isFunction @[request.action]
-        @[request.action]?(request.body)
+        @[request.action]?(request.body, respond)
       else
         message = "Unrecognized request action #{inspect request.action}"
         log.error message
 
-        response:
-          status: 'error'
-          error: message
+        respond response:
+                  status: 'error'
+                  error: message
 
-  job_start: (data) ->
+  job_start: (data, respond) ->
     try
       throw new Error "Got unexpected type: #{typeof data}" if typeof data isnt 'object'
 
@@ -135,46 +135,46 @@ class Controller
     catch e
       logger.error 'job.start: ', e
 
-    return response:
-             status: 'ok'
+    respond response:
+              status: 'ok'
 
-  job_resume: (data) ->
+  job_resume: (data, respond) ->
     if @job
       try
         @job.resume data.creds
-        return response:
-                 status: 'ok'
+        respond response:
+                  status: 'ok'
 
       catch e
-        return response:
-                 status: 'error'
-                 error: e.toString()
+        respond response:
+                  status: 'error'
+                  error: e.toString()
 
     else
-      return response:
-               status: 'error'
-               error: "No running jobs"
+      respond response:
+                status: 'error'
+                error: "No running jobs"
 
-  job_status: (data) ->
+  job_status: (data, respond) ->
     unless @job
-      return response:
-               status: 'error'
-               error: "No running jobs"
+      respond response:
+                status: 'error'
+                error: "No running jobs"
+    else
+      respond response:
+                status: 'ok'
+                'job.status':
+                  status: @job.status
+                  result: @job.result
+                  data: @job.data
+                  jobid: @job.jobid
+                  fid: @job.fid
+                  completed: @job.done
+                  cookies: cookies.dump()
+                  timestamp: new Date().getTime()
+                  version: @job.version
 
-    response:
-      status: 'ok'
-      'job.status':
-        status: @job.status
-        result: @job.result
-        data: @job.data
-        jobid: @job.jobid
-        fid: @job.fid
-        completed: @job.done
-        cookies: cookies.dump()
-        timestamp: new Date().getTime()
-        version: @job.version
-
-  statement_list: (data) ->
+  statement_list: (data, respond) ->
     statements = Dir.profile.child 'statements'
     list = []
 
@@ -182,55 +182,56 @@ class Controller
       list = for {file} in statements.children()
                file.basename
 
-    response:
-      status: 'ok'
-      'statement.list': list
+    respond response:
+              status: 'ok'
+              'statement.list': list
 
-  statement_read: (data) ->
+  statement_read: (data, respond) ->
     unless data
-      return response:
-               status: 'error'
-               error: "statement id required"
+      respond response:
+                status: 'error'
+                error: "statement id required"
+      return
 
     statement = Dir.profile.child('statements').child(data)
 
     if statement.exists()
-      response:
-        status: 'ok'
-        'statement.read': statement.read()
+      respond response:
+                status: 'ok'
+                'statement.read': statement.read()
     else
-      response:
-        status: 'error'
-        error: "No statement found with id=#{data}"
+      respond response:
+                status: 'error'
+                error: "No statement found with id=#{data}"
 
-  job_stop: (data) ->
+  job_stop: (data, respond) ->
     logger.info 'Got request to stop job, shutting down'
 
     # job didn't finish, so it failed
     @job.fail 504, 'timeout.quit' unless @job.done
 
-    response:
-      status: 'ok'
+    respond response:
+              status: 'ok'
 
-  xul_quit: (data) ->
+  xul_quit: (data, resopnd) ->
     setTimeout (-> goQuitApplication()), 1000
 
-    response:
-      status: 'ok'
+    respond response:
+              status: 'ok'
 
-  page_dump: (data) ->
+  page_dump: (data, respond) ->
     try
-      response:
-        status: 'ok'
-        'page.dump': @job.player.page.dump()
+      respond response:
+                status: 'ok'
+                'page.dump': @job.player.page.dump()
 
     catch e
       logger.error 'page.dump: ', e
-      response:
-        status: 'error'
-        error: e.toString()
+      respond response:
+                status: 'error'
+                error: e.toString()
 
-  eval: (data) ->
+  eval: (data, respond) ->
     try
       script = data.script
       @scope ||=
@@ -249,15 +250,15 @@ class Controller
 
       @scope._ = result
 
-      response:
-        status: 'ok'
-        eval: inspect(result, undefined, undefined, color: data.color)
+      respond response:
+                status: 'ok'
+                eval: inspect(result, undefined, undefined, color: data.color)
 
     catch e
       logger.error 'eval: error: ', e
-      response:
-        status: 'error'
-        error: e.toString()
+      respond response:
+                status: 'error'
+                error: e.toString()
 
 
 module.exports = Controller
