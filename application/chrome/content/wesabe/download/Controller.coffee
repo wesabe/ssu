@@ -207,7 +207,7 @@ class Controller
   window_list: (data, respond) ->
     respond response:
               status: 'ok'
-              'window.list': (name for name of @windows when name isnt 'length')
+              'window.list': ({name, port: w.port} for name, w of @windows when name isnt 'length')
 
   statement_list: (data, respond) ->
     statements = Dir.profile.child 'statements'
