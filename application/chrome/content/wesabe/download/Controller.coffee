@@ -18,6 +18,9 @@ class Controller
     Cc['@mozilla.org/network/server-socket;1'].createInstance(Ci.nsIServerSocket)
 
   start: (@port) ->
+    @windows ||= length: 1
+    @windows[window.name] = window
+
     bindSuccessful = false
 
     if @port
@@ -35,6 +38,7 @@ class Controller
           @server.init @port, true, -1
           @server.asyncListen this
           bindSuccessful = true
+          window.port = @port
         catch e
           log.warn 'Failed to bind to port ', @port, ', trying up to ', retriesLeft, ' more. ', e
           @port++
@@ -173,6 +177,37 @@ class Controller
                   cookies: cookies.dump()
                   timestamp: new Date().getTime()
                   version: @job.version
+
+  window_open: (data, respond) ->
+    index = @windows.length++
+    name = data?.name or "#{window.name}:#{index}"
+    @windows[name] = window.open window.location.href, name, "chrome,width=600,height=300"
+
+    waitForPort = =>
+      if port = @windows[name].port
+        respond response:
+                  status: 'ok'
+                  'window.open': {name, port}
+      else
+        setTimeout waitForPort, 10
+
+    waitForPort()
+
+  window_close: (name, respond) ->
+    w = @windows[name]
+
+    if w?
+      w.close()
+      delete @windows[name]
+
+    respond response:
+              status: 'ok'
+              'window.close': w?
+
+  window_list: (data, respond) ->
+    respond response:
+              status: 'ok'
+              'window.list': (name for name of @windows when name isnt 'length')
 
   statement_list: (data, respond) ->
     statements = Dir.profile.child 'statements'

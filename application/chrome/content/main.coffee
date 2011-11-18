@@ -7,6 +7,8 @@
 # Please be aware of this difference when debugging this file.
 #
 
+window.name ||= 'main'
+
 # everyone else will get logging for free,
 # but we need to set it up manually.
 logger = (require 'Logger').loggerForFile 'main'
@@ -115,17 +117,17 @@ class Arguments
   constructor: (@args) ->
 
   on: (flag) ->
-    @cmdline.handleFlag flag, false
+    @cmdline?.handleFlag flag, false
 
   string: (name) ->
-    @cmdline.handleFlagWithParam name, false
+    @cmdline?.handleFlagWithParam name, false
 
   number: (name) ->
     if value = @string name
       Number(value)
 
   @::__defineGetter__ 'cmdline', ->
-    @_cmdline ||= @args.QueryInterface(Components.interfaces.nsICommandLine)
+    @_cmdline ||= @args?.QueryInterface(Components.interfaces.nsICommandLine)
 
 
-new Application new Arguments(window.arguments[0])
+new Application new Arguments(window.arguments?[0])
