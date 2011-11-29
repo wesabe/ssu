@@ -88,7 +88,11 @@ module.exports = Browser
 # with the transition, this section adds back wesabe.dom.browser.go and
 # friends but yells at you that you're using a deprecated method.
 #
-deprecated = {}
+deprecated =
+  getURI: (browser) ->
+    logger.deprecated "wesabe.dom.browser.getURI(browser)", "browser.url"
+    browser.url
+
 for name in ['go', 'joinURI', 'atURI']
   do (name) ->
     deprecated[name] = (browser, args...) ->
