@@ -14,13 +14,13 @@ bootstrap_darwin()
   if [ -d $THIS ]; then
     info "XUL.framework version $(basename $(readlink $THIS)) is already installed."
   else
-    URL="http://mozilla.mirrors.tds.net/pub/mozilla.org/xulrunner/releases/1.9.1.18/runtimes/xulrunner-1.9.1.18.en-US.mac-pkg.dmg"
+    URL="http://ftp.mozilla.org/pub/mozilla.org/xulrunner/releases/1.9.1.18/runtimes/xulrunner-1.9.1.18.en-US.mac-pkg.dmg"
     DOWNLOAD="$HOME/Downloads/$(basename $URL)"
     MOUNTPOINT="/Volumes/XULRunnerFramework"
 
     if [ ! -e $DOWNLOAD ]; then
       info "Downloading $(basename $URL)"
-      curl -o $DOWNLOAD $URL >>bootstrap.log 2>&1|| die "Unable to download $(basename $URL)"
+      curl -L -o $DOWNLOAD $URL >>bootstrap.log 2>&1|| die "Unable to download $(basename $URL)"
     fi
 
     info "Installing XUL.framework version $XULVERSION (you may be asked for your password)"
