@@ -181,7 +181,10 @@ class Logger
 
     lines = strings.join('').split(/\r?\n/)
 
-    return ("[#{window.name}] #{prefix}#{@name and "#{@name}: "}#{line}" for line in lines).join('\n')
+    if window?.name?
+      prefix = "[#{window.name}] #{prefix}"
+
+    return ("#{prefix}#{@name and "#{@name}: "}#{line}" for line in lines).join('\n')
 
 rootLogger = new Logger()
 fileAppender = null
