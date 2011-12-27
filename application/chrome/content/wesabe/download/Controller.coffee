@@ -248,7 +248,7 @@ class Controller
     respond response:
               status: 'ok'
 
-  xul_quit: (data, resopnd) ->
+  xul_quit: (data, respond) ->
     setTimeout (-> goQuitApplication()), 1000
 
     respond response:
