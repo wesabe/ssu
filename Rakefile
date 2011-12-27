@@ -22,6 +22,7 @@ task :spec do
       $stderr.puts "~ For help installing npm, visit http://npmjs.org/"
     end
   else
+    ENV['NODE_PATH'] = [File.expand_path('../application/chrome/content/wesabe', __FILE__), ENV['NODE_PATH']].compact.join(':')
     system %{jasmine-node --coffee spec}
     exit $?.exitstatus
   end

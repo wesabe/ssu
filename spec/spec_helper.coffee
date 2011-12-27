@@ -13,7 +13,6 @@ require path.join(root, 'lib/node-ext')
 
 # bring in the main wesabe code
 wesroot = path.join(root, 'application/chrome/content/wesabe')
-require.paths.unshift wesroot
 require wesroot
 
 # set up a logger for all of node.js
