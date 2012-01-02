@@ -647,13 +647,12 @@ class Page
   # and whose png property is the path of the dumped PNG.
   dump: ->
     tryThrow 'Page.dump', =>
-      Dir.profile.child('wesabe-page-dumps').create()
+      folder = Dir.profile.child('wesabe-page-dumps')
+      folder.create()
 
-      html = folder.clone()
-      png = folder.clone()
       basename = "#{new Date().getTime()}-#{@document.title.replace /[^-_a-zA-Z0-9 ]/g, ''}"
-      html.append "#{basename}.html"
-      png.append "#{basename}.png"
+      html = folder.child("#{basename}.html")
+      png = folder.child("#{basename}.png")
 
       logger.debug 'Dumping contents of current page to ', html.path, ' and ', png.path
       File.write html, "<html>#{@document.documentElement.innerHTML}</html>"
