@@ -68,7 +68,8 @@ don't see any errors you should be good to go. Next you can generate
 a credentials file to test with. Again, let's assume you have an
 account at Chase. In another terminal window, run this:
 
-    ssu$ script/generate credential com.chase chase
+    ssu$ bundle
+    ssu$ bundle exec script/generate credential com.chase chase
 
 That'll create a file at `credentials/chase` that looks like this:
 
@@ -145,7 +146,8 @@ My bank isn't supported. Can I add it?
 Yep, there's a generator for that which will build a skeleton script for
 your financial insitution:
 
-    ssu$ script/generate player com.ally "Ally Bank" https://www.ally.com/
+    ssu$ bundle
+    ssu$ bundle exec script/generate player com.ally "Ally Bank" https://www.ally.com/
     Generating with player generator:
          [ADDED]  application/chrome/content/wesabe/fi-scripts/com/ally.coffee
          [ADDED]  application/chrome/content/wesabe/fi-scripts/com/ally/login.coffee
