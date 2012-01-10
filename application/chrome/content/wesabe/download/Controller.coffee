@@ -214,7 +214,7 @@ class Controller
     list = []
 
     if statements.exists
-      list = for {file} in statements.children()
+      list = for file in statements.children()
                file.basename
 
     respond response:

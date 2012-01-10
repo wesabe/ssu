@@ -6,6 +6,8 @@ Timer  = require 'util/Timer'
 Page    = require 'dom/Page'
 Browser = require 'dom/Browser'
 Player  = require 'download/Player'
+OFXPlayer = require 'download/OFXPlayer'
+CompoundPlayer = require 'download/CompoundPlayer'
 
 {EventEmitter} = require 'events2'
 

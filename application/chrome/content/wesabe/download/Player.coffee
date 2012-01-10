@@ -158,9 +158,9 @@ class Player extends EventEmitter
       @setErrorTimeout 'global'
 
       tryThrow 'Player#downloadSuccess', (log) =>
-        statements = Dir.profile.child('statements')
-        unless statements.exists
-          statements.create()
+        folder = Dir.profile.child('statements')
+        unless folder.exists
+          folder.create()
 
         statement = statements.child(uuid()).asFile
 
