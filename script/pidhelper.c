@@ -9,7 +9,7 @@ int main (int argc, char **argv)
   FILE *output = stdout;
 
   opterr = 0;
-  
+
   while ((c = getopt(argc, argv, "spo:")) != -1) {
     switch (c) {
       case 'p':
@@ -26,8 +26,8 @@ int main (int argc, char **argv)
         break;
     }
   }
-  
+
   fprintf(output, "%d\n", pid);
-  
+
   return 0;
 }
