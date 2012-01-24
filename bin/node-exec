@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+
+ENV['NODE_PATH'] = [File.expand_path('../../application/chrome/content/wesabe', __FILE__), ENV['NODE_PATH']].compact.join(':')
+exec *ARGV
