@@ -10,8 +10,10 @@ DAY_PATTERN   = "\\b(?:[0-3]?[0-9])\\b"
 MONTH_PATTERN = "\\b(?:0?[0-9]|1[0-2])\\b"
 
 DATE_FORMATS = [
-  {pattern: new RegExp("(#{MONTH_NAME_PATTERN})\\s+(#{DAY_PATTERN})", 'i'),       m: 1, d: 2} # may 5
-  {pattern: /^(\d{4})[-\/]?(\d{1,2})[-\/]?(\d{1,2})$/,                      y: 1, m: 2, d: 3} # 2011-7-11
+  # "may 5", "june 12, 2012"
+  {pattern: new RegExp("(#{MONTH_NAME_PATTERN})\\s+(#{DAY_PATTERN})(?:,?\\s+(\\d{4}))?", 'i'), y: 3, m: 1, d: 2}
+  # "2011-7-11", "2012-10-29"
+  {pattern: /^(\d{4})[-\/]?(\d{1,2})[-\/]?(\d{1,2})$/, y: 1, m: 2, d: 3}
 ]
 
 DAY_NAMES = [
