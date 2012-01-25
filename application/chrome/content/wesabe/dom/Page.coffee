@@ -702,7 +702,7 @@ class Page
       # replace the existing one with the sanitized one
       text.nodeValue = sanitized.join('')
 
-    @dump
+    @dump()
 
   # Internal: Returns alternate content for util/inspect to use when
   # generating a string representing this Page.
