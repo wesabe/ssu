@@ -7,7 +7,7 @@ File      = require 'io/File'
 snapshot  = require 'canvas/snapshot'
 english   = require 'util/words'
 privacy   = require 'util/privacy'
-{Pathway, bind} = require 'xpath'
+{Pathway} = require 'xpath'
 {tryCatch, tryThrow} = require 'util/try'
 
 # Internal: Event name to internal type mapping.
@@ -346,10 +346,10 @@ class Page
   #
   # Returns either a tainted Element or null if no matching Element is found.
   field: (idNameOrLabel, scope) ->
-    if field = @find bind('//*[name()="input" or name()="select"][@id=":label" or @name=":label"]', label: idNameOrLabel)
+    if field = @find Pathway.bind('//*[translate(name(),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="input" or translate(name(),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="select"][@id=":label" or @name=":label"]', label: idNameOrLabel)
       return field
 
-    if label = @find bind('//label[contains(string(.), ":label")]', label: idNameOrLabel)
+    if label = @find Pathway.bind('//label[contains(string(.), ":label")]', label: idNameOrLabel)
       if fieldId = label.getAttribute('for')
         return @byId fieldId
 
