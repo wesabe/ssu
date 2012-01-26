@@ -372,6 +372,25 @@ class Page
 
     return null
 
+  # Public: Finds an button or input of the right type matching the id, name,
+  # or value.
+  #
+  # idNameOrValue - A button id, name, or value.
+  # scope - An Element to restrict the search to.
+  #
+  # Examples
+  #
+  #   page.click page.button('Next')
+  #
+  # Returns either a tainted Element or null if no matching Element is found.
+  button: (idNameOrValue, scope) ->
+    if input = @find Pathway.bind('//input[lower-case(@type)="submit" or lower-case(@type)="image" or lower-case(@type)="button"][@id=":value" or @name=":value" or @value=":value"]', value: idNameOrValue)
+      return input
+
+    if button = @find Pathway.bind('//button[@id=":value" or @name=":value" or contains(string(.), ":value")]', value: idNameOrValue)
+      return button
+
+    return null
 
   # Public: Clicks the given element by firing mousedown, click,
   # and mouseup events.
