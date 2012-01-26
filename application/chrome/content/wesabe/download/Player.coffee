@@ -162,8 +162,7 @@ class Player extends EventEmitter
         unless folder.exists
           folder.create()
 
-        statement = statements.child(uuid()).asFile
-
+        statement = folder.child(uuid()).asFile
         statement.write data
 
         metadata = @job.nextDownloadMetadata or {}
