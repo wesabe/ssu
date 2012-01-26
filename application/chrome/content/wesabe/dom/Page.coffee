@@ -355,8 +355,7 @@ class Page
   # Public: Finds an input or select matching the id, name, or label.
   #
   # idNameOrLabel - A field id, name, or label.
-  # scope - An Element to restrict the xpath search to, ignored if xpathOrNode
-  #         is a Node.
+  # scope - An Element to restrict the search to.
   #
   # Examples
   #
