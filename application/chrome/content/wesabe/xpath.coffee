@@ -10,7 +10,54 @@ privacy = require 'util/privacy'
 # Xpath:: <String, Array[String], Pathway, Pathset>
 #
 class Pathway
-  constructor: (@value) ->
+  constructor: (value) ->
+    @value = @_prepare(value)
+
+  @REPLACEMENTS:
+    'upper-case($1)': 'translate($1, \"abcdefghijklmnopqrstuvwxyz\", \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\")'
+    'lower-case($1)': 'translate($1, \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\", \"abcdefghijklmnopqrstuvwxyz\")'
+
+  _prepare: (value) ->
+    for own func, replacement of @constructor.REPLACEMENTS
+      [head, tail] = func.split('$1')
+      [replacementHead, replacementTail] = replacement.split('$1')
+
+      while (start = value.indexOf(head)) isnt -1
+        end = start
+        nesting = 0
+        while end < (start + head.length)
+          switch value.substring(end, end+1)
+            when '('
+              nesting++
+            when ')'
+              nesting--
+
+          if nesting < 0
+            throw new Error("unbalanced parentheses in xpath expression: #{value}")
+
+          end++
+
+        while nesting > 0 or end < value.length
+          switch value.substring(end, end+1)
+            when '('
+              nesting++
+            when ')'
+              nesting--
+
+          if nesting < 0
+            throw new Error("unbalanced parentheses in xpath expression: #{value}")
+
+          end++
+          break if nesting is 0 and value.substring(end-tail.length, end) is tail
+
+        if nesting isnt 0
+          throw new Error("unbalanced parentheses in xpath expression: #{value}")
+
+        value = value.substring(0, start) +
+                "#{replacementHead}#{value.substring(start+head.length, end-tail.length)}#{replacementTail}" +
+                value.substring(end)
+
+    return value
 
   #
   # Returns the first matching DOM element in the given document.

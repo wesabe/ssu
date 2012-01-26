@@ -363,7 +363,7 @@ class Page
   #
   # Returns either a tainted Element or null if no matching Element is found.
   field: (idNameOrLabel, scope) ->
-    if field = @find Pathway.bind('//*[translate(name(),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="input" or translate(name(),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="select"][@id=":label" or @name=":label"]', label: idNameOrLabel)
+    if field = @find Pathway.bind('//*[lower-case(name())="input" or lower-case(name())="select"][@id=":label" or @name=":label"]', label: idNameOrLabel)
       return field
 
     if label = @find Pathway.bind('//label[contains(string(.), ":label")]', label: idNameOrLabel)
