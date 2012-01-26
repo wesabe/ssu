@@ -135,22 +135,40 @@ class Page
   # Examples
   #
   #   # finds the first link on the page
-  #   page.find '//a'
+  #   page.findByXpath '//a'
   #
   #   # nodes passed in will simply be returned.
-  #   link = page.find '//a'
-  #   (page.find link) is link
+  #   link = page.findByXpath '//a'
+  #   (page.findByXpath link) is link
   #   # => true
   #
   # Returns a tainted Node.
   # Raises DocumentMismatchError given a node not belonging to this page.
-  find: (xpathOrNode, scope) ->
+  findByXpath: (xpathOrNode, scope) ->
     if xpathOrNode?.nodeType
       DocumentMismatchError.assert @, xpathOrNode
       return xpathOrNode
 
     xpath = Pathway.from(xpathOrNode)
     return xpath.first(@document, scope)
+
+  # Public: Finds an Element by CSS selector.
+  #
+  # selector - A String containing a selector to search on.
+  # scope - An Element to restrict the selector search to.
+  #
+  # Examples
+  #
+  #   # finds the first link on the page
+  #   page.findBySelector 'a'
+  #
+  # Returns a tainted Element or null if no matching Element was found.
+  findBySelector: (selector, scope=@document) ->
+    privacy.taint scope.querySelector(selector)
+
+  # Public: Alias for findByXpath().
+  find: (args...) ->
+    @findByXpath args...
 
   # Public: Finds an Element by id.
   #
