@@ -166,7 +166,7 @@ wesabe.download.Player.register({
       ],
 
       continueButton: [
-        '//div[@class="continuebutton"]//*[contains(@onclick, "continue")]',
+        '//div[has-class("continuebutton")]//*[contains(@onclick, "continue")]',
         '//*[contains(@onclick, "continue")][.//img[contains(@src, "continue")]]',
       ],
     },

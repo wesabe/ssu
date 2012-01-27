@@ -99,7 +99,7 @@ wesabe.provide("fi-scripts.com.citibank.login", {
     ],
 
     signoffSuccess: [
-      '//span[@class="jrspageHeader"]/text()[contains(., "Sign Off Complete")]',
+      '//span[has-class("jrspageHeader")]/text()[contains(., "Sign Off Complete")]',
       '//text()[contains(., "Sign Off Complete")]'
     ],
   },

@@ -146,7 +146,7 @@ wesabe.provide('fi-scripts.com.ingdirect.transfers', {
 
         errors: {
           general: [
-            '//div[contains(@class, "alert")][contains(@class, "stop")]',
+            '//div[has-class("alert")][has-class("stop")]',
           ],
 
           validationFailed: [

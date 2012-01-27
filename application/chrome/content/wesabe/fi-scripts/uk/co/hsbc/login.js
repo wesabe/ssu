@@ -106,7 +106,7 @@ wesabe.provide('fi-scripts.uk.co.hsbc.login', {
           'ancestor::div[position()=1]//text()[contains(., "NINTH")]',
           'ancestor::div[position()=1]//text()[contains(., "TENTH")]',
           'ancestor::div[position()=1]//text()[contains(., "LAST")]',
-          'ancestor::div[position()=1]//span[@class="hsbcTextHighlight"]//text()',
+          'ancestor::div[position()=1]//span[has-class("hsbcTextHighlight")]//text()',
         ],
 
         continueButton: [

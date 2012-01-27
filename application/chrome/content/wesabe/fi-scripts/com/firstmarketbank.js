@@ -168,7 +168,7 @@ wesabe.download.Player.register({
 
     loginError: [
       '//text()[contains(.,"Sign-on unsuccessful")]',
-      '//*[contains(@class,"errorTextTop")]'
+      '//*[has-class("errorTextTop")]'
     ],
 
     errorInvalidUserId: [

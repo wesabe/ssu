@@ -65,7 +65,7 @@ wesabe.provide("fi-scripts.com.citibank.accounts", {
     ],
 
     noActivityError: [
-      '//td[@class="apptxtlg"][contains(text(), "no activity")]'
+      '//td[has-class("apptxtlg")][contains(text(), "no activity")]'
     ],
 
     // download page
@@ -98,7 +98,7 @@ wesabe.provide("fi-scripts.com.citibank.accounts", {
       ],
 
       button: [
-        '//a[contains(text(), "Download File")][@class="appNavNext"]'
+        '//a[contains(text(), "Download File")][has-class("appNavNext")]'
       ],
 
       dateRangeRadio: [

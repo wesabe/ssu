@@ -74,7 +74,7 @@ wesabe.download.Player.register({
 
         errors: {
           invalid: [
-            '//form[@name="Login"]//*[@class="con-error-text" and contains(string(.), "Username")]',
+            '//form[@name="Login"]//*[has-class("con-error-text") and contains(string(.), "Username")]',
             '//form[@name="Login"]//text()[contains(., "must enter a valid Username")]',
           ],
         },
@@ -89,7 +89,7 @@ wesabe.download.Player.register({
 
         errors: {
           invalid: [
-          '//form[@name="Login"]//*[@class="con-error-text" and contains(string(.), "password")]',
+          '//form[@name="Login"]//*[has-class("con-error-text") and contains(string(.), "password")]',
             '//form[@name="Login"]//text()[contains(., "invalid password")]',
           ],
         },
@@ -122,7 +122,7 @@ wesabe.download.Player.register({
 
       errors: {
         invalid: [
-          '//form[@name="Form1"]//*[@class="con-error-text"]',
+          '//form[@name="Form1"]//*[has-class("con-error-text")]',
           '//form[@name="Form1"]//text()[contains(., "cannot verify the answer you provided")]',
           '//text()[contains(., "cannot verify the answer you provided")]',
         ],

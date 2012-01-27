@@ -166,7 +166,7 @@ wesabe.download.Player.register({
 
         item: {
           container: [
-            '//tr[@class="EVEN" or @class="ODD"][.//a[contains(@href, "DdaDetail")]]',
+            '//tr[has-class("EVEN") or has-class("ODD")][.//a[contains(@href, "DdaDetail")]]',
           ],
 
           accountNumber: [

@@ -69,7 +69,7 @@ wesabe.provide 'fi-scripts.com.chase.transfers',
   elements:
     paymentsAndTransfersTabLink: [
       '//a[contains(@href, "payments")][@name="Payments & Transfers"]'
-      '//td[contains(@class, "tabpayments")]//a'
+      '//td[has-class("tabpayments")]//a'
     ]
 
     accountTransfersSubtabLink: [
@@ -87,7 +87,7 @@ wesabe.provide 'fi-scripts.com.chase.transfers',
 
     transfers:
       indicator: [
-        '//*[contains(@class, "pagetitle")][contains(string(.), "Transfer Money")]'
+        '//*[has-class("pagetitle")][contains(string(.), "Transfer Money")]'
       ]
 
       accountSelection:
@@ -139,11 +139,11 @@ wesabe.provide 'fi-scripts.com.chase.transfers',
 
       confirmation:
         indicator: [
-          '//*[contains(@class, "confrow")][contains(string(.), "Transfer Scheduled")]'
+          '//*[has-class("confrow")][contains(string(.), "Transfer Scheduled")]'
           '//*[contains(@summary, "confirmation")][contains(string(.), "Transfer Scheduled")]'
         ]
 
       errors:
         general: [
-          '//*[contains(@class, "errorrow")][not(contains(string(.), "Attention"))]'
+          '//*[has-class("errorrow")][not(contains(string(.), "Attention"))]'
         ]

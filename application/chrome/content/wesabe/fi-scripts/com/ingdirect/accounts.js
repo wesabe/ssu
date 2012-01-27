@@ -114,20 +114,20 @@ wesabe.provide('fi-scripts.com.ingdirect.accounts', {
 
     errors: {
       general: [
-        '//*[@class="errormsg" or @class="actionmsg"]',
+        '//*[has-class("errormsg") or has-class("actionmsg")]',
       ],
 
       sessionExpired: [
-        '//*[@class="actionmsg"][contains(string(text()), "session")][contains(string(text()), "expired")]'
+        '//*[has-class("actionmsg")][contains(string(text()), "session")][contains(string(text()), "expired")]'
       ],
 
       // the user entered their pin directly into the field
       pinLettersNotNumbers: [
-        '//*[@class="errormsg"][contains(string(text()), "LETTERS")][contains(string(text()), "NUMBERS")]'
+        '//*[has-class("errormsg")][contains(string(text()), "LETTERS")][contains(string(text()), "NUMBERS")]'
       ],
 
       noTransactionsForPeriod: [
-        '//*[@class="errormsg" and contains(string(.), "no transactions for the selected timeframe")]'
+        '//*[has-class("errormsg") and contains(string(.), "no transactions for the selected timeframe")]'
       ],
     },
   },

@@ -268,15 +268,15 @@ wesabe.download.Player.register({
     ],
 
     errorWrongUsername: [
-      '//*[(contains(@class, "error") or contains(@class, "alert")) and contains(string(.), "entered an invalid username")]'
+      '//*[(has-class("error") or has-class("alert")) and contains(string(.), "entered an invalid username")]'
     ],
 
     errorWrongUsernameOrPassword: [
-      '//*[(contains(@class, "error") or contains(@class, "alert")) and contains(string(.), "do not recognize your username and/or password")]',
+      '//*[(has-class("error") or has-class("alert")) and contains(string(.), "do not recognize your username and/or password")]',
     ],
 
     errorCannotVerifyEntry: [
-      '//*[(contains(@class, "error") or contains(@class, "alert")) and contains(string(.), "cannot verify your entry")]'
+      '//*[(has-class("error") or has-class("alert")) and contains(string(.), "cannot verify your entry")]'
     ],
 
     errorOfSomeKind: [

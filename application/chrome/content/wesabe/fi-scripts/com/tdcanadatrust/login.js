@@ -100,7 +100,7 @@ wesabe.provide("fi-scripts.com.tdcanadatrust.login", {
 
     logoff: {
       link: [
-        '//a[@class="logout"][contains(@href, "LogoffServlet")]',
+        '//a[has-class("logout")][contains(@href, "LogoffServlet")]',
         '//a[img[contains(@src, "logout")]]',
       ],
     },
@@ -108,7 +108,7 @@ wesabe.provide("fi-scripts.com.tdcanadatrust.login", {
     security: {
       indicator: [
         '//form[@name="challengeCustomer"]',
-        '//*[contains(@class, "pageTitle")][contains(string(.), "Maintain Security Options")]',
+        '//*[has-class("pageTitle")][contains(string(.), "Maintain Security Options")]',
       ],
 
       // the Text node of the questions

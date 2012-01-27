@@ -129,8 +129,8 @@ wesabe.download.Player.register({
     ],
 
     passwordSecurityKey: [
-      '//form[@name="inputForm"]//*[@class="id_key" and string(text())=":n"]',
-      '//*[@class="id_key" and string(text())=":n"]',
+      '//form[@name="inputForm"]//*[has-class("id_key") and string(text())=":n"]',
+      '//*[has-class("id_key") and string(text())=":n"]',
       '//*[string(text())=":n"]'
     ],
 

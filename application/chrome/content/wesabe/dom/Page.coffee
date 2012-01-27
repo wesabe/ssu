@@ -537,7 +537,7 @@ class Page
   #   page.visible '//body'
   #   # => true
   #
-  #   page.visible '//div[@class="this-class-hides-things"]//a'
+  #   page.visible '//div[has-class("this-class-hides-things")]//a'
   #   # => false
   #
   # Returns a Boolean indicating whether the Node is visible.
@@ -646,10 +646,10 @@ class Page
   #
   # Examples
   #
-  #   page.hasClass page.find('//div[@class="section"]'), 'section'
+  #   page.hasClass page.find('//div[has-class("section")]'), 'section'
   #   # => true
   #
-  #   page.hasClass page.find('//div[@class="section"]'), 'section'
+  #   page.hasClass page.find('//div[has-class("section")]'), 'section'
   #   # => true
   #
   # Returns true if the Element has the given class.

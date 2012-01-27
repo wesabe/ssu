@@ -88,7 +88,7 @@ wesabe.provide 'fi-scripts.com.americanexpress.accounts',
             ]
 
             name: [
-              './/*[@class="cardDescription"]' # relative to container
+              './/*[has-class("cardDescription")]' # relative to container
             ]
 
           statements:

@@ -139,12 +139,12 @@ wesabe.provide("fi-scripts.com.paypal.login", {
       // but not both, so you'll probably need to trim some of this
       error: {
         user: [
-          '//div[@class="error"]/text()[contains(.,"enter a valid email address")]'
+          '//div[has-class("error")]/text()[contains(.,"enter a valid email address")]'
         ],
 
         creds: [
           // for example
-          '//div[@class="error"]/text()[contains(.,"Please make sure")]',
+          '//div[has-class("error")]/text()[contains(.,"Please make sure")]',
           '//text()[contains(., "your last action could not be completed")]'
         ],
 

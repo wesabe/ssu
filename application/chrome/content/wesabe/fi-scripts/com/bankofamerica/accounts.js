@@ -142,12 +142,12 @@ wesabe.provide('fi-scripts.com.bankofamerica.accounts', {
     detail: {
       tab: {
         selected: [
-          '//li[@class="currentTab" and (contains(string(.), "Account Detail") or .//a[contains(@href, "GotoOnlineStatement")])]',
+          '//li[has-class("currentTab") and (contains(string(.), "Account Detail") or .//a[contains(@href, "GotoOnlineStatement")])]',
         ],
       },
 
       title: [
-        '//h1[@class="title1"]',
+        '//h1[has-class("title1")]',
       ],
     },
 
@@ -180,7 +180,7 @@ wesabe.provide('fi-scripts.com.bankofamerica.accounts', {
     ],
 
     downloadErrorBadDateRange: [
-      '//label[@for="fromDate"]//span[@class="error"]',
+      '//label[@for="fromDate"]//span[has-class("error")]',
       '//*[contains(string(.), "correct date range")]',
     ],
 
@@ -220,15 +220,15 @@ wesabe.provide('fi-scripts.com.bankofamerica.accounts', {
       '//a[contains(@href, "GotoLogout")]',   // bank
       '//a[contains(@href, "BacLogoff")]',    // credit
       '//a[contains(@href, "logoutScreen")]', // small business
-      '//div[@class="navheader" or @class="masthead"]//a[contains(string(.), "Sign Off")]', // nw
+      '//div[has-class("navheader") or has-class("masthead")]//a[contains(string(.), "Sign Off")]', // nw
 
       // 2011 redesign
       '//a[contains(@href, "target=signOff")]',
-      '//div[contains(@class, "header")]//a[contains(string(.), "Sign Off")]',
+      '//div[has-class("header")]//a[contains(string(.), "Sign Off")]',
     ],
 
     errorWrongOnlineId: [
-      '//*[contains(string(.), "Enter another Online ID") and contains(@class, "error")]'
+      '//*[contains(string(.), "Enter another Online ID") and has-class("error")]'
     ],
 
     errorWrongSecurityAnswer: [

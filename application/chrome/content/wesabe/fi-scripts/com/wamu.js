@@ -220,11 +220,11 @@ wesabe.download.Player.register({
     },
 
     downloadInvalidDateFormat: [
-      '//div[@class="error" and contains(string(.), "enter a valid date")]'
+      '//div[has-class("error") and contains(string(.), "enter a valid date")]'
     ],
 
     downloadInvalidDateFormatReason: [
-      '//div[@class="error"]//*[@class="validation"]//text()'
+      '//div[has-class("error")]//*[has-class("validation")]//text()'
     ],
 
     /////////////////////////////////////////////////////////////////////////////
@@ -245,7 +245,7 @@ wesabe.download.Player.register({
     ],
 
     confirmDownloadErrorReason: [
-      '//div[@id="PageFormBox"]//table[@class="datagrid"]//tr//td[position()=3]/text()'
+      '//div[@id="PageFormBox"]//table[has-class("datagrid")]//tr//td[position()=3]/text()'
     ],
 
     /////////////////////////////////////////////////////////////////////////////

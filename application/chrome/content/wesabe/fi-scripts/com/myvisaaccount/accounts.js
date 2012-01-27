@@ -33,7 +33,7 @@ wesabe.provide("fi-scripts.com.myvisaaccount.accounts", {
           ],
 
           selected: [
-            '//a[contains(@href, "TransHistory.do")][contains(@class, "selected")]',
+            '//a[contains(@href, "TransHistory.do")][has-class("selected")]',
           ],
         },
       },

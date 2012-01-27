@@ -139,7 +139,7 @@ wesabe.provide('fi-scripts.com.bankofamerica.northwest', {
       page: {
         balanceSheet: {
           indicator: [
-            '//*[name()="h1" or contains(@class, "h1Text")][contains(string(.), "Balance Sheet")]',
+            '//*[name()="h1" or has-class("h1Text")][contains(string(.), "Balance Sheet")]',
           ],
         },
 
@@ -153,13 +153,13 @@ wesabe.provide('fi-scripts.com.bankofamerica.northwest', {
         downloadForm: {
           indicator: [
             '//form[@name="acctHistDownload"]',
-            '//*[name()="h1" or contains(@class, "h1Text")][contains(string(.), "Download Transactions")]',
+            '//*[name()="h1" or has-class("h1Text")][contains(string(.), "Download Transactions")]',
           ],
         },
 
         downloadConfirm: {
           indicator: [
-            '//*[name()="h1" or contains(@class, "h1Text")][contains(string(.), "Account Detail Download")]',
+            '//*[name()="h1" or has-class("h1Text")][contains(string(.), "Account Detail Download")]',
             '//text()[contains(., "Continue with download")]',
             '//*[attribute::*="Continue with download"]',
           ],
@@ -168,7 +168,7 @@ wesabe.provide('fi-scripts.com.bankofamerica.northwest', {
 
       errors: {
         noTransactions: [
-          '//*[@class="alertError"][contains(string(.), "The time period you have requested to download has no posted transactions.")]',
+          '//*[has-class("alertError")][contains(string(.), "The time period you have requested to download has no posted transactions.")]',
         ],
       },
 
@@ -275,7 +275,7 @@ wesabe.provide('fi-scripts.com.bankofamerica.northwest', {
         link: [
           '//a[contains(@href, "logoff") and contains(string(.), "Sign Off")]',
           '//a[@href="JavaScript:logoff();"]',
-          '//*[@class="masthead"]//a[contains(@href, "logoff") or contains(string(.), "Sign Off")]',
+          '//*[has-class("masthead")]//a[contains(@href, "logoff") or contains(string(.), "Sign Off")]',
         ],
       },
     },

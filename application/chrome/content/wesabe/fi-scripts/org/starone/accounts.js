@@ -152,8 +152,8 @@ wesabe.provide('fi-scripts.org.starone.accounts', {
     ],
 
     errorWrongUsernameOrPassword: [
-      '//span[@class="mainTitle"][text()="Member Verification Error"]',
-      '//span[@class="error-text"]',
+      '//span[has-class("mainTitle")][text()="Member Verification Error"]',
+      '//span[has-class("error-text")]',
     ],
 
     /////////////////////////////////////////////////////////////////////////////
@@ -179,7 +179,7 @@ wesabe.provide('fi-scripts.org.starone.accounts', {
     /////////////////////////////////////////////////////////////////////////////
 
     warningMessage: [
-      '//span[@class="warning"]',
+      '//span[has-class("warning")]',
     ],
 
     moreHistoryForm: [

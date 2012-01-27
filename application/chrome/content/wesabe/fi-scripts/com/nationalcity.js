@@ -138,7 +138,7 @@ wesabe.download.Player.register({
       '//form[@name="aspnetForm"]//input[contains(@name, "btExport") and (@type="submit" or @type="image")]',
       '//input[contains(@name, "btExport") and (@type="submit" or @type="image")]',
       '//form[@name="aspnetForm"]//input[@type="submit" or @type="image"]',
-      '//input[contains(@class, "defaultButton") and (@type="submit" or @type="image")]'
+      '//input[has-class("defaultButton") and (@type="submit" or @type="image")]'
     ],
 
     ///////////////////////////////////////////////////////////////////////////
@@ -150,8 +150,8 @@ wesabe.download.Player.register({
     ],
 
     downloadExportButton: [
-      '//form[@name="aspnetForm"]//input[contains(@class, "defaultButton") and (@type="submit" or @type="image")]',
-      '//input[contains(@class, "defaultButton") and (@type="submit" or @type="image")]',
+      '//form[@name="aspnetForm"]//input[has-class("defaultButton") and (@type="submit" or @type="image")]',
+      '//input[has-class("defaultButton") and (@type="submit" or @type="image")]',
       '//form[@name="aspnetForm"]//input[@type="submit" or @type="image"]',
       '//input[@type="submit" or @type="image"]'
     ],

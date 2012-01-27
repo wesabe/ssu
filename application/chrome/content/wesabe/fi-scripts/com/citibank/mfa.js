@@ -12,7 +12,7 @@ wesabe.provide("fi-scripts.com.citibank.mfa", {
   elements: {
     mfa: {
       indicator: [
-        '//*[@class="jrspageHeader"][contains(string(.), "Authorization Required")]',
+        '//*[has-class("jrspageHeader")][contains(string(.), "Authorization Required")]',
         '//form[@action="/US/JRS/mfa/cq/ValidateCQ.do"]',
       ],
 
@@ -32,7 +32,7 @@ wesabe.provide("fi-scripts.com.citibank.mfa", {
 
     security: {
       questions: [
-        '//form[contains(@action, "mfa")]//*[@class="jrsnoteText"]/b/text()',
+        '//form[contains(@action, "mfa")]//*[has-class("jrsnoteText")]/b/text()',
       ],
 
       answers: [

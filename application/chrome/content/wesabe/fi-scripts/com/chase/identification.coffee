@@ -121,13 +121,13 @@ wesabe.provide 'fi-scripts.com.chase.identification',
       page:
         info:
           indicator: [
-            '//td[@class="steptexton"][contains(string(.), "Identification")][not(contains(string(.), "Code"))]'
+            '//td[has-class("steptexton")][contains(string(.), "Identification")][not(contains(string(.), "Code"))]'
             '//form[@name="frmSSOSecAuthInformation"]'
           ]
 
         contact:
           indicator: [
-            '//*[@class="instrtexthead"][contains(string(.), "Get your Identification Code")]'
+            '//*[has-class("instrtexthead")][contains(string(.), "Get your Identification Code")]'
           ]
 
         confirmation:
@@ -137,12 +137,12 @@ wesabe.provide 'fi-scripts.com.chase.identification',
 
         codeEntry:
           indicator: [
-            '//*[@class="instrtexthead"][contains(string(.), "Enter your Identification Code")]'
+            '//*[has-class("instrtexthead")][contains(string(.), "Enter your Identification Code")]'
           ]
 
         legalAgreements:
           indicator: [
-            '//td[@class="steptexton"][contains(string(.), "Legal Agreements")]'
+            '//td[has-class("steptexton")][contains(string(.), "Legal Agreements")]'
             '//form[@name="frmSecureLA"]'
           ]
 
@@ -192,7 +192,7 @@ wesabe.provide 'fi-scripts.com.chase.identification',
 
       error:
         noIdentificationCode: [
-          '//*[@class="errorText"][contains(string(.), "Select an Identification Code Delivery Method")]'
+          '//*[has-class("errorText")][contains(string(.), "Select an Identification Code Delivery Method")]'
           '//text()[contains(., "Our records show that you do not currently have a valid Identification Code for this account")]'
         ]
 
@@ -205,7 +205,7 @@ wesabe.provide 'fi-scripts.com.chase.identification',
         link: [
           '//a[contains(@href, "CustomerCenter")][@name="Customer Center"]'
           '//td[@title="Go to Customer Center"]//a'
-          '//td[contains(@class, "tabcustomercenter")]//a'
+          '//td[has-class("tabcustomercenter")]//a'
         ]
 
       pfmLink: [

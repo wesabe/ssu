@@ -114,7 +114,7 @@ wesabe.provide('fi-scripts.com.ingdirect.login', {
       errors: {
         lockedOut: '//text()[contains(., "you have reached the maximum number of login failures")]',
 
-        badCreds: '//*[@class="errormsg"][contains(string(.), "check") or contains(string(.), "verify") or contains(string(.), "don\'t recognize")][contains(string(.), "Customer Number")]',
+        badCreds: '//*[has-class("errormsg")][contains(string(.), "check") or contains(string(.), "verify") or contains(string(.), "don\'t recognize")][contains(string(.), "Customer Number")]',
       },
     },
 
@@ -124,7 +124,7 @@ wesabe.provide('fi-scripts.com.ingdirect.login', {
 
     security: {
       questions: [
-        '//label[contains(@class, "question")]//text()',
+        '//label[has-class("question")]//text()',
       ],
 
       answers: [

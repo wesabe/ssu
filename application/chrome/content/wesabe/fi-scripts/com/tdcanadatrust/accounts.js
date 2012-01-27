@@ -110,7 +110,7 @@ wesabe.provide("fi-scripts.com.tdcanadatrust.accounts", {
         ],
 
         accountName: [ // relative to 'select'
-          '../../td[@class="table"][1]/text()',
+          '../../td[has-class("table")][1]/text()',
         ],
 
         showCheckbox: [

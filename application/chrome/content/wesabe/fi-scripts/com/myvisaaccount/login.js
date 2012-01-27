@@ -63,12 +63,12 @@ wesabe.provide("fi-scripts.com.myvisaaccount.login", {
 
       error: {
         user: [
-          '//*[contains(@class, "dispute")]//text()[contains(., "User Name cannot be less than 6 characters")]',
-          '//*[contains(@class, "dispute")]//text()[contains(., "User Name is required")]',
+          '//*[has-class("dispute")]//text()[contains(., "User Name cannot be less than 6 characters")]',
+          '//*[has-class("dispute")]//text()[contains(., "User Name is required")]',
         ],
 
         pass: [
-          '//*[contains(@class, "dispute")]//text()[contains(., "Password is required")]',
+          '//*[has-class("dispute")]//text()[contains(., "Password is required")]',
         ],
 
         creds: [
