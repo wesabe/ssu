@@ -14,8 +14,9 @@ class Pathway
     @value = @_prepare(value)
 
   @REPLACEMENTS:
-    'upper-case($1)': 'translate($1, \"abcdefghijklmnopqrstuvwxyz\", \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\")'
-    'lower-case($1)': 'translate($1, \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\", \"abcdefghijklmnopqrstuvwxyz\")'
+    'upper-case($1)': 'translate($1, "abcdefghijklmnopqrstuvwxyz", "ABCDEFGHIJKLMNOPQRSTUVWXYZ")'
+    'lower-case($1)': 'translate($1, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz")'
+    'has-class("$1")': 'contains(concat(" ", @class, " "), " $1 ")'
 
   _prepare: (value) ->
     for own func, replacement of @constructor.REPLACEMENTS

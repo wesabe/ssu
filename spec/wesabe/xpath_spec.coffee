@@ -10,3 +10,6 @@ describe 'xpath.Pathway', ->
     
   it 'can combine upper-case() and lower-case()', ->
     expect((new xpath.Pathway "//*[upper-case(lower-case(name()))=\"INPUT\"]").value).toEqual("//*[translate(translate(name(), \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\", \"abcdefghijklmnopqrstuvwxyz\"), \"abcdefghijklmnopqrstuvwxyz\", \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\")=\"INPUT\"]")
+    
+  it 'adds a has-class() function', ->
+    expect((new xpath.Pathway "//span[has-class(\"error\")]").value).toEqual("//span[contains(concat(\" \", @class, \" \"), \" error \")]")
