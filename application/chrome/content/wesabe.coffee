@@ -2,10 +2,6 @@
 # Provides the basic methods needed to load packages and any functions
 # useful enough to live in the core.
 #
-# NOTE: Much of the package stuff is drawn from Dojo, which is a project
-# that is arguably over-engineered and generally stuffy, but hopefully
-# taking a small slice out of it will not spread the seeds of doom.
-#
 
 if window? and not GLOBAL?
   # we're in a DOM-ish environment rather than a commonjs-ish environment
@@ -103,14 +99,11 @@ wesabe =
   #   # looks for files in this order:
   #   # wesabe/math/vector.js
   #   # wesabe/math.js
-  #   # wesabe/math/__package__.js
   #   wesabe.require("math.vector");
   #
   #   # specifying an asterisk last changes the order:
-  #   # wesabe/math/vector/__package__.js
   #   # wesabe/math/vector.js
   #   # wesabe/math.js
-  #   # wesabe/math/__package__.js
   #
   require: (module) ->
     return required[module].exports if required[module]
@@ -175,11 +168,9 @@ wesabe =
   # Transforms an array of module parts to a list of possible Uris.
   # @method _getUrisForParts
   # @param parts {Array} The list of module parts.
-  # @param lookForPackages {Boolean} Whether to look for a package file at all.
-  # @param preferPackages {Boolean} Whether to look for a package file first.
   # @private
   #
-  _getUrisForParts: (parts, scheme, lookForPackages, preferPackages) ->
+  _getUrisForParts: (parts, scheme) ->
     s = wesabe.baseUrlForScheme(scheme)
     u = (pp) ->
       base = [s].concat(pp).join('/')
@@ -188,23 +179,13 @@ wesabe =
     if parts.length is 0
       return []
 
-    if parts[parts.length-1] is '*'
-      parts.pop()
-      lookForPackages = preferPackages = true
-
     uris = []
-    # A/B/C/__package__.{js,coffee}
-    if lookForPackages
-      uris = uris.concat(u(parts.concat(['__package__'])))
 
     # A/B/C.{js,coffee}
-    if preferPackages
-      uris = uris.concat(u(parts))
-    else
-      uris = u(parts).concat(uris)
+    uris = u(parts).concat(uris)
 
     # start over with A/B
-    uris.concat(wesabe._getUrisForParts(parts[0...parts.length-1], scheme, true, false))
+    uris.concat(wesabe._getUrisForParts(parts[0...parts.length-1], scheme))
 
   #
   # Loads (and evals) the JS file at +uri+. Returns true on success.
