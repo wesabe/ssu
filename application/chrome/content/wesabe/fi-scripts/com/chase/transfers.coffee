@@ -17,8 +17,7 @@ wesabe.provide 'fi-scripts.com.chase.transfers',
         return
 
     if page.present e.transfers.confirmation.indicator
-      job.succeed()
-      action.logoff()
+      job.nextGoal()
     else if page.present e.transfers.errors.general
       job.fail 'transfer.error'
     else if page.present e.transfers.accountSelection.fromAccount

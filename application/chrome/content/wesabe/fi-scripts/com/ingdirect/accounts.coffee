@@ -7,8 +7,7 @@ wesabe.provide "fi-scripts.com.ingdirect.accounts",
 
     if page.visible e.errors.noTransactionsForPeriod
       logger.warn "No transactions available, skipping account"
-      job.succeed()
-      action.logoff()
+      job.nextGoal()
     else if page.visible e.downloadPeriod
       action.downloadActivity()
     else if page.present e.downloadLink

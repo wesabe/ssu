@@ -9,8 +9,7 @@ wesabe.provide 'fi-scripts.com.ingdirect.transfers',
         return
 
     if page.present e.transfers.confirmation.indicator
-      job.succeed()
-      action.logoff()
+      job.nextGoal()
     else if page.present e.transfers.form.errors.validationFailed
       job.fail 'transfer.invalid'
     else if page.present e.transfers.form.errors.general
