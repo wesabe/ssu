@@ -276,7 +276,8 @@ class Controller
       @scope.job = @job
 
       if data.type is 'text/coffeescript'
-        script = string.trim(CoffeeScript.compile "(-> #{script})()")
+        script = string.trim(CoffeeScript.compile "(-> #{script})()", bare: on)
+        logger.debug script
       else
         script = "(function(){#{script}})()" if /[;\n]/.test script
 
