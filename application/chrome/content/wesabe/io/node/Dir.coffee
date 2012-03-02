@@ -43,16 +43,6 @@ class Dir extends File
 
     return list
 
-
-  @__defineGetter__ 'profile', ->
-    getNamedDir 'ProfD'
-
-  @__defineGetter__ 'chrome', ->
-    getNamedDir 'AChrom'
-
-  @__defineGetter__ 'root', ->
-    (new @ "#{@chrome.path}/../../").normalize()
-
   @__defineGetter__ 'tmp', ->
     for tmp in ['TMPDIR', 'TMP', 'TEMP']
       return new @ process.env[tmp] if process.env[tmp]
