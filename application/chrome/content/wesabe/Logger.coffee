@@ -246,8 +246,9 @@ module.exports = Logger
 #
 # This will still allow calls to wesabe.debug etc. but with
 # a nice fat deprecation warning.
-for own level of LEVELS
-  do (level) ->
-    wesabe[level] = (args...) ->
-      rootLogger.deprecated "wesabe.#{level}(...)", "logger.#{level}(...)"
-      rootLogger[level](args...)
+if wesabe?
+  for own level of LEVELS
+    do (level) ->
+      wesabe[level] = (args...) ->
+        rootLogger.deprecated "wesabe.#{level}(...)", "logger.#{level}(...)"
+        rootLogger[level](args...)

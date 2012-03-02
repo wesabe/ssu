@@ -111,14 +111,15 @@ wrap = (fn, self) ->
 
 
 # shortcuts
-wesabe.success = (callback, args) ->
-  executeCallback callback, 'success', args
+if wesabe?
+  wesabe.success = (callback, args) ->
+    executeCallback callback, 'success', args
 
-wesabe.failure = (callback, args) ->
-  executeCallback callback, 'failure', args
+  wesabe.failure = (callback, args) ->
+    executeCallback callback, 'failure', args
 
-wesabe.callback = (callback, which, args) ->
-  executeCallback callback, (if which then 'success' else 'failure'), args
+  wesabe.callback = (callback, which, args) ->
+    executeCallback callback, (if which then 'success' else 'failure'), args
 
 
 module.exports = {callWithScope, executeCallback, wrap, argNames}

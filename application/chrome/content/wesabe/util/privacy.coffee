@@ -187,9 +187,9 @@ privacy.registerTaintWrapper
   generator: (o) -> o
 
 
-wesabe ?= require '../../wesabe'
-wesabe.untaint = logger.wrapDeprecated 'wesabe.untaint', 'privacy.untaint', privacy.untaint
-wesabe.taint = logger.wrapDeprecated 'wesabe.taint', 'privacy.taint', privacy.taint
+if wesabe?
+  wesabe.untaint = logger.wrapDeprecated 'wesabe.untaint', 'privacy.untaint', privacy.untaint
+  wesabe.taint = logger.wrapDeprecated 'wesabe.taint', 'privacy.taint', privacy.taint
 
 
 module.exports = privacy
