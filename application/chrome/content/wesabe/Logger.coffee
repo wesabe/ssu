@@ -65,7 +65,9 @@ class Logger
   # Appenders append text to things, like stdout or a file.
   #
   @::__defineGetter__ 'appender', ->
-    @_appender or @_parent?._appender or (text) -> dump "#{text}\n"
+    @_appender or @_parent?._appender or
+      (console?.log and (text) -> console.log text) or
+      (text) -> dump "#{text}\n"
 
   @::__defineSetter__ 'appender', (appender) ->
     @_appender = appender
