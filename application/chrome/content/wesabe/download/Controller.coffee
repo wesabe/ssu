@@ -282,7 +282,7 @@ class Controller
         script = "(function(){#{script}})()" if /[;\n]/.test script
 
       script = "return #{script}"
-      result = func.callWithScope script, wesabe, @scope
+      result = func.callWithScope script, @scope, @scope
 
       @scope._ = result
 
