@@ -9,14 +9,12 @@ xhr     = require 'io/xhr'
 Job     = require 'download/Job'
 Logger  = require 'Logger'
 inspect = require 'util/inspect'
+Server  = require 'io/http/Server'
 
 {EventEmitter} = require 'events2'
 {tryCatch, tryThrow} = require 'util/try'
 
 class Controller
-  createServerSocket: ->
-    Cc['@mozilla.org/network/server-socket;1'].createInstance(Ci.nsIServerSocket)
-
   start: (@port) ->
     @windows ||= length: 1
     @windows[window.name] = window
@@ -31,12 +29,24 @@ class Controller
       retriesLeft = 100
       @port = 5000
 
+    listener = (request, response) =>
+      try
+        request = json.parse request.body
+        @dispatch request, (res) =>
+          responseText = "#{json.render res}\n"
+          response.headers['Content-Type'] = 'application/json'
+          response.write responseText
+          response.close()
+      catch e
+        response.statusCode = 500
+        response.write "#{e}"
+        response.close()
+
     tryCatch 'Controller#start', (log) =>
-      @server = @createServerSocket()
+      @server = new Server()
       until bindSuccessful or retriesLeft is 0
         try
-          @server.init @port, true, -1
-          @server.asyncListen this
+          @server.listen @port, listener
           bindSuccessful = true
           window.port = @port
         catch e
@@ -50,49 +60,6 @@ class Controller
       else
         log.error "Failed to start listener"
         return false
-
-  onSocketAccepted: (serv, transport) ->
-    tryCatch 'Controller#onSocketAccepted', (log) =>
-      outstream = transport.openOutputStream(Ci.nsITransport.OPEN_BLOCKING, 0, 0)
-
-      stream = transport.openInputStream(0, 0, 0)
-      instream = Cc['@mozilla.org/scriptableinputstream;1'].createInstance(Ci.nsIScriptableInputStream)
-
-      instream.init stream
-      log.debug 'Accepted connection'
-
-      pump = Cc['@mozilla.org/network/input-stream-pump;1'].createInstance(Ci.nsIInputStreamPump)
-      pump.init(stream, -1, -1, 0, 0, false)
-      pump.asyncRead
-        onStartRequest: (request, context) =>
-          log.radioactive this
-          @request = ''
-
-        onStopRequest: (request, context, status) =>
-          log.radioactive this
-          outstream.close()
-
-        onDataAvailable: (request, context, inputStream, offset, count) =>
-          data = instream.read count
-          log.radioactive 'getting data: ', data
-          @request += data
-
-          while (index = @request.indexOf("\n")) isnt -1
-            requestText = @request[0...index]
-            @request = @request[index+1..]
-
-            request = json.parse requestText
-            @dispatch request, (response) =>
-              try
-                responseText = "#{json.render response}\n"
-                log.radioactive responseText
-                outstream.write responseText, responseText.length
-              catch e
-                log.error e
-      , null
-
-  onStopListening: (serv, status) ->
-    logger.debug "Controller#onStopListening"
 
   dispatch: (request, respond) ->
     request.action = request.action.replace /\./g, '_'
