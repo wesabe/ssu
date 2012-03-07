@@ -8,7 +8,7 @@ Request
   ;
 
 SimpleRequest
-  : METHOD SP PATH NEWLINE { $$ = {method: $1, url: $3, httpVersion: 0.9}; }
+  : METHOD SP PATH NEWLINE NEWLINE { $$ = {method: $1, url: $3, httpVersion: 0.9}; }
   ;
 
 FullRequest
@@ -21,7 +21,7 @@ RequestLine
   ;
 
 HeaderList
-  : EOF { $$ = []; }
+  : NEWLINE EOF { $$ = []; }
   | HEADER NEWLINE { $$ = [$1]; }
   | HEADER NEWLINE HeaderList { $$ = $3.concat([$1]); }
   ;

@@ -1,10 +1,10 @@
 Parser = require 'io/http/request/Parser'
 
-emptyGET = 'GET /login?return_to=%2fhome HTTP/1.0\n'
-simpleGET = 'GET /signup\n'
-withHeaders = 'GET / HTTP/1.0\nHost: example.com\nAccept: text/plain\n'
+emptyGET = 'GET /login?return_to=%2fhome HTTP/1.0\r\n\r\n'
+simpleGET = 'GET /signup\r\n\r\n'
+withHeaders = 'GET / HTTP/1.0\r\nHost: example.com\r\nAccept: text/plain\r\nUser-Agent: curl/7.21.4 (universal-apple-darwin11.0) libcurl/7.21.4 OpenSSL/0.9.8r zlib/1.2.5\r\n\r\n'
 
-basicPOST = 'POST /items HTTP/1.0\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 7\n\nfoo=bar\n'
+basicPOST = 'POST /items HTTP/1.0\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: 7\r\n\r\nfoo=bar'
 
 describe 'io/http/request/Parser', ->
   describe 'parsing an HTTP/1.0 GET request without headers', ->
@@ -49,6 +49,9 @@ describe 'io/http/request/Parser', ->
     it 'parses simple headers correctly', ->
       expect(request.headers.Host).toEqual('example.com')
       expect(request.headers.Accept).toEqual('text/plain')
+
+    it 'parses headers with spaces correctly', ->
+      expect(request.headers['User-Agent']).toEqual('curl/7.21.4 (universal-apple-darwin11.0) libcurl/7.21.4 OpenSSL/0.9.8r zlib/1.2.5')
 
   describe 'parsing an HTTP/1.0 POST', ->
     request = null

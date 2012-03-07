@@ -66,12 +66,6 @@ class Lexer
 
   dataToken: ->
     @tokens.body = @chunk
-
-    newlineToken = null
-    while @tokens[@tokens.length-1]?[0] is 'NEWLINE'
-      newlineToken = @tokens.pop()
-    @tokens.push newlineToken if newlineToken
-
     return @chunk.length
 
   token: (tag, value) ->
@@ -84,7 +78,7 @@ METHOD = /^(GET|HEAD|POST|PUT|DELETE|OPTIONS)\b/
 PATH   = /^\/\S*/
 HEADER = /^([a-zA-Z][-a-zA-Z]*): ([^\r\n]*)/
 
-WHITESPACE = /^[^\n\S]+/
+WHITESPACE = /^[^\r\n\S]+/
 NEWLINE    = /^\r?\n/
 
 HTTP_VER_PRE = /^HTTP\//

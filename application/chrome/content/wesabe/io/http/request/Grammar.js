@@ -4,7 +4,7 @@ var parser = {trace: function trace() { },
 yy: {},
 symbols_: {"error":2,"Request":3,"SimpleRequest":4,"FullRequest":5,"METHOD":6,"SP":7,"PATH":8,"NEWLINE":9,"RequestLine":10,"HeaderList":11,"HttpVersion":12,"EOF":13,"HEADER":14,"HTTP":15,"NUMBER":16,"$accept":0,"$end":1},
 terminals_: {2:"error",6:"METHOD",7:"SP",8:"PATH",9:"NEWLINE",13:"EOF",14:"HEADER",15:"HTTP",16:"NUMBER"},
-productions_: [0,[3,1],[3,1],[4,4],[5,3],[10,5],[11,1],[11,2],[11,3],[12,2]],
+productions_: [0,[3,1],[3,1],[4,5],[5,3],[10,5],[11,2],[11,2],[11,3],[12,2]],
 performAction: function anonymous(yytext,yyleng,yylineno,yy,yystate,$$,_$) {
 
 var $0 = $$.length - 1;
@@ -13,7 +13,7 @@ case 1: return $$[$0];
 break;
 case 2: return $$[$0]; 
 break;
-case 3: this.$ = {method: $$[$0-3], url: $$[$0-1], httpVersion: 0.9}; 
+case 3: this.$ = {method: $$[$0-4], url: $$[$0-2], httpVersion: 0.9}; 
 break;
 case 4: $$[$0-2].headers = {}; $$[$0].forEach && $$[$0].forEach(function(h){ $$[$0-2].headers[h.name] = h.value; this.$ = $$[$0-2]; }); 
 break;
@@ -29,8 +29,8 @@ case 9: this.$ = $$[$0];
 break;
 }
 },
-table: [{3:1,4:2,5:3,6:[1,4],10:5},{1:[3]},{1:[2,1]},{1:[2,2]},{7:[1,6]},{9:[1,7]},{8:[1,8]},{11:9,13:[1,10],14:[1,11]},{7:[1,13],9:[1,12]},{1:[2,4]},{1:[2,6]},{9:[1,14]},{1:[2,3]},{12:15,15:[1,16]},{1:[2,7],11:17,13:[1,10],14:[1,11]},{9:[2,5]},{16:[1,18]},{1:[2,8]},{9:[2,9]}],
-defaultActions: {2:[2,1],3:[2,2],9:[2,4],10:[2,6],12:[2,3],15:[2,5],17:[2,8],18:[2,9]},
+table: [{3:1,4:2,5:3,6:[1,4],10:5},{1:[3]},{1:[2,1]},{1:[2,2]},{7:[1,6]},{9:[1,7]},{8:[1,8]},{9:[1,10],11:9,14:[1,11]},{7:[1,13],9:[1,12]},{1:[2,4]},{13:[1,14]},{9:[1,15]},{9:[1,16]},{12:17,15:[1,18]},{1:[2,6]},{1:[2,7],9:[1,10],11:19,14:[1,11]},{1:[2,3]},{9:[2,5]},{16:[1,20]},{1:[2,8]},{9:[2,9]}],
+defaultActions: {2:[2,1],3:[2,2],9:[2,4],14:[2,6],16:[2,3],17:[2,5],19:[2,8],20:[2,9]},
 parseError: function parseError(str, hash) {
     throw new Error(str);
 },
