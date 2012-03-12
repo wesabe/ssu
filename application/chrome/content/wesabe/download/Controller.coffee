@@ -30,17 +30,7 @@ class Controller
       @port = 5000
 
     listener = (request, response) =>
-      try
-        request = json.parse request.body
-        @dispatch request, (res) =>
-          responseText = "#{json.render res}\n"
-          response.headers['Content-Type'] = 'application/json'
-          response.write responseText
-          response.close()
-      catch e
-        response.statusCode = 500
-        response.write "#{e}"
-        response.close()
+      @dispatch request, response
 
     tryCatch 'Controller#start', (log) =>
       @server = new Server()
@@ -61,7 +51,33 @@ class Controller
         log.error "Failed to start listener"
         return false
 
-  dispatch: (request, respond) ->
+  dispatch: (request, response) ->
+    data = ->
+      result = json.parse request.body
+      data = -> result
+      data()
+
+    try
+      switch "#{request.method} #{request.url}"
+        when 'POST /_legacy'
+          @dispatchLegacy data(), (res) =>
+            responseText = "#{json.render res}\n"
+            response.headers['Content-Type'] = 'application/json'
+            response.write responseText
+            response.close()
+        else
+          response.statusCode = 404
+          response.write "<html><head><title>404 Not Found</title></head><body><h1>404 Not Found</h1></body></html>\r\n"
+          response.close()
+
+    catch e
+      logger.error "Error while processing request=", request, ": ", e
+      response.statusCode = 500
+      response.write "#{e}"
+      response.close()
+
+
+  dispatchLegacy: (request, respond) ->
     request.action = request.action.replace /\./g, '_'
     tryCatch 'Controller#dispatch', (log) =>
       if type.isFunction @[request.action]

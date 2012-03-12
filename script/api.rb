@@ -1,4 +1,4 @@
-require 'socket'
+require 'net/http'
 require 'json'
 
 class Api
@@ -17,23 +17,46 @@ class Api
       self['eval', {:script => '(require "io/Dir").profile.path', :type => 'text/coffeescript'}]
     end
 
-    def [](action, body=nil)
-      begin
-        sock = TCPSocket.new('127.0.0.1', port)
-        req = {:action => action, :body => body}.to_json
-        sock.puts(req)
-        res = JSON.parse(sock.readline)['response']
-        case res['status']
-        when 'ok'
-          res[action]
-        when 'error'
-          raise Error, res['error']
+    def post(path, data=nil)
+      request :method => :post,
+              :path   => path,
+              :body   => data
+    end
+
+    def request(options={})
+      Net::HTTP.start('127.0.0.1', port) do |http|
+        request = Net::HTTP::Post.new options[:path]
+        case options[:body]
+        when String
+          request.body = options[:body]
+          request.content_type = options[:content_type] || 'text/plain'
+        when nil
+          # no body
         else
-          raise Error, "Invalid response: #{res.inspect}"
+          request.body = options[:body].to_json
+          request.content_type = 'application/json'
         end
-      rescue Errno::ECONNREFUSED
-        raise Errno::ECONNREFUSED, "Couldn't connect to the server. Are you sure it's running?"
+
+        case response = http.request(request)
+        when Net::HTTPSuccess
+          return response
+        end
+
+        raise Error, "Invalid response: #{response.inspect}"
       end
     end
+
+    def [](action, body=nil)
+      response = post '/_legacy', :action => action, :body => body
+
+      res = JSON.parse(response.body)['response']
+      case res['status']
+      when 'ok'
+        return res[action]
+      when 'error'
+        raise Error, res['error']
+      end
+    end
+
   end
 end
