@@ -109,32 +109,40 @@ the SSU process][daemon] and [this file that talks to it][sync_job].
 [daemon]: https://github.com/wesabe/pfc/blob/master/app/models/ssu/daemon.rb
 [sync_job]: https://github.com/wesabe/pfc/blob/master/app/models/ssu/sync_job.rb
 
-Basically, SSU listens on a socket (at port 5000 by default) for lines
-of JSON issued as commands. Here's a sample command JSON line:
+Basically, SSU sets up a tiny HTTP server (at port 5000 by default) for commands.
+Here's a request to list all the statements that have been downloaded:
 
-    {"action":"statement.list", "body":null}
+    POST /_legacy HTTP/1.0
 
-That calls the `statement.list` action with no extra data. Here's one
-that starts a job with credentials:
+    {"action": "statement.list"}
 
-    {"action":"job.start",
-     "body":{"fid":"com.ingdirect",
-             "creds":{"username":"joesmith","password":"iamgod"}}}
+Here's one that starts a job with credentials:
 
-You'll similarly get responses back as JSON lines:
+    POST /_legacy HTTP/1.0
+    Content-Type: application/json
+    Content-Length: 76
 
-    # a successful response to the `statement.list` action
-    {"response": {"status": "ok",
-                  "statement.list": ["1D8787AA-6D2D-0001-DFF3-9EB052301CD4"]}}
+    {"action": "job.start", "body": {"fid":"com.ingdirect", "creds":{"username":"joesmith","password":"iamgod"}}}
+
+Responses will be in JSON regardless of what Accept header you pass:
+
+    # a successful response to the /statements request
+    HTTP/1.0 200 OK
+    Content-Type: application/json
+
+    {"status": "ok", "statements": ["1D8787AA-6D2D-0001-DFF3-9EB052301CD4"]}
 
     # an example error response
-    {"response": {"status": "error", "error": "ReferenceError: foo is not defined"}}
+    {"status": "error", "error": "ReferenceError: foo is not defined"}
 
-You can use any programming language you like that supports spawning
-processes and network sockets to manage an SSU instance. This project
-ships with development tools that also serve as basic examples in the [server][server]
-(spawning) and [console][console] (communication & managing via [api.rb][api.rb])
-scripts.
+**NOTE:** The `/_legacy` route is a temporary compatibility measure with the
+old pure-socket way of communicating with SSU. Eventually it'll be replaced by
+REST-based routes (e.g. `GET /statements`, `POST /jobs`, etc).
+
+You can use any programming language you like that supports spawning processes
+and HTTP to manage an SSU instance. This project ships with development tools
+that also serve as basic examples in the [server][server] (spawning) and
+[console][console] (communication & managing via [api.rb][api.rb]) scripts.
 
 [server]: https://github.com/wesabe/ssu/blob/master/bin/server
 [console]: https://github.com/wesabe/ssu/blob/master/script/console
@@ -143,8 +151,8 @@ scripts.
 My bank isn't supported. Can I add it?
 --------------------------------------
 
-Yep, there's a generator for that which will build a skeleton script for
-your financial insitution:
+Yep, there's a generator for that which will build a skeleton script for your
+financial insitution:
 
     ssu$ bundle
     ssu$ bundle exec script/generate player com.ally "Ally Bank" https://www.ally.com/
@@ -153,28 +161,26 @@ your financial insitution:
          [ADDED]  application/chrome/content/wesabe/fi-scripts/com/ally/login.coffee
          [ADDED]  application/chrome/content/wesabe/fi-scripts/com/ally/accounts.coffee
 
-You can probably leave the base script (`ally.coffee` in this example)
-alone and start filling in `login.coffee` with the info required to navigate
-the site. Once you've added something and created a matching credential
-file, go ahead and try it out:
+You can probably leave the base script (`ally.coffee` in this example) alone
+and start filling in `login.coffee` with the info required to navigate the
+site. Once you've added something and created a matching credential file, go
+ahead and try it out:
 
     ssu$ script/console
     >> job.start ally
 
-There are lots of examples in the `fi-scripts` directory for you to
-reference as you build your own script. Once you're satisfied just
-commit your files and send a pull request so we can add your financial
-institution for others to use.
+There are lots of examples in the `fi-scripts` directory for you to reference
+as you build your own script. Once you're satisfied just commit your files and
+send a pull request so we can add your financial institution for others to use.
 
 
 Why use a browser?
 ------------------
 
-Using XulRunner means that SSU can access any bank site that Firefox
-can, so you don't have to use mechanize or some other tool that doesn't
-fully emulate the browser environment. This matters because, by its
-nature, navigating any website in a scripted way is brittle and anything
-we can do to reduce the breakage is good. Websites are intended to be
-viewed in web browsers and their authors worked hard to make that
-function properly -- that is work you don't have to do when you use a
-browser as your scraper.
+Using XulRunner means that SSU can access any bank site that Firefox can, so
+you don't have to use mechanize or some other tool that doesn't fully emulate
+the browser environment. This matters because, by its nature, navigating any
+website in a scripted way is brittle and anything we can do to reduce the
+breakage is good. Websites are intended to be viewed in web browsers and their
+authors worked hard to make that function properly -- that is work you don't
+have to do when you use a browser as your scraper.
