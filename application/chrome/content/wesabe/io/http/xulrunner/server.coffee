@@ -46,16 +46,20 @@ class HttpServer
         onDataAvailable = (request, context, inputStream, offset, count) ->
           data += instream.read count
 
+          if methodMatch = /^([A-Z]+) /.exec data
+            method = methodMatch[1]
+
           if contentLengthMatch = /\bContent-Length:\s*(\d+)\r\n/i.exec data
             contentLength = parseInt(contentLengthMatch[1], 10)
-            endOfHeaders = data.indexOf('\r\n\r\n')
 
-            if endOfHeaders > 0
-              if endOfHeaders + 4 + contentLength is data.length
-                instream.close()
-                processHttpRequest()
-                http = null
-                data = null
+          endOfHeaders = data.indexOf('\r\n\r\n')
+
+          if endOfHeaders > 0
+            if method in ['GET', 'HEAD'] or (endOfHeaders + 4 + contentLength is data.length)
+              instream.close()
+              processHttpRequest()
+              http = null
+              data = null
 
         processHttpRequest = ->
           request = RequestParser.parse data
