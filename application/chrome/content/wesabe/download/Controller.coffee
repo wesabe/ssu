@@ -244,7 +244,6 @@ class Controller
 
       if data.type is 'text/coffeescript'
         script = string.trim(CoffeeScript.compile "(-> #{script})()", bare: on)
-        logger.debug script
       else
         script = "(function(){#{script}})()" if /[;\n]/.test script
 
