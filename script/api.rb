@@ -26,6 +26,7 @@ class Api
     def request(options={})
       Net::HTTP.start('127.0.0.1', port) do |http|
         request = Net::HTTP::Post.new options[:path]
+        request['Accept'] = 'application/json'
         case options[:body]
         when String
           request.body = options[:body]
@@ -42,7 +43,7 @@ class Api
           return response
         end
 
-        raise Error, "Invalid response: #{response.inspect}"
+        raise Error, "Invalid response: #{response.inspect}: #{response.body}"
       end
     end
 

@@ -45,8 +45,8 @@ class Application
       logger.info "Verify-Only option used, exiting"
       return goQuitApplication()
 
-    if not @startController {port: args.number 'port'}
-      logger.fatal "Failed to start Controller, going down!"
+    if not @startController(port: args.number 'port')
+      logger.fatal "Failed to start server, going down!"
       return goQuitApplication()
 
     # write out our configuration so that whoever started us can talk to us
@@ -73,8 +73,10 @@ class Application
         cookies.restore cookiesFile.read()
 
   startController: (options={}) ->
-    @controller = new Controller()
-    return @controller.start options.port
+    @controller = new Controller
+    result = @controller.start options.port or [5000, 5100]
+    logger.info "HTTP Server listening at http://localhost:#{@controller.port}/"
+    return result
 
   writeConfig: (config) ->
     configFile = Dir.profile.child('config').asFile

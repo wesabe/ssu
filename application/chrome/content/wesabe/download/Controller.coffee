@@ -15,80 +15,33 @@ Server  = require 'io/http/Server'
 {tryCatch, tryThrow} = require 'util/try'
 
 class Controller
-  start: (@port) ->
+  start: (port) ->
     @windows ||= length: 1
     @windows[window.name] = window
 
     bindSuccessful = false
 
-    if @port
-      # bind only to a specific port
-      retriesLeft = 1
-    else
-      # start at 5000 and try up to 5100
-      retriesLeft = 100
-      @port = 5000
-
     listener = (request, response) =>
       @dispatch request, response
 
     tryCatch 'Controller#start', (log) =>
-      @server = new Server()
-      until bindSuccessful or retriesLeft is 0
-        try
-          @server.listen @port, listener
-          bindSuccessful = true
-          window.port = @port
-        catch e
-          log.warn 'Failed to bind to port ', @port, ', trying up to ', retriesLeft, ' more. ', e
-          @port++
-          retriesLeft--
+      @server = new Server port
+      @port   = @server.port
 
-      if bindSuccessful
-        log.info 'Listening on port ', @port
-        return true
+    if not @server?
+      return false
+
+    @server.post '/_legacy', =>
+      action = @server.request.json?.action.replace /\./g, '_'
+      if type.isFunction @[action]
+        logger.debug "Procesing legacy action #{inspect action}"
+        @[action]? @server.request.json.body, (resdata) =>
+          @server.deliver resdata
       else
-        log.error "Failed to start listener"
-        return false
+        throw new Server.NotFoundError "Unrecognized request action #{inspect action}"
 
-  dispatch: (request, response) ->
-    data = ->
-      result = json.parse request.body
-      data = -> result
-      data()
+    return true
 
-    try
-      switch "#{request.method} #{request.url}"
-        when 'POST /_legacy'
-          @dispatchLegacy data(), (res) =>
-            responseText = "#{json.render res}\n"
-            response.headers['Content-Type'] = 'application/json'
-            response.write responseText
-            response.close()
-        else
-          response.statusCode = 404
-          response.write "<html><head><title>404 Not Found</title></head><body><h1>404 Not Found</h1></body></html>\r\n"
-          response.close()
-
-    catch e
-      logger.error "Error while processing request=", request, ": ", e
-      response.statusCode = 500
-      response.write "#{e}"
-      response.close()
-
-
-  dispatchLegacy: (request, respond) ->
-    request.action = request.action.replace /\./g, '_'
-    tryCatch 'Controller#dispatch', (log) =>
-      if type.isFunction @[request.action]
-        @[request.action]?(request.body, respond)
-      else
-        message = "Unrecognized request action #{inspect request.action}"
-        log.error message
-
-        respond response:
-                  status: 'error'
-                  error: message
 
   job_start: (data, respond) ->
     try
