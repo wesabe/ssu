@@ -71,6 +71,10 @@ class Server
       throw new NotFoundError
     else if /Error$/.test data.constructor.name
       throw new InternalServerError(data)
+    else if type.isString(data)
+      @response.statusCode = 200
+      @response.headers['Content-Type'] = 'application/octet-stream'
+      @response.write data
     else
       @response.statusCode = 200
       @response.headers['Content-Type'] = 'application/json'
