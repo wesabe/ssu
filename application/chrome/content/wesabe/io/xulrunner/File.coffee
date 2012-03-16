@@ -110,6 +110,18 @@ class File
     newPath += pathComponent
     new @constructor newPath
 
+  # Public: Gets the number of bytes contained in this file.
+  #
+  # Returns a Number of bytes.
+  @::__defineGetter__ 'size', ->
+    @localFile.fileSize
+
+  # Public: Gets the time at which this File was last modified.
+  #
+  # Returns a Date representing this File's last modified timestamp.
+  @::__defineGetter__ 'lastModifiedTime', ->
+    @localFile.lastModifiedTime
+
   # Public: Gets the basename for this File.
   #
   # Examples

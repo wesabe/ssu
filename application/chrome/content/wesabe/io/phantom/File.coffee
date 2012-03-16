@@ -64,6 +64,21 @@ class File
     newPath += pathComponent
     new @constructor newPath
 
+  # Public: Gets the number of bytes contained in this file.
+  #
+  # Returns a Number of bytes.
+  @::__defineGetter__ 'size', ->
+    fs.size(@path)
+
+  # Public: Gets the time at which this File was last modified.
+  #
+  # NOTE: PhantomJS's fs module does not yet expose mtime, so until it does
+  # this will return undefined.
+  #
+  # Returns a Date representing this File's last modified timestamp.
+  @::__defineGetter__ 'lastModifiedTime', ->
+    undefined
+
   # Public: Gets the basename for this File.
   #
   # Examples
