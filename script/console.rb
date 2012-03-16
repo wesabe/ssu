@@ -27,6 +27,32 @@ self.instance_eval do
     start_script_repl :coffee, 'text/coffeescript'
   end
 
+  def get(path)
+    request :get, path
+  end
+
+  def post(path, data=nil)
+    request :post, path, data
+  end
+
+  def put(path, data=nil)
+    request :put, path, data
+  end
+
+  def delete(path, data=nil)
+    request :delete, path, data
+  end
+
+  def request(method, path, data=nil)
+    response = Api.request :method => method, :path => path, :body => data
+    case response.content_type
+    when 'application/json'
+      JSON.parse(response.body)
+    else
+      response.body
+    end
+  end
+
   def start_script_repl(command, type)
     # this bit of insanity is needed since HISTORY is not an Array
     history = IRB::ReadlineInputMethod::HISTORY

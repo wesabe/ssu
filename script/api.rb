@@ -25,7 +25,7 @@ class Api
 
     def request(options={})
       Net::HTTP.start('127.0.0.1', port) do |http|
-        request = Net::HTTP::Post.new options[:path]
+        request = Net::HTTP.const_get(options[:method].to_s.capitalize).new options[:path]
         request['Accept'] = 'application/json'
         case options[:body]
         when String
