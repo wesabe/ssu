@@ -12,11 +12,9 @@ CompoundPlayer = require 'download/CompoundPlayer'
 {EventEmitter} = require 'events2'
 
 class Job extends EventEmitter
-  constructor: (jobid, fid, creds, user_id, options) ->
-    @jobid = jobid
+  constructor: (fid, creds, options) ->
     @fid = fid
     @creds = creds
-    @user_id = user_id
     @status = 202
     @done = false
     @version = 0
@@ -113,6 +111,6 @@ class Job extends EventEmitter
 
 
   contentForInspect: ->
-    {@jobid, @status, @result, @done, @options, @player, @data}
+    {@status, @result, @done, @options, @player, @data}
 
 module.exports = Job

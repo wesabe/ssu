@@ -70,7 +70,7 @@ class Controller
     try
       throw new Error "Got unexpected type: #{typeof data}" if typeof data isnt 'object'
 
-      @job = new Job data.jobid, data.fid, data.creds, data.user_id, data.options
+      @job = new Job data.fid, data.creds, data.options
 
       cookies.restore data.cookies if data.cookies
 
@@ -130,7 +130,6 @@ class Controller
                   status: @job.status
                   result: @job.result
                   data: @job.data
-                  jobid: @job.jobid
                   fid: @job.fid
                   completed: @job.done
                   cookies: cookies.dump()
