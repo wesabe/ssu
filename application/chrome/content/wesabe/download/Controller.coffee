@@ -38,10 +38,33 @@ class Controller
         @[action]? @server.request.json.body, (resdata) =>
           @server.deliver resdata
       else
-        throw new Server.NotFoundError "Unrecognized request action #{inspect action}"
+        message = "Unrecognized legacy action #{inspect action}"
+        logger.error message
+        throw new Server.NotFoundError message
+
+
+    @server.post '/eval', =>
+      params = @server.request.json
+      script = params.script
+      @scope ||=
+        logger: Logger.loggerForFile('repl'),
+        __filename: 'repl',
+        __dirname: '.'
+      @scope.job = @job
+
+      if params.type is 'text/coffeescript'
+        script = string.trim(CoffeeScript.compile "(-> #{script})()", bare: on)
+      else
+        script = "(function(){#{script}})()" if /[;\n]/.test script
+
+      script = "return #{script}"
+      result = func.callWithScope script, @scope, @scope
+
+      @scope._ = result
+
+      @server.deliver {result: inspect(result, undefined, undefined, color: params.color)}
 
     return true
-
 
   job_start: (data, respond) ->
     try
@@ -201,35 +224,5 @@ class Controller
       respond response:
                 status: 'error'
                 error: e.toString()
-
-  eval: (data, respond) ->
-    try
-      script = data.script
-      @scope ||=
-        logger: Logger.loggerForFile('repl'),
-        __filename: 'repl',
-        __dirname: '.'
-      @scope.job = @job
-
-      if data.type is 'text/coffeescript'
-        script = string.trim(CoffeeScript.compile "(-> #{script})()", bare: on)
-      else
-        script = "(function(){#{script}})()" if /[;\n]/.test script
-
-      script = "return #{script}"
-      result = func.callWithScope script, @scope, @scope
-
-      @scope._ = result
-
-      respond response:
-                status: 'ok'
-                eval: inspect(result, undefined, undefined, color: data.color)
-
-    catch e
-      logger.error 'eval: error: ', e
-      respond response:
-                status: 'error'
-                error: e.toString()
-
 
 module.exports = Controller

@@ -14,7 +14,10 @@ class Api
     end
 
     def profile
-      self['eval', {:script => '(require "io/Dir").profile.path', :type => 'text/coffeescript'}]
+      response = post '/eval', :script => '(require "io/Dir").profile.path',
+                               :type => 'text/coffeescript'
+
+      JSON.parse(response.body)['result']
     end
 
     def post(path, data=nil)

@@ -70,7 +70,7 @@ self.instance_eval do
 
       history << script
       begin
-        puts Api['eval', {:script => script, :type => type, :color => $stdin.tty?}]
+        puts post('/eval', :script => script, :type => type, :color => $stdin.tty?)['result']
       rescue Api::Error => e
         puts e
       rescue => e
