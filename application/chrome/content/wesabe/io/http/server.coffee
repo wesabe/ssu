@@ -64,20 +64,30 @@ class Server
   # Public: Sends data as the response body to the client.
   #
   # data - an object to send as JSON to the client
+  # options - used to define additional response parameters;
+  #           status      - HTTP status code to respond with (default: 200)
+  #           contentType - HTTP response content type
+  #                         (default: application/octet-stream for String data,
+  #                         application/json for Object data)
   #
   # Returns nothing.
-  deliver: (data) ->
+  deliver: (data, options={}) ->
+    options =
+      status: options.status or 200
+      contentType: options.contentType
+
     if not data?
       throw new NotFoundError
     else if /Error$/.test data.constructor.name
       throw new InternalServerError(data)
-    else if type.isString(data)
-      @response.statusCode = 200
-      @response.headers['Content-Type'] = 'application/octet-stream'
+    else if type.isString data
+      @response.statusCode = options.status
+      @response.headers['Content-Type'] ||= options.contentType or
+                                            'application/octet-stream'
       @response.write data
     else
-      @response.statusCode = 200
-      @response.headers['Content-Type'] = 'application/json'
+      @response.statusCode = options.status
+      @response.headers['Content-Type'] ||= options.contentType or 'application/json'
       @response.write JSON.stringify(data)
 
     @response.close()
