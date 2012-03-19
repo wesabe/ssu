@@ -67,7 +67,7 @@ class Bridge extends EventEmitter
 
   evaluate: (script, fn) ->
     tryThrow 'Bridge.evaluate', =>
-      script = "(#{script.toSource()})()" if type.isFunction(script)
+      script = "(#{script.toString()})()" if type.isFunction(script)
       @request 'evaluate', script, fn
 
   request: (methodName, data, fn) ->
@@ -201,7 +201,7 @@ bootstrap = `function() {
   };
 
   window._xulBridge = new _xulBridge();
-}`.toSource()
+}`.toString()
 
 
 module.exports = Bridge
