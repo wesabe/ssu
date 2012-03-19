@@ -1,6 +1,7 @@
 # Helper class to contain status messages from the OFX response.
 
 type = require 'lang/type'
+privacy = require 'util/privacy'
 
 class Status
   constructor: (@code, @status, @message) ->
@@ -26,8 +27,8 @@ class Status
     not @isAuthenticationError() and
     not @isAuthorizationError()
 
-wesabe.util.privacy.registerTaintWrapper
-  detector: (o) -> type.is(o, wesabe.ofx.Status)
+privacy.registerTaintWrapper
+  detector: (o) -> type.is(o, Status)
   getters: ["code", "status", "message"]
 
 
