@@ -43,7 +43,8 @@ describe 'Router', ->
 
   describe 'with a route including placeholders', ->
     matching = method: 'GET', url: '/files/list.txt'
-    nonmatching = method: 'GET', url: '/files/list'
+    nonmatchingPath = method: 'GET', url: '/files/list'
+    nonmatchingMethod = method: 'DELETE', url: '/files/list.txt'
 
     beforeEach ->
       callback = jasmine.createSpy('route callback')
@@ -53,7 +54,10 @@ describe 'Router', ->
       expect(router.match(matching)).toBeTruthy()
 
     it 'does not match requests with the wrong structure', ->
-      expect(router.match(nonmatching)).toBeFalsy()
+      expect(router.match(nonmatchingPath)).toBeFalsy()
+
+    it 'does not match requests with the wrong method', ->
+      expect(router.match(nonmatchingMethod)).toBeFalsy()
 
     it 'calls the callback with the path parts named for placeholders', ->
       expect(router.route(matching)).toBeTruthy()

@@ -106,10 +106,12 @@ class Route
   #   # => {name: 'people', format: 'txt'}
   #
   match: (request) ->
+    return null if request.method isnt @method
+
     params = {}
 
     if @_placeholders.length is 0
-      if request.method isnt @method or request.url isnt @path
+      if request.url isnt @path
         params = null
     else
       if values = @_matcher.exec(request.url)
