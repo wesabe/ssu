@@ -1,6 +1,7 @@
 date   = require 'lang/date'
 extend = require 'lang/extend'
 type   = require 'lang/type'
+{uuid} = require 'lang/uuid'
 Timer  = require 'util/Timer'
 
 Page    = require 'dom/Page'
@@ -12,11 +13,11 @@ CompoundPlayer = require 'download/CompoundPlayer'
 {EventEmitter} = require 'events2'
 
 class Job extends EventEmitter
-  constructor: (fid, creds, options) ->
+  constructor: (id, fid, creds, options) ->
+    @id = id or uuid()
     @fid = fid
     @creds = creds
     @status = 202
-    @done = false
     @version = 0
     @data = {}
     @options = options or {}
@@ -24,7 +25,7 @@ class Job extends EventEmitter
     @options.since &&= date.parse(@options.since)
     @timer = new Timer()
 
-  update: (result, data) ->
+  update: (result, data=null) ->
     @version++
     @result = result
     @data[result] = data if data
@@ -59,9 +60,8 @@ class Job extends EventEmitter
     @finish status, result, true
 
   finish: (status, result, successful) ->
+    @player?.finish?()
     @version++
-    @done = true
-    @player.finish() if type.isFunction @player.finish
     @status = status or (if successful then 200 else 400)
     @result = result or (if successful then 'ok' else 'fail')
     @emit 'update'
@@ -108,6 +108,9 @@ class Job extends EventEmitter
     logger.error 'failed to download file'
     @data.downloads ||= []
     @data.downloads.push(extend({status: 'error'}, metadata or {}))
+
+  @::__defineGetter__ 'done', ->
+    @status isnt 202
 
 
   contentForInspect: ->

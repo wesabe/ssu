@@ -1,9 +1,9 @@
 date    = require 'lang/date'
 func    = require 'lang/func'
 type    = require 'lang/type'
+{uuid}  = require 'lang/UUID'
 xhr     = require 'io/xhr'
 privacy = require 'util/privacy'
-{uuid}  = require 'ofx/UUID'
 
 Response = require 'ofx/Response'
 
