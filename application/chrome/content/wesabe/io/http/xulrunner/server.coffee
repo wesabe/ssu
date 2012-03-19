@@ -17,6 +17,8 @@ STATUS_CODES =
   502: 'Bad Gateway'
   503: 'Service Unavailable'
 
+END_OF_HEADERS = '\r\n\r\n'
+
 class HttpServer
   listen: (port, callback) ->
     socket = Cc['@mozilla.org/network/server-socket;1'].createInstance(Ci.nsIServerSocket)
@@ -52,10 +54,14 @@ class HttpServer
           if contentLengthMatch = /\bContent-Length:\s*(\d+)\r\n/i.exec data
             contentLength = parseInt(contentLengthMatch[1], 10)
 
-          endOfHeaders = data.indexOf('\r\n\r\n')
+          endOfHeaders = data.indexOf(END_OF_HEADERS)
 
           if endOfHeaders > 0
-            if method in ['GET', 'HEAD'] or (endOfHeaders + 4 + contentLength is data.length)
+            hasAllContent = method in ['GET', 'HEAD']
+            hasAllContent ||= contentLengthMatch is null
+            hasAllContent ||= endOfHeaders + END_OF_HEADERS.length + contentLength is data.length
+
+            if hasAllContent
               instream.close()
               processHttpRequest()
               http = null

@@ -19,11 +19,8 @@ class Parser
 
     result = JisonParser.parse @tokens
 
-    if result.method not in ['GET', 'HEAD']
-      if 'Content-Length' not of result.headers
-        throw new Error "Header 'Content-Length' required for #{result.method} requests"
-
-      contentLength = parseInt(result.headers['Content-Length'])
+    if result.method not in ['GET', 'HEAD'] and 'Content-Length' of result.headers
+      contentLength = parseInt(result.headers['Content-Length'], 10)
       result.body = @tokens.body.slice(0, contentLength)
     else if @tokens.body
       throw new Error "Received entity body for #{result.method} request: #{@tokens.body}"
