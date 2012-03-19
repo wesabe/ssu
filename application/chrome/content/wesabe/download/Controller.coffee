@@ -15,6 +15,9 @@ Server  = require 'io/http/Server'
 {tryCatch, tryThrow} = require 'util/try'
 
 class Controller
+  constructor: ->
+    @jobs = []
+
   start: (port) ->
     @windows ||= length: 1
     @windows[window.name] = window
@@ -43,6 +46,33 @@ class Controller
         throw new Server.NotFoundError message
 
 
+    ## POST /eval
+    #
+    #   Allows running arbitrary JS/CoffeeScript. Useful for facilitating
+    #   building a REPL to introspect/debug at runtime.
+    #
+    #   script - a String of code to run
+    #   type   - a String representing the MIME type of script
+    #            (default: text/javascript)
+    #   color  - a Boolean that, if true, makes the response string use ANSI
+    #            color escapes (default: false)
+    #
+    #   Examples
+    #
+    #     # Request
+    #     POST /eval HTTP/1.0
+    #     Content-Type: application/json
+    #
+    #     {"script": "(-> 3+4)()", "type": "text/coffeescript"}
+    #
+    #
+    #     # Response
+    #     HTTP/1.0 200 OK
+    #     Content-Type: application/json
+    #
+    #     {"result": "7"}
+    #
+    # Returns a REPL-friendly stringified version of the result.
     @server.post '/eval', =>
       params = @server.request.json
       script = params.script
@@ -64,78 +94,175 @@ class Controller
 
       @server.deliver {result: inspect(result, undefined, undefined, color: params.color)}
 
-    return true
 
-  job_start: (data, respond) ->
-    try
-      throw new Error "Got unexpected type: #{typeof data}" if typeof data isnt 'object'
+    ## /jobs
 
-      @job = new Job data.jobid, data.fid, data.creds, data.options
+    jobResponse = (job) ->
+      return unless job?
 
-      cookies.restore data.cookies if data.cookies
+      id: job.id
+      status: job.status
+      result: job.result
+      data: job.data
+      fid: job.fid
+      completed: job.done
+      cookies: cookies.dump()
+      timestamp: new Date().getTime()
+      version: job.version
 
-      if data.callback
-        callbacks = if type.isString data.callback
-                      [data.callback]
-                    else
-                      data.callback
+    jobById = =>
+      return job for job in @jobs when @server.params.id is job.id
 
-        if callbacks.length
-          @job.on 'update', =>
-            params =
-              status: @job.status
-              result: @job.result
-              data: json.render @job.data
-              completed: @job.done
-              cookies: cookies.dump()
-              timestamp: new Date().getTime()
-              version: @job.version
-
-            for callback in callbacks
-              xhr.put callback, params
-
+    ## POST /jobs
+    #
+    #   Creates and starts a new sync job.
+    #
+    #   id      - an id to use to identify this job (optional)
+    #   fid     - the reverse-dns of the player to use for this job
+    #   creds   - an Object of credentials to use in this job
+    #   options - an Object with customizations to how to run this job
+    #             (default: {})
+    #
+    #   Examples
+    #
+    #     # Request
+    #     POST /jobs HTTP/1.0
+    #     Content-Type: application/json
+    #
+    #     {"fid": "com.example", "creds": {"username": "milo123", "password": "letmein"}}
+    #
+    #
+    #     # Response
+    #     HTTP/1.0 201 Created
+    #     Content-Type: application/json
+    #     Location: /jobs/1D992147-9078-0001-FFFF-1FFF1FFF1FFF
+    #
+    #   Returns a pointer to the newly created job in the form of a Location
+    #   header URL.
+    @server.post '/jobs', =>
+      params = @server.request.json
+      @jobs.push @job = new Job params.id, params.fid, params.creds, params.options
+      cookies.restore params.cookies if params.cookies
       @job.start()
-    catch e
-      logger.error 'job.start: ', e
+      @server.response.headers['Location'] = "/jobs/#{@job.id}"
+      @server.deliver jobResponse(@job), status: 201
 
-    respond response:
-              status: 'ok'
+    ## GET /jobs
+    #
+    #   Lists all previously-run and currently running jobs.
+    #
+    #   Examples
+    #
+    #     # Request
+    #     GET /jobs HTTP/1.0
+    #
+    #
+    #     # Response
+    #     HTTP/1.0 200 OK
+    #     Content-Type: application/json
+    #
+    #     [{"id": "1D992147-9078-0001-FFFF-1FFF1FFF1FFF", "fid": "com.example", ...}]
+    #
+    #   Returns relevant data for all jobs started by this instance.
+    @server.get '/jobs', =>
+      @server.deliver(@jobs.map jobResponse)
 
-  job_resume: (data, respond) ->
-    if @job
-      try
-        @job.resume data.creds
-        respond response:
-                  status: 'ok'
+    ## GET /jobs/:id
+    #
+    #   Gets data for a specific job by id.
+    #
+    #   Examples
+    #
+    #     # Request for a non-existent job id
+    #     GET /jobs/1D992147-9078-0001-FFFF-1FFF1FFF1FFF HTTP/1.0
+    #
+    #     # Response
+    #     HTTP/1.0 404 Not Found
+    #
+    #
+    #     # Request for a real job id
+    #     GET /jobs/1D992147-9078-0001-FFFF-1FFF1FFF1FFF HTTP/1.0
+    #
+    #     # Response
+    #     HTTP/1.0 200 OK
+    #     Content-Type: application/json
+    #
+    #     {"id": "1D992147-9078-0001-FFFF-1FFF1FFF1FFF", "fid": "com.example", ...}
+    #
+    #   Returns relevant data for the job given by id, or 404 Not Found if no
+    #   such job exists.
+    @server.get '/jobs/:id', =>
+      @server.deliver(jobResponse jobById())
 
-      catch e
-        respond response:
-                  status: 'error'
-                  error: e.toString()
+    ## PUT /jobs/:id
+    #
+    #   Updates the credentials for this job and resumes it.
+    #
+    #   Examples
+    #
+    #     # Request for a job that doesn't exist
+    #     PUT /jobs/1D992147-9078-0001-FFFF-1FFF1FFF1FFF HTTP/1.0
+    #     Content-Type: application/json
+    #
+    #     {"creds": [{"key": "What's your mother's maiden name?", "value": "Smith"}]}
+    #
+    #     # Response
+    #     HTTP/1.0 404 Not Found
+    #
+    #
+    #     # Request for a real job
+    #     PUT /jobs/1D992147-9078-0001-FFFF-1FFF1FFF1FFF HTTP/1.0
+    #     Content-Type: application/json
+    #
+    #     {"creds": [{"key": "What's your mother's maiden name?", "value": "Smith"}]}
+    #
+    #     # Response
+    #     HTTP/1.0 200 OK
+    #     Content-Type: application/json
+    #
+    #     {"id": "1D992147-9078-0001-FFFF-1FFF1FFF1FFF", "fid": "com.example", ...}
+    #
+    #   Returns relevant data for the job given by id, or 404 Not Found if no
+    #   such job exists.
+    @server.put '/jobs/:id', =>
+      params = @server.request.json
+      job = jobById()
+      job?.resume? params.creds
+      @server.deliver(jobResponse job)
 
-    else
-      respond response:
-                status: 'error'
-                error: "No running jobs"
+    ## DELETE /jobs/:id
+    #
+    #   Stops the job with the given id but does not actually remove it from
+    #   the list returned by GET /jobs.
+    #
+    #   Examples
+    #
+    #     # Request for a job that doesn't exist
+    #     DELETE /jobs/1D992147-9078-0001-FFFF-1FFF1FFF1FFF HTTP/1.0
+    #
+    #     # Response
+    #     HTTP/1.0 404 Not Found
+    #
+    #
+    #     # Request for a real job
+    #     DELETE /jobs/1D992147-9078-0001-FFFF-1FFF1FFF1FFF HTTP/1.0
+    #
+    #     # Response
+    #     HTTP/1.0 200 OK
+    #     Content-Type: application/json
+    #
+    #     {"id": "1D992147-9078-0001-FFFF-1FFF1FFF1FFF", "fid": "com.example", ...}
+    #
+    #   Returns relevant data for the stopped job or 404 Not Found if no such
+    #   job exists.
+    @server.delete '/jobs/:id', =>
+      job = jobById()
+      logger.debug {job, done: job.done}
+      job.fail 504, 'timeout.quit' if job? and job.done is false
+      @server.deliver(jobResponse job)
 
-  job_status: (data, respond) ->
-    unless @job
-      respond response:
-                status: 'error'
-                error: "No running jobs"
-    else
-      respond response:
-                status: 'ok'
-                'job.status':
-                  id: @job.id
-                  status: @job.status
-                  result: @job.result
-                  data: @job.data
-                  fid: @job.fid
-                  completed: @job.done
-                  cookies: cookies.dump()
-                  timestamp: new Date().getTime()
-                  version: @job.version
+
+    return true
 
   window_open: (data, respond) ->
     index = @windows.length++
