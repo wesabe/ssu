@@ -31,32 +31,47 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <h3>Welcome to GitHub Pages.</h3>
+        <h3>Collect information from your favorite sites.</h3>
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
+        <p>
+          SSU was originally designed to power data aggregation for Wesabe, a
+          personal finance website. When Wesabe shut down, SSU was made open
+          source and expanded to include support for more than simply bank
+          websites. You can use it to gather documents, scrape data, and
+          generally mine the web for information you or your business needs.
+        </p>
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
+        <h3>Get Started</h3>
+
+<pre><code>$ git clone https://github.com/wesabe/ssu.git
+$ cd ssu
+$ ./bootstrap
 </code></pre>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+        <p>
+          SSU works out of the box on Mac OS X and any Linux distribution using
+          <code>apt-get</code>.
+        </p>
 
-<h3>Designer Templates</h3>
+        <h3>Data Aggregation</h3>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+        <p>
+          SSU works using per-site scripts &ndash; written in CoffeeScript or
+          JavaScript &ndash; that know how to do various things such as
+          &ldquo;download all the transaction history from this user's Chase
+          account&rdquo;. Each script is named with reverse DNS naming, so a
+          script for banking.example.com would be named com.example.banking and
+          will be located in
+          <code>application/chrome/content/wesabe/fi-scripts/com/example.banking.(js|coffee)</code>.
+        </p>
 
-<h3>Rather Drive Stick?</h3>
+        <h3>Support or Contact</h3>
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+        <p>
+          While there's no paid support available for SSU, you can use the
+          <a href="mailto:ssu@librelist.com">mailing list</a> to ask questions.
+        </p>
 
-<h3>Authors and Contributors</h3>
-
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
-
-<h3>Support or Contact</h3>
-
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact support@github.com and we’ll help you sort it out.</p>
       </section>
     </div>
 
