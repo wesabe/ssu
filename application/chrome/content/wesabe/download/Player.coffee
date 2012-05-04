@@ -510,7 +510,11 @@ class Player extends EventEmitter
           callbacks = @["#{messageType}ReceivedCallbacks"]
           if callbacks
             for callback in callbacks
-              @callWithMagicScope callback, browser, page, extend({message, logger: (require 'Logger').rootLogger}), message
+              names = func.argNames callback
+              if names.length > 2
+                callback.call @, browser, page, message
+              else
+                @callWithMagicScope callback, browser, page, extend({message, logger: (require 'Logger').rootLogger}), message
 
     unless @shouldDispatch browser, page
       logger.info 'skipping document load'
