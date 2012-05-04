@@ -114,6 +114,6 @@ class Job extends EventEmitter
 
 
   contentForInspect: ->
-    {@status, @result, @done, @options, @player, @data}
+    {@id, @status, @result, @done, @options, @player, @data}
 
 module.exports = Job
