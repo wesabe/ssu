@@ -257,10 +257,82 @@ class Controller
     #   job exists.
     @server.delete '/jobs/:id', =>
       job = jobById()
-      logger.debug {job, done: job.done}
       job.fail 504, 'timeout.quit' if job? and job.done is false
       @server.deliver(jobResponse job)
 
+
+    ## /statements
+
+    statementsDirectory = Dir.profile.child 'statements'
+
+    readStatement = (id) ->
+      statement = statementsDirectory.child(id)
+      if statement.exists
+        statement.read()
+      else
+        null
+
+    getStatementList = ->
+      if statementsDirectory.exists
+        {id: file.basename} for file in statementsDirectory.children()
+      else
+        []
+
+    ## GET /statements
+    #
+    #   Returns a list of all the statements downloaded for any jobs.
+    #
+    #   Examples
+    #
+    #     # Request
+    #     GET /statements HTTP/1.0
+    #
+    #
+    #     # Response
+    #     HTTP/1.0 200 OK
+    #     Content-Type: application/json
+    #
+    #     [{"id": "1D992147-9078-0001-FFFF-1FFF1FFF1FFF"}]
+    #
+    #   Returns relevant data for all jobs started by this instance.
+    @server.get '/statements', =>
+      @server.deliver(getStatementList())
+
+    ## GET /statements/:id
+    #
+    #   Gets data for a specific statement by id.
+    #
+    #   Examples
+    #
+    #     # Request for a non-existent statement id
+    #     GET /statements/1D992147-9078-0001-FFFF-1FFF1FFF1FFF HTTP/1.0
+    #
+    #     # Response
+    #     HTTP/1.0 404 Not Found
+    #
+    #
+    #     # Request for a real statement id
+    #     GET /statements/1D992147-9078-0001-FFFF-1FFF1FFF1FFF HTTP/1.0
+    #     Accept: application/ofx
+    #
+    #     # Response
+    #     HTTP/1.0 200 OK
+    #     Content-Type: application/ofx
+    #
+    #     OFXHEADER:100
+    #     DATA:OFXSGML
+    #     VERSION:102
+    #     SECURITY:NONE
+    #     ENCODING:USASCII
+    #     ...
+    #
+    #     <OFX>
+    #     ...
+    #
+    #   Returns relevant data for the job given by id, or 404 Not Found if no
+    #   such job exists.
+    @server.get '/statements/:id', =>
+      @server.deliver(readStatement(@server.params.id), contentType: 'application/ofx')
 
     return true
 

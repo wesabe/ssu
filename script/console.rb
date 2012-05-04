@@ -113,28 +113,65 @@ self.instance_eval do
     method = method.to_s
     if fis.include?(method)
       JSON.parse(File.read(credpath/method))
-    elsif args.empty?
-      ApiMethodChainer.new(method)
     else
       super
     end
   end
 end
 
-class ApiMethodChainer
-  instance_methods.each { |m| undef_method m unless m =~ /^(__|object_id)/ }
+class Job
+  ROOT = '/jobs'.freeze
 
-  def initialize(first=nil)
-    parts << first if first
+  def self.create(data)
+    new Api.json(:post, ROOT, data)['id']
   end
 
-  def parts
-    @parts ||= []
+  def self.all
+    Api.json(:get, ROOT).map do |data|
+      new data['id']
+    end
   end
 
-  def method_missing(method, *args, &block)
-    parts << method
-    Api[parts.join('.'), *args]
+  attr_reader :id
+
+  def initialize(id)
+    @id = id
+  end
+
+  def resume(creds)
+    Api.json :put, :creds => creds
+  end
+
+  def status
+    Api.json :get, path
+  end
+
+  def path
+    ROOT/id
+  end
+end
+
+class Statement
+  ROOT = '/statements'.freeze
+
+  def self.all
+    Api.json(:get, ROOT).map do |data|
+      new data['id']
+    end
+  end
+
+  attr_reader :id
+
+  def initialize(id)
+    @id = id
+  end
+
+  def read
+    Api.get(path).body
+  end
+
+  def path
+    ROOT/id
   end
 end
 

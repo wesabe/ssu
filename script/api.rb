@@ -20,10 +20,25 @@ class Api
       JSON.parse(response.body)['result']
     end
 
+    def get(path)
+      request :method => :get,
+              :path   => path
+    end
+
     def post(path, data=nil)
       request :method => :post,
               :path   => path,
               :body   => data
+    end
+
+    def put(path, data=nil)
+      request :method => :put,
+              :path   => path,
+              :body   => data
+    end
+
+    def json(method, path, data=nil)
+      JSON.parse(request(:method => method, :path => path, :body => data).body)
     end
 
     def request(options={})

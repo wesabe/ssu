@@ -81,7 +81,7 @@ for Chase and save the file.
 Now fire up the test client and start a job:
 
     ssu$ script/console
-    >> job.start chase
+    >> job = Job.create chase
 
 Your first terminal window and the blank browser should now be doing
 something -- ideally logging into your financial institution site and
@@ -89,9 +89,9 @@ getting your recent transaction data. If it succeeds it'll store the
 downloaded statement's in the app's profile directory. You can get a
 list like so from the console:
 
-    >> statement.list
-    => ["1D8787AA-6D2D-0001-DFF3-9EB052301CD4"]
-    >> statement.read "1D8787AA-6D2D-0001-DFF3-9EB052301CD4"
+    >> list = Statement.all
+    => [#<Statement:0x10f014018 @id="1D87E4D6-DCCD-0001-FFFF-1FFF1FFF1FFF">]
+    >> list.first.read
     => "OFXHEADER:100\r\n..."
 
 Congrats, you've successfully gotten data out of your financial
