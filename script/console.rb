@@ -139,7 +139,7 @@ class Job
   end
 
   def resume(creds)
-    Api.json :put, :creds => creds
+    Api.json :put, path, :creds => creds
   end
 
   def status
