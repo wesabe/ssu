@@ -47,7 +47,7 @@ server_linux()
     PROFILES="$HOME/.$vendor/$appname"
     for profile in "$PROFILES"/*.default
     do
-      logfile="wuff_log.txt"
+      logfile="$profile/wuff_log.txt"
       break
     done
   fi
