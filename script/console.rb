@@ -170,6 +170,11 @@ class Statement
     Api.get(path).body
   end
 
+  #EDITED BY @MDOBS
+  def save
+    File.open("#{@id}", 'w') {|f| f.write(Api.get(path).body) }
+  end
+
   def path
     ROOT/id
   end
