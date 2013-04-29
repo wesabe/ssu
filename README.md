@@ -81,6 +81,7 @@ for Chase and save the file.
 Now fire up the test client and start a job:
 
     ssu$ script/console
+    >> chase = File.read('./credentials/chase')
     >> job = Job.create chase
 
 Your first terminal window and the blank browser should now be doing
@@ -167,6 +168,7 @@ site. Once you've added something and created a matching credential file, go
 ahead and try it out:
 
     ssu$ script/console
+    >> ally = File.read('./credentials/ally')
     >> job.start ally
 
 There are lots of examples in the `fi-scripts` directory for you to reference
